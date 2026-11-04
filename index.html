@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Archon, Step by Step</title>
-<meta name="description" content="Archon, the open-source workflow engine for AI coding, run with Claude Code: an introduction, the concepts, setting up a team workspace around the repo, a 20-step real run of one request on a Spring Boot repo, and a 16-step real run of one bug across two repos.">
+<meta name="description" content="Archon, the open-source workflow engine for AI coding, run with Claude Code, in 5 modules over 3 parts: the introduction and concepts, setting up a team workspace around the repo, a 20-step real run of one request on a Spring Boot repo, and a 16-step real run of one bug across two repos.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@600;700;800&family=Red+Hat+Text:wght@400;500;600&display=swap" rel="stylesheet">
@@ -15,38 +15,74 @@
 :root[data-theme="dark"]{--bg:#0F141A;--panel:#171F29;--ink:#E7EDF3;--ink-2:#B1BDCA;--ink-3:#7E8B98;--line:#273240;--accent:#A78BFA;--accent-soft:#231A3A}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 var(--font-text);-webkit-font-smoothing:antialiased}
-main{max-width:920px;margin:0 auto;padding:48px 16px 64px}
+main{max-width:880px;margin:0 auto;padding:48px 16px 64px}
+a{color:var(--accent)}
 h1{font:800 clamp(1.8rem,4vw,2.5rem)/1.15 var(--font-display);margin:0 0 12px;letter-spacing:-.01em}
-.lead{color:var(--ink-2);font-size:1.08rem;margin:0 0 28px;max-width:62ch}
-.kicker{font:600 .8rem var(--font-display);letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin:0 0 8px}
-.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
-@media (max-width:680px){.grid{grid-template-columns:minmax(0,1fr)}}
-a.card{display:block;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px;color:inherit;text-decoration:none;transition:border-color .15s,transform .15s}
-a.card:hover,a.card:focus-visible{border-color:var(--accent);transform:translateY(-1px)}
-a.card.main{grid-column:1/-1;background:var(--accent-soft);border-color:var(--accent)}
-.card b{display:block;font:700 1.15rem var(--font-display);margin-bottom:4px}
-.card span{color:var(--ink-2);font-size:.95rem}
-.card small{display:block;margin-top:8px;color:var(--ink-3);font-size:.82rem}
-.order{margin:28px 0 0;color:var(--ink-2);font-size:.95rem}
+h2{font:750 1.4rem/1.2 var(--font-display);margin:0 0 4px}
+.kicker,.pn{font:600 .8rem var(--font-display);letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin:0 0 6px}
+.lead{color:var(--ink-2);font-size:1.08rem;margin:0 0 22px;max-width:62ch}
+.start{display:inline-flex;gap:10px;align-items:center;background:var(--accent);color:var(--panel);font:700 1rem var(--font-display);padding:11px 20px;border-radius:999px;text-decoration:none}
+.start:hover,.start:focus-visible{filter:brightness(1.08)}
+.path{display:flex;flex-wrap:wrap;gap:8px;margin:28px 0 8px;padding:0;list-style:none}
+.path a{display:flex;gap:8px;align-items:center;padding:6px 12px 6px 6px;border:1px solid var(--line);background:var(--panel);border-radius:999px;color:var(--ink);text-decoration:none;font:600 .9rem var(--font-display)}
+.path a:hover,.path a:focus-visible{border-color:var(--accent)}
+.path span{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--accent-soft);color:var(--accent);font-size:.8rem}
+.part{margin-top:40px}
+.part header{margin-bottom:14px}
+.why{margin:0;color:var(--ink-2)}
+.mods{list-style:none;margin:0;padding:0;background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.mod{display:grid;grid-template-columns:44px minmax(0,1fr);gap:4px 14px;padding:16px 20px 16px 16px;border-top:1px solid var(--line)}
+.mod:first-child{border-top:0}
+.n{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;border:1.5px solid var(--accent);color:var(--accent);font:700 .95rem var(--font-display)}
+.t{font:700 1.08rem/1.3 var(--font-display);color:var(--ink);text-decoration:none}
+.t:hover,.t:focus-visible{color:var(--accent);text-decoration:underline}
+.mod p{margin:4px 0 0;color:var(--ink-2);font-size:.95rem}
+.mod small{display:block;margin-top:6px;color:var(--ink-3);font-size:.82rem}
+.refs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:560px){.refs{grid-template-columns:minmax(0,1fr)}}
+.ref{display:block;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;color:inherit;text-decoration:none}
+.ref:hover,.ref:focus-visible{border-color:var(--accent)}
+.ref b{display:block;font:700 1rem var(--font-display)}
+.ref span{color:var(--ink-2);font-size:.9rem}
+.note{margin:32px 0 0;color:var(--ink-2);font-size:.95rem}
 code{font-size:.88em;background:var(--accent-soft);padding:1px 5px;border-radius:5px}
+@media (max-width:560px){.mod{grid-template-columns:34px minmax(0,1fr);padding:14px 14px 14px 12px}.n{width:28px;height:28px;font-size:.85rem}}
 </style>
 </head>
 <body>
 <main>
   <p class="kicker">Archon 0.13.2 · Claude Code</p>
   <h1>Archon, Step by Step</h1>
-  <p class="lead">Archon turns how your team works into a YAML workflow and runs it with the agent you already use: agents where judgment is needed, commands where it isn't, and a pause wherever a person must decide. Learn the ideas, set up a repo, then run one real request through it.</p>
-  <div class="grid">
-    <a class="card main" href="archon-introduction.html"><b>Introduction: workflows, pauses, commands and files</b><span>What Archon is, how one node runs, the course's workflow drawn as a graph, where you type, the team workspace with its repo and <code>~/.archon</code>, which of the 25 bundled workflows fits which work, what you type at each pause, and every command.</span><small>Built from Archon 0.13.2's own help and output</small></a>
-    <a class="card main" href="archon-workspace-setup.html"><b>Start here: set up Archon and a team workspace</b><span>Install, connect Claude Code, check with <code>doctor</code>, turn telemetry off, make sure Windows finds Git Bash, then a workspace like AI-DLC's: ten team files at its root and the code repo cloned inside, validated and dry-run. Plus the Web UI and where PRs come from.</span><small>Real output on Windows; macOS equivalents</small></a>
-    <a class="card main" href="archon-hello-world-java/archon-hello-world-java-run.html"><b>Hands-on run: one request, 20 steps (Java)</b><span>Every setup command first: the remotes, the team's workspace repo, priorauth-api cloned inside it. Then Ravi's request through the team's <code>request-to-pr</code> workflow, run from the workspace: seven questions answered, requirements sent back once, a plan approved, code written until the tests pass, a review that says READY, a 500 that Kiran finds by hand, a fix with the bundled <code>archon-implement</code>, and the merge. Then the bundled <code>archon-plan</code> on the same request, and a side-by-side with AI-DLC.</span><small>A real run · every command and reply · 21 tests · the workspace and the repo in the course files</small></a>
-    <a class="card main" href="archon-hello-world-java/archon-two-repos-run.html"><b>Hands-on run: one bug, two repos (a folder project)</b><span>Ravi's New Year bug, whose fix spans the aging library and the API that depends on it, taken through a workflow run from a workspace that holds both repos. Every setup command is shown: the starter split into a library and an API, the workspace repo, the remotes, the clones. Archon works in place, the agent branches and commits in each repo, Meena corrects the plan's numbers, the packaged jar is checked by hand, and a branch is pushed per repo, library first. Then the same bug in AI-DLC, side by side.</span><small>A real run · 16 steps · 2 repos · the workspace and both repos in the course files</small></a>
-    <a class="card" href="archon-concepts-explained.html"><b>Concepts, explained</b><span>Workflow, nodes, the graph, commands and packs, loops, waits and the attention queue, runs, isolation (in place or a worktree), artifacts, providers, and the sdlc pack: what, why, how, an example and an analogy for each.</span></a>
-    <a class="card" href="archon-concepts-onepage.html"><b>One-page cheat sheet</b><span>The same concepts on a single A4 page, to print or keep open while you work.</span></a>
-    <a class="card" href="archon-concepts-map.svg"><b>Concept map</b><span>Where things live, how one run flows, and who decides what, in one diagram.</span></a>
-    <a class="card" href="https://github.com/varasrinivas/aidlc-priorauth-api"><b>Starter repo</b><span>priorauth-api at <code>v1.0.2</code>, the same starter as the AI-DLC course. Clone with <code>--no-tags</code>: tag <code>v1.1.0</code> is the AI-DLC answer key.</span></a>
-  </div>
-  <p class="order">Suggested order: the introduction (or the concepts page if you prefer ideas first), then set up the workspace, then the hands-on run, then the two-repo run if your work spans repos. If you have done the AI-DLC course, step 20 of the run (and step 16 of the two-repo run) compares the two on the same change.</p>
+  <p class="lead">Archon turns how your team works into a YAML workflow and runs it with the agent you already use: agents where judgment is needed, commands where it isn't, and a pause wherever a person must decide. 5 modules in 3 parts, built from real runs and real output.</p>
+  <a class="start" href="archon-introduction.html">Start with module 1: Introduction →</a>
+  <nav aria-label="Parts"><ol class="path"><li><a href="#part1"><span>1</span>Understand Archon</a></li><li><a href="#part2"><span>2</span>Set up</a></li><li><a href="#part3"><span>3</span>Real runs</a></li><li><a href="#reference"><span>★</span>Reference</a></li></ol></nav>
+
+  <section class="part" id="part1"><header><p class="pn">Part 1</p><h2>Understand Archon</h2><p class="why">What Archon is, the words it uses, and the commands you type. No setup needed.</p></header>
+  <ol class="mods">
+    <li class="mod"><span class="n">1</span><div class="body"><a class="t" href="archon-introduction.html">Introduction: workflows, pauses, commands and files</a><p>How one node runs, the course's workflow as a graph, where you type, the team workspace with its repo and <code>~/.archon</code>, which of the 25 bundled workflows fits which work, what you type at each pause, and every command.</p><small>Built from Archon 0.13.2's own help and output</small></div></li>
+    <li class="mod"><span class="n">2</span><div class="body"><a class="t" href="archon-concepts-explained.html">Concepts, explained</a><p>Workflows, nodes, the graph, commands and packs, loops, waits and the attention queue, runs, isolation (in place or a worktree), artifacts, providers and the sdlc pack: what, why, how, an example and an analogy for each.</p><small>Long read · keep the cheat sheet open next to it</small></div></li>
+  </ol></section>
+
+  <section class="part" id="part2"><header><p class="pn">Part 2</p><h2>Set up</h2><p class="why">Archon on your machine, and a team workspace with the code repo cloned inside it, as in AI-DLC.</p></header>
+  <ol class="mods">
+    <li class="mod"><span class="n">3</span><div class="body"><a class="t" href="archon-workspace-setup.html">Set up Archon and a team workspace</a><p>Install, connect Claude Code, check with <code>doctor</code>, turn telemetry off, make sure Windows finds Git Bash, then ten team files at the workspace root and the code repo cloned inside, validated and dry-run. Plus the Web UI and where PRs come from.</p><small>Windows and macOS · real output</small></div></li>
+  </ol></section>
+
+  <section class="part" id="part3"><header><p class="pn">Part 3</p><h2>Real runs</h2><p class="why">Every setup command and every reply, from a Slack message to a merge. Each ends side by side with the same work in AI-DLC.</p></header>
+  <ol class="mods">
+    <li class="mod"><span class="n">4</span><div class="body"><a class="t" href="archon-hello-world-java/archon-hello-world-java-run.html">One request, one repo: 20 steps (Java)</a><p>Ravi's request through the team's <code>request-to-pr</code> workflow: seven questions answered, requirements sent back once, a plan approved, code written until the tests pass, a review that says READY, a 500 that Kiran finds by hand, a fix with the bundled <code>archon-implement</code>, and the merge. Then the bundled <code>archon-plan</code> on the same request.</p><small>Real run · 21 tests · the workspace and repo are in the course files</small></div></li>
+    <li class="mod"><span class="n">5</span><div class="body"><a class="t" href="archon-hello-world-java/archon-two-repos-run.html">One bug, two repos: 16 steps</a><p>Ravi's New Year bug, whose fix spans the aging library and the API that depends on it. Archon works in place, the agent branches and commits in each repo, Meena corrects the plan's numbers, the packaged jar is checked by hand, and a branch is pushed per repo, library first.</p><small>Real run · 2 repos · the workspace and both repos are in the course files</small></div></li>
+  </ol></section>
+
+  <section class="part" id="reference"><header><p class="pn">Reference</p><h2>Keep these at hand</h2><p class="why">Cheat sheet, concept map and the repos the modules use.</p></header>
+  <div class="refs">
+    <a class="ref" href="archon-concepts-onepage.html"><b>One-page cheat sheet</b><span>The concepts on one A4 page, to print or keep open while you work.</span></a>
+    <a class="ref" href="archon-concepts-map.svg"><b>Concept map</b><span>Where things live, how one run flows, and who decides what, in one diagram.</span></a>
+    <a class="ref" href="https://github.com/varasrinivas/aidlc-priorauth-api"><b>Starter repo</b><span>priorauth-api at <code>v1.0.2</code>, the AI-DLC course's starter. Clone with <code>--no-tags</code>: tag <code>v1.1.0</code> is the answer key.</span></a>
+    <a class="ref" href="https://github.com/varasrinivas/ai-dlc-archon/tree/main/archon-hello-world-java"><b>The runs' workspaces</b><span><code>java-workspace/</code> and <code>multirepo-workspace/</code>: the team files and the code repos after the merge.</span></a>
+  </div></section>
+
+  <p class="note">Done the AI-DLC course? Step 20 of module 4 and step 16 of module 5 compare the two on the same change.</p>
 </main>
 </body>
 </html>
