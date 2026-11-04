@@ -47,7 +47,7 @@ Re-run steps 1–5 above in an empty `D:\tmp` (a full run takes about 30 minutes
 
 ## Repo and deployment
 
-GitHub: `varasrinivas/ai-dlc-archon` (private), branch `main`. The raw captures are scrubbed (`tools/scrub_captures.py`); run `py -3.12 tools/scrub_captures.py --check` before every push.
+GitHub: `varasrinivas/ai-dlc-archon` (**public** since 4 Nov 2026; history squashed to one commit at that point), branch `main`. The raw captures are scrubbed (`tools/scrub_captures.py`); run `py -3.12 tools/scrub_captures.py --check` before every push.
 
 The course is deployed to two sites, same files to both: `index.html`, the four pages, the cheat sheet, `archon-concepts-map.svg` and `img/*.png` (the pages link nothing else locally, and the run page's `../../ai-dlc-execution/...` link resolves on both sites as-is, so no link rewriting).
 
