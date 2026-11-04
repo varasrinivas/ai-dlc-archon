@@ -1,0 +1,353 @@
+{
+ "660d03e5-e4b1-48b3-aa38-37812ff51438": {
+  "workflow": "archon-plan",
+  "message": "Plan the request in docs-in/request.md",
+  "start": "2026-11-03T13:37:41.298Z",
+  "end": "2026-11-03T13:40:35.485Z",
+  "events": 84,
+  "nodes": [
+   {
+    "node": "go",
+    "event": "node_complete",
+    "ts": "2026-11-03T13:37:41.576Z",
+    "ms": 241,
+    "input": null,
+    "output": null,
+    "cost": null
+   },
+   {
+    "node": "stage__policy",
+    "event": "node_complete",
+    "ts": "2026-11-03T13:37:42.121Z",
+    "ms": 536,
+    "input": null,
+    "output": null,
+    "cost": null
+   },
+   {
+    "node": "stage__plan",
+    "event": "node_complete",
+    "ts": "2026-11-03T13:39:35.238Z",
+    "ms": 113035,
+    "input": 459015,
+    "output": 7297,
+    "cost": 0.7549443
+   },
+   {
+    "node": "attend__answer",
+    "event": "node_complete",
+    "ts": "2026-11-03T13:39:35.744Z",
+    "ms": 425,
+    "input": null,
+    "output": null,
+    "cost": null
+   },
+   {
+    "node": "attend__decide",
+    "event": "node_complete",
+    "ts": "2026-11-03T13:39:55.893Z",
+    "ms": 20057,
+    "input": 70015,
+    "output": 1367,
+    "cost": 0.1554157
+   },
+   {
+    "node": "attend__settle",
+    "event": "node_complete",
+    "ts": "2026-11-03T13:39:56.300Z",
+    "ms": 328,
+    "input": null,
+    "output": null,
+    "cost": null
+   },
+   {
+    "node": "attend__ask",
+    "event": "node_complete",
+    "ts": "2026-11-03T13:40:34.362Z",
+    "ms": 38052,
+    "input": null,
+    "output": null,
+    "cost": null
+   },
+   {
+    "node": "go",
+    "event": "node_skipped",
+    "ts": "2026-11-03T13:40:34.466Z",
+    "ms": 0,
+    "input": null,
+    "output": null,
+    "cost": null
+   },
+   {
+    "node": "stage__policy",
+    "event": "node_skipped",
+    "ts": "2026-11-03T13:40:34.472Z",
+    "ms": 0,
+    "input": null,
+    "output": null,
+    "cost": null
+   },
+   {
+    "node": "stage__plan",
+    "event": "node_skipped",
+    "ts": "2026-11-03T13:40:34.478Z",
+    "ms": 0,
+    "input": null,
+    "output": null,
+    "cost": null
+   },
+   {
+    "node": "attend__answer",
+    "event": "node_complete",
+    "ts": "2026-11-03T13:40:34.813Z",
+    "ms": 327,
+    "input": null,
+    "output": null,
+    "cost": null
+   },
+   {
+    "node": "attend__decide",
+    "event": "node_skipped",
+    "ts": "2026-11-03T13:40:34.818Z",
+    "ms": 0,
+    "input": null,
+    "output": null,
+    "cost": null
+   },
+   {
+    "node": "attend__settle",
+    "event": "node_complete",
+    "ts": "2026-11-03T13:40:35.132Z",
+    "ms": 308,
+    "input": null,
+    "output": null,
+    "cost": null
+   },
+   {
+    "node": "attend__ask",
+    "event": "node_skipped",
+    "ts": "2026-11-03T13:40:35.138Z",
+    "ms": 0,
+    "input": null,
+    "output": null,
+    "cost": null
+   },
+   {
+    "node": "cycle",
+    "event": "node_complete",
+    "ts": "2026-11-03T13:40:35.233Z",
+    "ms": 884,
+    "input": null,
+    "output": null,
+    "cost": null
+   },
+   {
+    "node": "result",
+    "event": "node_complete",
+    "ts": "2026-11-03T13:40:35.479Z",
+    "ms": 241,
+    "input": null,
+    "output": null,
+    "cost": null
+   }
+  ]
+ },
+ "9eabd2e8-a41e-4aa9-9126-c32fa83c5ec8": {
+  "workflow": "archon-implement",
+  "message": "Apply review findings R-1 and R-2 from the adopted run's review.md, as Meena decided: R-1 option (a), an asOf after today is a caller error, 400 under FR8, with a test. R-2: add the test for an empty asOf. Keep to the plan's files; tests only through ./scripts/verify.sh.",
+  "start": "2026-11-03T13:35:56.219Z",
+  "end": "2026-11-03T13:37:06.001Z",
+  "events": 35,
+  "nodes": [
+   {
+    "node": "implement-iteration-1",
+    "event": "node_complete",
+    "ts": "2026-11-03T13:37:05.977Z",
+    "ms": null,
+    "input": null,
+    "output": null,
+    "cost": null
+   },
+   {
+    "node": "implement",
+    "event": "node_complete",
+    "ts": "2026-11-03T13:37:05.985Z",
+    "ms": 69579,
+    "input": 461371,
+    "output": 4217,
+    "cost": 0.5821807999999998
+   }
+  ]
+ },
+ "cd54631b99f7e43dc9739bb63499690f": {
+  "workflow": "request-to-pr",
+  "message": "Implement the request in docs-in/request.md",
+  "start": "2026-11-03T13:21:44.217Z",
+  "end": "2026-11-03T13:35:39.421Z",
+  "events": 233,
+  "nodes": [
+   {
+    "node": "scan",
+    "event": "node_complete",
+    "ts": "2026-11-03T13:22:34.181Z",
+    "ms": 49864,
+    "input": 207275,
+    "output": 3909,
+    "cost": 0.24267539999999999
+   },
+   {
+    "node": "questions",
+    "event": "node_complete",
+    "ts": "2026-11-03T13:23:00.380Z",
+    "ms": 26048,
+    "input": 79827,
+    "output": 2468,
+    "cost": 0.38244940000000005
+   },
+   {
+    "node": "answer",
+    "event": "node_complete",
+    "ts": "2026-11-03T13:23:24.880Z",
+    "ms": 24422,
+    "input": null,
+    "output": null,
+    "cost": null
+   },
+   {
+    "node": "write-requirements",
+    "event": "node_complete",
+    "ts": "2026-11-03T13:24:18.205Z",
+    "ms": 53225,
+    "input": 101880,
+    "output": 4821,
+    "cost": 0.21373379999999997
+   },
+   {
+    "node": "review-requirements",
+    "event": "node_complete",
+    "ts": "2026-11-03T13:24:45.836Z",
+    "ms": 27531,
+    "input": null,
+    "output": null,
+    "cost": null
+   },
+   {
+    "node": "write-requirements",
+    "event": "node_complete",
+    "ts": "2026-11-03T13:25:38.114Z",
+    "ms": 52097,
+    "input": 82032,
+    "output": 5680,
+    "cost": 0.17962940000000005
+   },
+   {
+    "node": "review-requirements",
+    "event": "node_complete",
+    "ts": "2026-11-03T13:25:52.019Z",
+    "ms": 13821,
+    "input": null,
+    "output": null,
+    "cost": null
+   },
+   {
+    "node": "requirements",
+    "event": "node_complete",
+    "ts": "2026-11-03T13:25:52.124Z",
+    "ms": 116,
+    "input": null,
+    "output": null,
+    "cost": null
+   },
+   {
+    "node": "plan",
+    "event": "node_complete",
+    "ts": "2026-11-03T13:28:03.263Z",
+    "ms": 131045,
+    "input": 205321,
+    "output": 13156,
+    "cost": 0.7116357
+   },
+   {
+    "node": "approve-plan",
+    "event": "node_complete",
+    "ts": "2026-11-03T13:28:17.183Z",
+    "ms": 13832,
+    "input": null,
+    "output": null,
+    "cost": null
+   },
+   {
+    "node": "stop-plan",
+    "event": "node_skipped",
+    "ts": "2026-11-03T13:28:17.193Z",
+    "ms": 0,
+    "input": null,
+    "output": null,
+    "cost": null
+   },
+   {
+    "node": "implement-iteration-1",
+    "event": "node_complete",
+    "ts": "2026-11-03T13:31:28.646Z",
+    "ms": null,
+    "input": null,
+    "output": null,
+    "cost": null
+   },
+   {
+    "node": "implement",
+    "event": "node_complete",
+    "ts": "2026-11-03T13:31:28.657Z",
+    "ms": 191271,
+    "input": 619348,
+    "output": 19633,
+    "cost": 0.8328200999999998
+   },
+   {
+    "node": "checks",
+    "event": "node_complete",
+    "ts": "2026-11-03T13:31:40.703Z",
+    "ms": 12039,
+    "input": null,
+    "output": null,
+    "cost": null
+   },
+   {
+    "node": "review",
+    "event": "node_complete",
+    "ts": "2026-11-03T13:33:28.785Z",
+    "ms": 107989,
+    "input": 374860,
+    "output": 8632,
+    "cost": 0.7486667
+   },
+   {
+    "node": "stop-plan",
+    "event": "node_skipped",
+    "ts": "2026-11-03T13:35:39.392Z",
+    "ms": 0,
+    "input": null,
+    "output": null,
+    "cost": null
+   },
+   {
+    "node": "approve-change",
+    "event": "node_complete",
+    "ts": "2026-11-03T13:35:39.413Z",
+    "ms": 130550,
+    "input": null,
+    "output": null,
+    "cost": null
+   },
+   {
+    "node": "push",
+    "event": "node_skipped",
+    "ts": "2026-11-03T13:35:39.418Z",
+    "ms": 0,
+    "input": null,
+    "output": null,
+    "cost": null
+   }
+  ]
+ }
+}

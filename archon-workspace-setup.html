@@ -1,0 +1,1352 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Set Up Archon for a Repo</title>
+<meta name="description" content="Install Archon 0.13.2, connect Claude Code, and prepare a repo for it: every command and every file, with real output on Windows and the macOS equivalents.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@600;700;800&family=Red+Hat+Text:wght@400;500;600&family=Red+Hat+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script>document.documentElement.classList.add('js');</script>
+<style>
+:root{
+  --bg:#F3F6F9; --bg-2:#E8EDF3; --panel:#FFFFFF; --ink:#141C25; --ink-2:#48566A; --ink-3:#7A8797; --line:#D9E1EA; --line-2:#B9C5D3;
+  --you:#1D4ED8; --you-soft:#E9EFFD; --you-ink:#15317E;
+  --setup:#5B6B7F; --plan:#0E7490; --build:#C2410C; --review:#6D28D9; --ship:#15803D; --gate:#D97706; --gate-soft:#FEF3C7; --gate-ink:#4A2E04; --ok:#15803D; --new:#15803D; --bad:#B91C1C;
+  --console:#0B1220; --console-ink:#E6EDF5; --c-muted:#8A9BB0; --c-str:#9FE1B0; --c-num:#F8C77A; --c-kw:#8CC4FF; --c-anno:#F0A6D2; --c-add:#10351F; --c-del:#4A1A1A; --c-prompt:#B5F5C8; --c-status:#7DD3FC;
+  --radius:14px; --shadow:0 1px 0 rgba(20,28,37,.04),0 14px 34px -24px rgba(20,28,37,.45);
+  --font-display:"Red Hat Display","Segoe UI",system-ui,sans-serif; --font-text:"Red Hat Text","Segoe UI",system-ui,sans-serif; --font-mono:"Red Hat Mono",ui-monospace,Consolas,Menlo,monospace;
+}
+[data-theme="dark"]{
+  --bg:#0F141A; --bg-2:#161D26; --panel:#171F29; --ink:#E7EDF3; --ink-2:#B1BDCA; --ink-3:#7E8B98; --line:#273240; --line-2:#3A4858;
+  --you:#8AB4FF; --you-soft:#15223D; --you-ink:#C9DAFF;
+  --setup:#9AA8B8; --plan:#38BDF8; --build:#FB923C; --review:#A78BFA; --ship:#4ADE80; --gate:#FBBF24; --gate-soft:#3A2A0A; --gate-ink:#FDE9B3; --ok:#4ADE80; --new:#4ADE80;
+  --console:#070C14; --shadow:0 1px 0 rgba(0,0,0,.4),0 14px 34px -24px rgba(0,0,0,.9);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 var(--font-text);-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-family:var(--font-display);line-height:1.15;margin:0 0 .4em;letter-spacing:-.01em}
+h1{font-size:clamp(1.9rem,4vw,2.9rem);font-weight:800}
+h2{font-size:1.45rem;font-weight:700}
+h3{font-size:1.12rem;font-weight:700}
+p{margin:0 0 .9em}
+a{color:inherit}
+code{font-family:var(--font-mono);font-size:.86em;background:rgba(120,140,170,.16);padding:.1em .38em;border-radius:6px;overflow-wrap:anywhere}
+pre{margin:0;font-family:var(--font-mono)}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--you);outline-offset:2px}
+.sr{position:absolute;left:-9999px}
+
+/* header */
+.top{position:sticky;top:0;z-index:40;background:color-mix(in srgb,var(--panel) 92%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top__in{max-width:1240px;margin:0 auto;padding:10px 20px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center}
+.brand{font-family:var(--font-display);font-weight:800;font-size:1.02rem;line-height:1.15}
+.brand small{display:block;font:500 .74rem/1.2 var(--font-text);color:var(--ink-3)}
+.prog{display:flex;align-items:center;gap:10px;min-width:0;overflow:hidden;font-size:.86rem;color:var(--ink-2)}
+.prog b{color:var(--ink);white-space:nowrap}
+.prog .bar{flex:1 1 0;height:8px;border-radius:99px;background:var(--bg-2);overflow:hidden;min-width:0}
+.prog .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--plan),var(--build),var(--review),var(--ship));transition:width .3s}
+.prog .ph{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.btn{border:1.5px solid var(--line-2);background:var(--panel);border-radius:10px;padding:7px 12px;font-weight:600;font-size:.86rem;cursor:pointer}
+.btn:hover{border-color:var(--ink-3)}
+@media (max-width:640px){.prog .ph{display:none}.brand small{display:none}.top__in{gap:8px;padding:8px 14px;grid-template-columns:minmax(0,auto) minmax(0,1fr) auto}.brand{min-width:0;overflow-wrap:anywhere}}
+
+/* shell */
+.shell{max-width:1240px;margin:0 auto;padding:0 20px 90px;display:grid;grid-template-columns:250px minmax(0,1fr);gap:28px;align-items:start}
+.rail{position:sticky;top:66px;max-height:calc(100vh - 80px);overflow:auto;padding:14px 0 20px}
+.rail h4{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin:14px 0 6px 10px}
+.rail h4:first-child{margin-top:0}
+.rl{display:grid;grid-template-columns:26px minmax(0,1fr);gap:8px;align-items:center;padding:6px 10px;border-radius:10px;text-decoration:none;color:var(--ink-2);font-size:.86rem;line-height:1.25}
+.rl b{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--bg-2);color:var(--ink-2);font:600 .74rem var(--font-mono);border:2px solid transparent}
+.rl:hover{background:var(--bg-2)}
+.rl.is-on{background:var(--panel);color:var(--ink);box-shadow:var(--shadow)}
+.rl.is-on b{border-color:var(--c);color:var(--c)}
+.rl.is-done b{background:var(--c);color:#fff;border-color:var(--c)}
+@media (max-width:900px){
+  .shell{grid-template-columns:minmax(0,1fr);gap:0}
+  .rail{position:sticky;top:58px;z-index:30;max-height:none;overflow-x:auto;overflow-y:hidden;display:flex;gap:6px;padding:8px 0;background:var(--bg);border-bottom:1px solid var(--line);margin:0 -20px 8px;padding-left:20px;padding-right:20px;scrollbar-width:thin}
+  .rail h4{display:none}
+  .rl{flex:0 0 auto;grid-template-columns:22px auto;padding:5px 9px;border:1px solid var(--line);background:var(--panel);white-space:nowrap}
+  .rl span{max-width:150px;overflow:hidden;text-overflow:ellipsis}
+}
+
+/* hero */
+.hero{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:28px;align-items:start;padding:40px 0 24px}
+.lead{font-size:1.1rem;color:var(--ink-2);max-width:62ch}
+.facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 18px;margin:18px 0 22px}
+.facts div{font-size:.86rem;color:var(--ink-2)}
+.facts b{display:block;font-family:var(--font-display);font-size:1.5rem;color:var(--ink);line-height:1.1}
+.slack{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.slack__bar{display:flex;justify-content:space-between;padding:9px 16px;background:var(--bg-2);font:500 .78rem var(--font-mono);color:var(--ink-2)}
+.slack__body{padding:16px 18px}
+.slack__who{display:flex;gap:10px;align-items:center;margin-bottom:10px}
+.slack__who i{width:38px;height:38px;border-radius:9px;background:var(--plan);color:#fff;display:grid;place-items:center;font:700 .9rem var(--font-display);font-style:normal}
+.slack__who b{display:block;line-height:1.2}.slack__who small{color:var(--ink-3)}
+.slack__body p{font-size:1rem}
+.legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin:0 0 30px}
+.legend>div{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:.86rem;color:var(--ink-2);display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:start}.legend>div>div{min-width:0}
+.legend b{display:block;color:var(--ink);font-size:.9rem}
+.legend svg{width:26px;height:26px;flex:none}
+@media (max-width:900px){.hero{grid-template-columns:minmax(0,1fr);padding-top:22px}.facts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* cards and steps */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px 24px;margin:0 0 18px}
+.phase{display:flex;align-items:center;gap:10px;margin:40px 0 14px;padding-top:18px;border-top:2px solid var(--line);color:var(--ink);font-family:var(--font-display);font-weight:800;font-size:1.3rem}
+.phase i{width:14px;height:14px;border-radius:50%;background:var(--c);flex:none}
+.phase span{font:500 .92rem var(--font-text);color:var(--ink-3)}
+.step{background:var(--panel);border:1px solid var(--line);border-top:5px solid var(--c);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px 24px;margin:0 0 20px;scroll-margin-top:84px}
+.step__head{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:start;margin-bottom:10px}
+.step__n{display:inline-grid;place-items:center;width:42px;height:42px;border-radius:12px;background:var(--c);color:#fff;font:800 1.15rem var(--font-display)}
+.chip{display:inline-block;font:600 .72rem/1.3 var(--font-mono);letter-spacing:.02em;padding:4px 9px;border-radius:99px;border:1.5px solid var(--c);color:var(--c);margin:0 6px 8px 0;overflow-wrap:anywhere}
+.chip--ours{border-color:var(--ink-3);color:var(--ink-3);border-style:dashed}
+.step h2{font-size:1.32rem;margin:0 0 .25em}
+.step__why{color:var(--ink-2);font-size:.98rem;margin:0}
+.who{font:500 .78rem/1.3 var(--font-mono);color:var(--ink-3);text-align:right;white-space:nowrap}
+@media (max-width:640px){.step__head{grid-template-columns:auto minmax(0,1fr)}.who{grid-column:1/-1;text-align:left}.step{padding:18px 16px}.card{padding:18px 16px}}
+
+.io{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:14px;margin:14px 0 0;align-items:start}
+@media (max-width:820px){.io{grid-template-columns:minmax(0,1fr)}}
+.io--stack{grid-template-columns:minmax(0,1fr)}.io--stack .you{max-width:760px}.io--stack .claude pre{max-height:none}
+.box{border-radius:12px;overflow:hidden;border:1px solid var(--line);min-width:0}
+.box__bar{display:flex;align-items:center;gap:8px;padding:8px 12px;font:600 .76rem var(--font-mono);letter-spacing:.02em}
+.box__bar svg{width:16px;height:16px;flex:none}
+.box__bar .tag{margin-left:auto;font-weight:500;opacity:.8}
+.box pre{padding:12px 14px;font-size:.84rem;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere;overflow:auto;max-height:560px}
+.you{background:var(--you-soft);border-color:color-mix(in srgb,var(--you) 40%,transparent)}
+.you .box__bar{background:color-mix(in srgb,var(--you) 14%,transparent);color:var(--you-ink)}
+.you pre{color:var(--you-ink);font-weight:500}
+.you pre .k{color:var(--ink-3);font-weight:400}
+.you pre .c{color:var(--ink-3);font-weight:400;font-style:italic}
+.you .copy{margin:0 12px 10px;border:1.5px solid color-mix(in srgb,var(--you) 50%,transparent);background:var(--panel);border-radius:8px;padding:4px 10px;font:600 .76rem var(--font-mono);cursor:pointer}
+.you .copy:hover{background:var(--you);color:#fff}
+.you .none{padding:12px 14px;font-size:.9rem;color:var(--ink-2)}
+.claude{background:var(--console);border-color:#1F2B3D}
+.claude .box__bar{background:#121C2C;color:#C7D4E3}
+.claude pre{color:var(--console-ink)}
+.claude .s{color:var(--c-status)}.claude .q{color:var(--c-prompt)}.claude .m{color:var(--c-muted)}.claude b{color:#fff;font-weight:600}.claude .ok{color:#86EFAC}.claude .w{color:#FCD34D}
+.disk{margin-top:12px;background:var(--bg-2);border-color:var(--line)}
+.disk .box__bar{background:color-mix(in srgb,var(--setup) 18%,transparent);color:var(--ink-2)}
+.disk pre{color:var(--ink-2);font-size:.76rem;max-height:none;white-space:pre}
+.disk .n{color:var(--new);font-weight:600}.disk .m{color:var(--ink-3)}.disk b{color:var(--ink);font-weight:600}.disk .d{color:var(--ink-3);text-decoration:line-through}
+.disk .ex{color:var(--ink-3)}
+@media (max-width:640px){.disk .box__bar::after{content:"swipe sideways for the notes";margin-left:auto;font-weight:500;opacity:.7}}
+.open{margin-top:12px}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 8px}
+.tab{border:1.5px solid var(--line-2);background:var(--panel);border-radius:99px;padding:5px 11px;font:500 .76rem var(--font-mono);cursor:pointer;color:var(--ink-2);max-width:100%;overflow-wrap:anywhere}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.pane{display:none}.pane.is-on{display:block}
+.code{border-radius:12px;overflow:hidden;border:1px solid var(--line)}
+.code__bar{display:flex;justify-content:space-between;gap:10px;padding:7px 12px;background:var(--bg-2);border-left:5px solid var(--c);font:500 .74rem var(--font-mono);color:var(--ink-2)}
+.code__bar .path{color:var(--ink);font-weight:600;overflow-wrap:anywhere}
+.code pre{background:var(--console);color:var(--console-ink);padding:12px 14px;font-size:.8rem;line-height:1.55;overflow:auto;white-space:pre;margin:0}
+.code--wrap pre{white-space:pre-wrap;overflow-wrap:anywhere}
+.code textarea.src{display:none}
+.tok-c{color:var(--c-muted);font-style:italic}.tok-s{color:var(--c-str)}.tok-n{color:var(--c-num)}.tok-k{color:var(--c-kw)}.tok-a{color:var(--c-anno)}.tok-p{color:var(--c-muted)}.tok-t{color:var(--c-kw)}
+.ln-add{display:block;background:var(--c-add)}.ln-del{display:block;background:var(--c-del)}
+.gate{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:start;background:var(--gate-soft);border:1.5px solid var(--gate);border-radius:12px;padding:12px 14px;margin-top:12px;color:var(--gate-ink)}
+.gate i{width:18px;height:18px;background:var(--gate);transform:rotate(45deg);margin:4px 3px 0;flex:none;border-radius:3px}
+.gate b{display:block;margin-bottom:2px}.gate p{margin:0;font-size:.94rem}.gate .by{font:500 .76rem var(--font-mono);opacity:.85;margin-top:4px}
+.plain{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:start;margin-top:12px;padding:11px 14px;border-radius:12px;background:var(--bg-2);border:1px dashed var(--line-2);font-size:.94rem;color:var(--ink-2)}
+.plain svg{width:24px;height:24px;color:var(--c);flex:none;margin-top:2px}
+.plain b{color:var(--ink)}
+.note{background:var(--bg-2);border-left:4px solid var(--ink-3);border-radius:10px;padding:12px 14px;font-size:.94rem;margin-top:12px}
+.note b{color:var(--ink)}
+.three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:12px}
+.three>div{background:var(--bg-2);border-radius:12px;padding:10px 12px;font-size:.9rem}
+.three b{display:block;font-size:.76rem;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3);margin-bottom:4px}
+@media (max-width:760px){.three{grid-template-columns:minmax(0,1fr)}}
+table{border-collapse:collapse;width:100%;font-size:.9rem;margin:10px 0}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--bg-2);font-weight:600}
+td code{font-size:.82em}td:first-child{white-space:nowrap}
+@media (max-width:640px){table{display:block;overflow-x:auto}}
+.setup{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
+.srow{display:grid;grid-template-columns:34px minmax(0,1fr);gap:12px;align-items:start;background:var(--bg-2);border-radius:12px;padding:12px 14px}
+.srow>b{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--setup);color:#fff;font:700 .9rem var(--font-display)}
+.srow .io{margin-top:8px}
+.srow .box pre{max-height:220px}
+.pills{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.pill{font:500 .74rem var(--font-mono);padding:4px 9px;border-radius:99px;border:1.5px solid var(--line-2);color:var(--ink-3);text-decoration:line-through;background:var(--panel)}
+.pill.on{text-decoration:none;color:var(--c);border-color:var(--c);font-weight:600}
+.os-mac{display:none}
+[data-os="mac"] .os-win{display:none}
+[data-os="mac"] .os-mac{display:revert}
+.top__btns{display:flex;gap:8px}
+@media (max-width:640px){.top__btns{gap:4px}.top__btns .btn{padding:5px 8px;font-size:.74rem}}
+.goal-rule{margin:10px 0 0;padding-left:1.3em}.goal-rule li{margin:4px 0}
+.cal{display:grid;grid-template-columns:repeat(13,minmax(0,1fr));gap:4px;margin:12px 0 4px;font:500 .74rem var(--font-mono);text-align:center}
+.cal div{border:1px solid var(--line);border-radius:8px;padding:6px 2px;background:var(--panel);min-width:0}
+.cal div b{display:block;font:700 .95rem var(--font-display);color:var(--ink)}
+.cal div i{display:block;font-style:normal;color:var(--ink-3)}
+.cal .wk,.cal .hol{background:var(--bg-2);color:var(--ink-3)}.cal .wk b,.cal .hol b{color:var(--ink-3)}
+.cal .hol{border-style:dashed}
+.cal .arr{border-color:var(--plan)}.cal .over{border-color:var(--bad);border-width:2px}.cal .over i{color:var(--bad);font-weight:600}
+@media (max-width:760px){.cal{grid-template-columns:repeat(7,minmax(0,1fr))}}
+.box pre .plus{color:var(--c-str);font-weight:600}
+.cmd{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;background:var(--bg-2);border-radius:10px;padding:10px 12px;margin:8px 0}
+.cmd code[data-copy]{display:block;background:none;padding:0;font-size:.84rem;overflow-wrap:anywhere}
+.cmd small{display:block;color:var(--ink-3);margin-top:3px}
+.cmd .copy{border:1.5px solid var(--line-2);background:var(--panel);border-radius:8px;padding:5px 10px;font:600 .76rem var(--font-mono);cursor:pointer}
+.cmd .copy:hover{background:var(--ink);color:var(--bg)}
+dl.gloss{display:grid;grid-template-columns:minmax(0,1fr);gap:0;margin:0}
+dl.gloss div{display:grid;grid-template-columns:190px minmax(0,1fr);gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:.94rem}
+dl.gloss dt{font-weight:600;color:var(--ink)}dl.gloss dd{margin:0;color:var(--ink-2)}
+@media (max-width:640px){dl.gloss div{grid-template-columns:minmax(0,1fr);gap:2px}}
+.foot{max-width:1240px;margin:0 auto;padding:20px 20px 60px;font-size:.84rem;color:var(--ink-3);border-top:1px solid var(--line)}
+
+figure.dia{margin:14px 0}figure.dia figcaption{font-size:.82rem;color:var(--ink-3);text-align:center;margin-top:4px}
+.gwrap{overflow-x:auto;max-width:100%}.gwrap figure.dia{min-width:760px}.gwrap table{display:table}
+.kv{table-layout:fixed}.kv td:first-child,.kv th:first-child{width:34%}.kv td:first-child code{white-space:normal;overflow-wrap:anywhere}
+.ref-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:12px}
+@media (max-width:760px){.ref-grid{grid-template-columns:minmax(0,1fr)}}
+.ref-grid>div{background:var(--bg-2);border-radius:12px;padding:12px 14px;font-size:.92rem}
+.ref-grid h3{margin:0 0 4px;font:700 1rem var(--font-display)}
+.ref-grid h3 small{font:500 .78rem var(--font-mono);color:var(--ink-3);margin-left:6px}
+.ref-grid p{margin:0 0 6px}.ref-grid ul{margin:0;padding-left:1.1em}.ref-grid li{margin:2px 0}
+.filter{width:100%;padding:9px 12px;border:1.5px solid var(--line-2);border-radius:10px;background:var(--panel);color:var(--ink);font:500 .92rem var(--font-mono);margin:10px 0}
+.flist{max-height:560px;overflow:auto;border:1px solid var(--line);border-radius:10px}.flist table{margin:0}
+.flist td:first-child{font-family:var(--font-mono);font-size:.8rem;white-space:nowrap}.flist td:last-child{font-size:.86rem;color:var(--ink-2)}
+.tag-yes{color:var(--ok);font-weight:600}.tag-no{color:var(--ink-3)}
+.lbl{display:inline-block;font:600 .72rem var(--font-mono);padding:1px 7px;border-radius:999px;vertical-align:2px;margin-left:4px}
+.lbl-real{background:color-mix(in srgb,var(--ok) 16%,transparent);color:var(--ok)}
+.lbl-doc{background:color-mix(in srgb,var(--gate) 18%,transparent);color:var(--gate-ink)}
+[data-theme="dark"] .lbl-doc{color:var(--gate)}
+@media (max-width:680px){.who,.box__bar .tag{white-space:normal;overflow-wrap:anywhere;min-width:0}.box__bar{flex-wrap:wrap}}
+.node{display:inline-block;font:600 .8rem var(--font-mono);padding:1px 8px;border-radius:6px;border:1.5px solid var(--c,var(--line-2));color:var(--ink)}
+</style>
+</head>
+<body>
+<a class="sr" href="#main">Skip to content</a>
+<header class="top"><div class="top__in">
+  <div class="brand">Archon setup<small>install · the repo's files · real output</small></div>
+  <div class="prog" aria-live="polite"><b id="progText">Step 0 of 10</b><div class="bar"><i id="progBar"></i></div><span class="ph" id="progPhase">Start at the top</span></div>
+  <div class="top__btns"><button class="btn" id="osToggle" type="button" title="Show the commands for your computer">Windows</button><button class="btn" id="themeToggle" type="button" aria-pressed="false">Dark mode</button></div>
+</div></header>
+
+<div class="shell">
+<nav class="rail" aria-label="Steps">
+  <h4>Once per machine</h4>
+  <a class="rl" href="#s01" data-step="1" style="--c:var(--setup)"><b>1</b><span>Install Archon</span></a>
+  <a class="rl" href="#s02" data-step="2" style="--c:var(--setup)"><b>2</b><span>version and doctor</span></a>
+  <a class="rl" href="#s03" data-step="3" style="--c:var(--setup)"><b>3</b><span>Telemetry</span></a>
+  <a class="rl" href="#s04" data-step="4" style="--c:var(--setup)"><b>4</b><span>Windows: Git Bash</span></a>
+  <h4>The repo</h4>
+  <a class="rl" href="#s05" data-step="5" style="--c:var(--plan)"><b>5</b><span>Clone the starter</span></a>
+  <a class="rl" href="#s06" data-step="6" style="--c:var(--plan)"><b>6</b><span>Write the team's files</span></a>
+  <a class="rl" href="#s07" data-step="7" style="--c:var(--plan)"><b>7</b><span>Validate, dry-run</span></a>
+  <a class="rl" href="#s08" data-step="8" style="--c:var(--plan)"><b>8</b><span>Commit</span></a>
+  <h4>First run</h4>
+  <a class="rl" href="#s09" data-step="9" style="--c:var(--build)"><b>9</b><span>Open the Web UI</span></a>
+  <a class="rl" href="#s10" data-step="10" style="--c:var(--build)"><b>10</b><span>Where PRs come from</span></a>
+  <h4>Reference</h4>
+  <a class="rl" href="#home" style="--c:var(--review)"><b>·</b><span>~/.archon folder by folder</span></a>
+  <a class="rl" href="#config" style="--c:var(--review)"><b>·</b><span>The config.yaml files</span></a>
+  <a class="rl" href="#real" style="--c:var(--review)"><b>·</b><span>What is real here</span></a>
+</nav>
+
+<main id="main">
+<section class="hero" id="top">
+  <div>
+    <h1>Set up Archon for a repo, and know what every file is for.</h1>
+    <p class="lead">Install once per machine, then add nine small files to the repo: that is the whole setup. This page does both on the course's Spring Boot repo with real output from Archon 0.13.2, including the two Windows snags the course hit. Next: <a href="archon-hello-world-java/archon-hello-world-java-run.html">run one request through it</a>.</p>
+    <div class="facts">
+      <div><b>1</b>install command, checksum verified</div>
+      <div><b>1</b>provider: Claude Code, your login</div>
+      <div><b>9</b>team files, committed</div>
+      <div><b>0</b>workspace folders: the repo is the project</div>
+      <div><b>1049</b>files under ~/.archon after the course</div>
+      <div><b>3090</b>the Web UI's port</div>
+    </div>
+  </div>
+  <aside class="slack" aria-label="Two places">
+    <div class="slack__bar"><span>Two places</span><span>Archon 0.13.2</span></div>
+    <div class="slack__body">
+      <p style="margin:0 0 8px"><b>The repo, <code>.archon/</code></b><br><span style="color:var(--ink-3)">The team's workflows, prompts and config. Committed; every clone gets them.</span></p>
+      <p style="margin:0 0 8px"><b>Beside it</b><br><span style="color:var(--ink-3)">CLAUDE.md for the agent, scripts/verify.sh for the check, docs-in/ for requests.</span></p>
+      <p style="margin:0"><b>Your home, <code>~/.archon/</code></b><br><span style="color:var(--ink-3)">The binary, plugins, the database, and every run's worktree, transcript and artifacts. Never committed.</span></p>
+    </div>
+  </aside>
+</section>
+<div class="phase" style="--c:var(--setup)"><i></i>Once per machine<span>steps 1–4 · install, check, telemetry, Windows</span></div>
+<section class="step" id="s01" data-step="1" data-phase="Once per machine" style="--c:var(--setup)">
+  <div class="step__head"><span class="step__n">1</span><div><span class="chip">install</span><h2>Install Archon and an agent</h2><p class="step__why">One binary, plus the agent it drives. Archon brings no model: it runs Claude Code (or Codex, Pi) with your own login.</p></div><span class="who">Kiran · 5 min</span></div>
+<div class="gwrap"><table><thead><tr><th>You need</th><th>Why</th><th>Check</th></tr></thead><tbody><tr><td>Claude Code, signed in</td><td>the agent every AI node runs</td><td><code>claude --version</code>, then <code>claude</code> once to sign in</td></tr><tr><td>git</td><td>worktrees, branches; on Windows also Git Bash, which runs every <code>bash:</code> node</td><td><code>git --version</code></td></tr><tr><td>JDK 21 + Maven 3.9</td><td>only for this course's Java repo</td><td><code>java -version</code> shows 21</td></tr></tbody></table></div><div class="io io--stack"><div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">PowerShell</span><span class="os-mac">Terminal</span></span></div><pre class="os-win">irm https://archon.diy/install.ps1 | iex</pre><pre class="os-mac">curl -fsSL https://archon.diy/install | bash</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">The installer returns <span class="tag">Windows · Archon 0.13.2 · real, run with -Providers claude</span></div><pre>+---------------------------------------+
+  |      Archon CLI Installer             |
+  |      Windows (PowerShell)             |
+  +---------------------------------------+
+
+[INFO]  Detecting architecture...
+[OK]    Architecture: x64
+[INFO]  Version     : latest
+[INFO]  Download URL: https://github.com/coleam00/Archon/releases/latest/download/archon-windows-x64.exe
+[INFO]  Downloading binary...
+[OK]    Downloaded successfully
+[INFO]  Verifying checksum...
+[OK]    Checksum verified
+[INFO]  Creating install directory: C:\Users\you\.archon\bin
+[INFO]  Installing to C:\Users\you\.archon\bin\archon.exe...
+[OK]    Installed to C:\Users\you\.archon\bin\archon.exe
+[OK]    Added C:\Users\you\.archon\bin to your user PATH
+[INFO]  Restart your terminal (or open a new one) for the PATH change to take effect
+
+[INFO]  Verifying installation...
+Archon CLI v0.13.2   Platform: win32-x64   Build: binary   Database: sqlite   Git commit: b8d01782
+[OK]    Installation complete!
+[INFO]  Adding a provider connects Archon to your agent CLI or SDK; it does not install that CLI.
+[INFO]  Adding providers: claude
+Installed coleam00/Archon/plugins/provider-claude from github.com/coleam00/Archon v0.13.2 (commit b8d01782fac602231a95685dabf42cc0edb0f1c1)
+  C:\Users\you\.archon\plugins\archon-provider-claude.exe  sha256 3ee501bc09e33ac5118d2c5e994886f615c21e5719a730f2496cdb45ead716f4
+  This runs code published by coleam00.
+[OK]    Providers installed: claude
+
+  Get started:
+    archon workflow list
+    archon workflow run archon-investigate &quot;Why does the test suite fail?&quot;
+
+  Note: Open a new terminal window so the updated PATH takes effect.</pre></div></div><div class="note">The installer downloads the release binary, verifies its SHA-256 against the release's <code>checksums.txt</code>, copies it to <code>~/.archon/bin</code>, adds that folder to your <b>user</b> PATH (open a new terminal to pick it up) and asks which providers to add. To skip the question: <code>&amp; ([scriptblock]::Create((irm https://archon.diy/install.ps1))) -Providers claude</code> on Windows, <code>curl -fsSL https://archon.diy/install | bash -s -- --providers claude</code> on macOS. Homebrew: <code>brew install coleam00/archon/archon</code>.</div><div class="plain"><div><b>In plain words.</b> A provider is a plug that fits Archon to one agent. Installing the plug doesn't install the agent: Claude Code must already be on the machine and signed in.</div></div>
+</section>
+<section class="step" id="s02" data-step="2" data-phase="Once per machine" style="--c:var(--setup)">
+  <div class="step__head"><span class="step__n">2</span><div><span class="chip">check</span><h2>Check the install: version and doctor</h2><p class="step__why">Two commands that tell you everything is wired before you spend a token.</p></div><span class="who">Kiran · 1 min</span></div>
+<div class="io"><div class="box you"><div class="box__bar">You type <span class="tag">any shell</span></div><pre>archon version
+archon doctor</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Archon returns <span class="tag">real</span></div><pre>Archon CLI v0.13.2
+  Platform: win32-x64
+  Build: binary
+  Database: sqlite
+  Git commit: b8d01782
+
+archon doctor — verifying your setup
+
+✓ Config files: valid (default assistant: claude)
+✓ Installed providers: claude (0.13.2)
+✓ claude: Claude binary: C:\Users\you\.local\bin\claude.exe (via autodetect, spawns OK)
+○ GitHub App: App mode not configured
+✓ Assistant login: claude: usable
+✓ Provider support: claude is supported
+✓ Database: reachable (sqlite); schema created by 0.13.2, last applied by 0.13.2
+○ Folder project: cwd is not a registered folder project
+○ AI credentials: none connected — run: archon ai login &lt;vendor&gt;  or  archon ai key set &lt;vendor&gt;
+✓ Workspace: C:\Users\you\.archon is writable
+✓ Bundled defaults: 25 workflow(s), 27 command(s) loaded
+○ Archon skill: not installed (run `archon skill add .` if you use Claude Code or Codex skills)
+○ Telemetry: disabled (ARCHON_TELEMETRY_DISABLED=1)
+○ Slack: no SLACK_BOT_TOKEN set
+○ Telegram: no TELEGRAM_BOT_TOKEN set
+
+All checks passed.</pre></div></div><div class="gwrap"><table class="kv"><thead><tr><th>Line</th><th>What it means</th></tr></thead><tbody><tr><td><code>claude: Claude binary … (via autodetect, spawns OK)</code></td><td>Archon found Claude Code and started it</td></tr><tr><td><code>Assistant login: claude: usable</code></td><td>Claude Code's own login (claude.ai) works; no API key needed</td></tr><tr><td><code>Database: reachable (sqlite)</code></td><td><code>~/.archon/archon.db</code>; set <code>DATABASE_URL</code> for PostgreSQL</td></tr><tr><td><code>Bundled defaults: 25 workflow(s), 27 command(s)</code></td><td>the sdlc pack inside the binary</td></tr><tr><td><code>○</code> lines</td><td>optional pieces not set up (GitHub App, chat platforms, the Archon skill): fine for this course</td></tr></tbody></table></div><div class="note"><b>Keep API keys out of it.</b> If <code>ANTHROPIC_API_KEY</code> is set in your shell, Claude Code (and so every Archon run) may use that key instead of your claude.ai login. The course cleared it for every run: <code>$env:ANTHROPIC_API_KEY=$null</code> in PowerShell, <code>unset ANTHROPIC_API_KEY</code> on macOS.</div>
+</section>
+<section class="step" id="s03" data-step="3" data-phase="Once per machine" style="--c:var(--setup)">
+  <div class="step__head"><span class="step__n">3</span><div><span class="chip">privacy</span><h2>Turn telemetry off (or decide to keep it)</h2><p class="step__why">Archon sends anonymous usage events by default. Know that before your first run.</p></div><span class="who">Kiran · 1 min</span></div>
+<div class="io"><div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">PowerShell</span><span class="os-mac">Terminal</span></span></div><pre class="os-win">[Environment]::SetEnvironmentVariable('ARCHON_TELEMETRY_DISABLED', '1', 'User')
+$env:ARCHON_TELEMETRY_DISABLED = '1'
+archon telemetry status</pre><pre class="os-mac">echo 'export ARCHON_TELEMETRY_DISABLED=1' >> ~/.zshrc
+export ARCHON_TELEMETRY_DISABLED=1
+archon telemetry status</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Archon returns <span class="tag">real</span></div><pre>Telemetry:   disabled
+Reason:      ARCHON_TELEMETRY_DISABLED=1 is set
+Distinct ID: (a random install id)
+Host:        https://us.i.posthog.com
+Key source:  embedded</pre></div></div><div class="note">Per the docs, what is sent is categorical: bundled workflow names (your own workflows report as <code>custom</code>), node counts, provider and model ids, outcome, durations and usage totals. Never code, prompts, file paths or your workflow names. <code>DO_NOT_TRACK=1</code> works too. The course ran with it off.</div>
+</section>
+<section class="step" id="s04" data-step="4" data-phase="Once per machine" style="--c:var(--setup)">
+  <div class="step__head"><span class="step__n">4</span><div><span class="chip">Windows only</span><h2>Windows: make sure Archon finds Git Bash</h2><p class="step__why">Every bash: node and every until_bash check runs under bash, on Windows too. Archon looks for Git Bash in the usual places only.</p></div><span class="who">Kiran · 1 min</span></div>
+<p>On this machine Git for Windows was on another drive. A one-node workflow showed what happens; <code>archon validate</code> does <b>not</b> catch it:</p><div class="open"><div class="tabs" role="tablist"><button class="tab" role="tab" aria-selected="true" data-pane="probe-1">bash-probe.yaml</button></div><div class="pane is-on" id="probe-1"><div class="code code--wrap"><div class="code__bar"><span class="path">.archon/workflows/bash-probe.yaml</span><span>a one-node test</span></div><textarea class="src" data-lang="yaml">name: bash-probe
+description: one bash node
+nodes:
+  - id: hello
+    bash: echo hello from $(uname -s)
+</textarea></div></div></div><div class="io"><div class="box claude"><div class="box__bar">Archon returns <span class="tag">real · without ARCHON_BASH_PATH</span></div><pre>[hello] Started
+[hello] Failed: Bash node &#x27;hello&#x27; failed: bash executable not found at &#x27;C:\Program Files\Git\bin\bash.exe&#x27;. Set ARCHON_BASH_PATH if Git Bash is installed elsewhere (e.g. user-scope installer at %LOCALAPPDATA%\Programs\Git\bin\bash.exe).
+Error: Workflow failed: Workflow did not complete successfully</pre></div><div class="box you"><div class="box__bar">You type <span class="tag">PowerShell · only if Git is elsewhere</span></div><pre>[Environment]::SetEnvironmentVariable('ARCHON_BASH_PATH', 'D:\Program Files\Git\bin\bash.exe', 'User')</pre><button class="copy" type="button">copy</button></div></div><div class="note">Archon checks <code>%ProgramFiles%\Git\bin\bash.exe</code>, <code>%ProgramFiles%\Git\usr\bin\bash.exe</code>, the x86 Program Files, <code>%LOCALAPPDATA%\Programs\Git\bin\bash.exe</code> and scoop. With <code>ARCHON_BASH_PATH</code> set, the same probe printed <code>Workflow completed successfully.</code> macOS and Linux use the <code>bash</code> on PATH.</div>
+</section>
+<div class="phase" style="--c:var(--plan)"><i></i>The repo<span>steps 5–8 · clone, write the team's files, check them, commit</span></div>
+<section class="step" id="s05" data-step="5" data-phase="The repo" style="--c:var(--plan)">
+  <div class="step__head"><span class="step__n">5</span><div><span class="chip">clone</span><h2>Clone the starter repo</h2><p class="step__why">The same Spring Boot API as the AI-DLC course, at v1.0.2: the code before the change.</p></div><span class="who">Kiran · 1 min</span></div>
+<div class="io"><div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">PowerShell</span><span class="os-mac">Terminal</span></span></div><pre class="os-win">cd C:\work
+git clone --single-branch --no-tags https://github.com/varasrinivas/aidlc-priorauth-api priorauth-api
+cd priorauth-api</pre><pre class="os-mac">cd ~/work
+git clone --single-branch --no-tags https://github.com/varasrinivas/aidlc-priorauth-api priorauth-api
+cd priorauth-api</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">git returns <span class="tag">real · the course cloned a local copy of the same repo</span></div><pre>Cloning into 'priorauth-api'...
+done.</pre></div></div><div class="note"><code>--no-tags</code> leaves out the <code>v1.1.0</code> tag, the answer key: an agent that scans the repo would otherwise find it. There is no workspace folder to make: <b>in Archon the repo is the project</b>, and Archon registers it on the first run.</div>
+</section>
+<section class="step" id="s06" data-step="6" data-phase="The repo" style="--c:var(--plan)">
+  <div class="step__head"><span class="step__n">6</span><div><span class="chip">ours</span><h2>Write the team's files</h2><p class="step__why">Nine small files the team owns: the workflow and its two prompts, Archon's repo config, the agent's rules, the one check, the request.</p></div><span class="who">Kiran · 3 min</span></div>
+<div class="io io--stack"><div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">PowerShell, from priorauth-api</span><span class="os-mac">Terminal, from priorauth-api</span></span></div><pre class="os-win">New-Item -ItemType Directory -Force .archon, .archon\workflows\team\request-to-pr, .archon\workflows\team\request-to-pr\commands, docs-in, scripts | Out-Null
+[IO.File]::WriteAllText(&quot;$PWD\.archon\config.yaml&quot;, (@&#x27;
+# Archon settings for this repo (committed; every clone and every worktree reads them).
+assistant: claude          # workflows use Claude Code unless a workflow or node says otherwise
+
+worktree:
+  baseBranch: main         # each run&#x27;s branch is cut from main
+&#x27;@ -replace &quot;`r&quot;, &quot;&quot;) + &quot;`n&quot;)
+[IO.File]::WriteAllText(&quot;$PWD\.archon\workflows\team\request-to-pr\commands\implement.md&quot;, (@&#x27;
+---
+description: Implement the approved plan; one pass of the implement loop.
+---
+The request: $USER_MESSAGE
+
+Implement the approved plan in $ARTIFACTS_DIR/plan.md against $ARTIFACTS_DIR/requirements.md,
+following CLAUDE.md. Notes from the person who approved the plan: $approve-plan.output.text
+
+If an earlier pass ran, this is what it reported (fix what it left failing):
+$LOOP_PREV_OUTPUT
+
+Run ./scripts/verify.sh. When it passes, commit the change on the current branch with a message
+that names the request and the requirement IDs. Write $ARTIFACTS_DIR/implementation.md: the files
+changed, the tests added, the verify result, and what you skipped or did not check.
+Return the verify result and the commit hash.
+&#x27;@ -replace &quot;`r&quot;, &quot;&quot;) + &quot;`n&quot;)
+[IO.File]::WriteAllText(&quot;$PWD\.archon\workflows\team\request-to-pr\commands\scan.md&quot;, (@&#x27;
+---
+description: Read the request and the code; write what a planner needs to know. Changes nothing.
+---
+The request: $USER_MESSAGE
+
+Read the request file it names (in docs-in/), then the code: the build file, the entry points, the
+classes the request touches, the tests, the configuration and the data files.
+
+Write $ARTIFACTS_DIR/scan.md with:
+- what the repo is and how it is built and tested (the verify command from CLAUDE.md);
+- the classes and files the request touches, with one line each on what they do now;
+- what is missing for the request (data, rules, configuration);
+- risks: callers or tests that a change could break.
+
+Do not change any file in the repository. Return a five-line summary.
+&#x27;@ -replace &quot;`r&quot;, &quot;&quot;) + &quot;`n&quot;)
+[IO.File]::WriteAllText(&quot;$PWD\.archon\workflows\team\request-to-pr\request-to-pr.yaml&quot;, (@&#x27;
+name: request-to-pr
+description: &gt;-
+  Take one request from docs-in/ to a pushed branch: scan the repo, ask the questions a person must
+  answer, write the requirements (revised until approved), plan, implement until ./scripts/verify.sh
+  passes, review, and push after a final approval. Use for one small change to priorauth-api.
+  NOT for: bugs whose cause is unknown (use archon-investigate first).
+
+nodes:
+  # ── Plan: read before anything is decided ─────────────────────────────
+  - id: scan
+    command: scan
+    mutates_checkout: false
+
+  - id: questions
+    depends_on: [scan]
+    mutates_checkout: false
+    prompt: |
+      The request: $USER_MESSAGE
+      The scan of the repo is in $ARTIFACTS_DIR/scan.md.
+
+      List only the questions a person must answer before requirements can be written
+      (rules, numbers, names, data sources). Number them; give each lettered options
+      (A, B, C, X = other) and say which you would pick and why. Write them to
+      $ARTIFACTS_DIR/questions.md and return the same text.
+    output_format:
+      type: object
+      properties:
+        questions: { type: string }
+      required: [questions]
+      additionalProperties: false
+
+  - id: answer
+    depends_on: [questions]
+    wait:
+      attention: |
+        Answer these before requirements are written (one message, e.g. &quot;1 A: ... 2 B: ...&quot;):
+
+        $questions.output.questions
+
+  - id: requirements
+    depends_on: [answer]
+    loop_group:
+      max_iterations: 3
+      until_bash: &#x27;decision=$review-requirements.output.decision; [ &quot;$decision&quot; = &quot;approve&quot; ]&#x27;
+      nodes:
+        - id: write-requirements
+          mutates_checkout: false
+          prompt: |
+            The request: $USER_MESSAGE
+            Scan: $ARTIFACTS_DIR/scan.md   Questions: $ARTIFACTS_DIR/questions.md
+            The person&#x27;s answers: $answer.output.text
+            Changes asked for on the previous version, if any: $LOOP_PREV.review-requirements.output.text
+
+            Write (or revise) $ARTIFACTS_DIR/requirements.md: numbered functional requirements
+            (FR1...), non-functional ones (NFR1...), assumptions (A-01...), and a worked check on
+            the sample data as of 2026-10-13. Return a short summary of what it says, and of what
+            changed if this is a revision.
+        - id: review-requirements
+          depends_on: [write-requirements]
+          wait:
+            form: approval
+            attention: |
+              Approve the requirements, or reject with the changes you want.
+
+              $write-requirements.output
+
+  # ── Build: plan, approve, implement until the checks pass ─────────────
+  - id: plan
+    depends_on: [requirements]
+    mutates_checkout: false
+    prompt: |
+      Read $ARTIFACTS_DIR/requirements.md and the code. Write $ARTIFACTS_DIR/plan.md:
+      the files to add or change, the tests to add, and the order. Follow CLAUDE.md.
+    output_format:
+      type: object
+      properties:
+        summary: { type: string }
+        files: { type: array, items: { type: string } }
+        tests: { type: string }
+      required: [summary, files, tests]
+      additionalProperties: false
+
+  - id: approve-plan
+    depends_on: [plan]
+    wait:
+      form: approval
+      attention: |
+        Approve the code plan before any code is written.
+
+        $plan.output.summary
+        Tests: $plan.output.tests
+
+  - id: stop-plan
+    depends_on: [approve-plan]
+    when: &quot;$approve-plan.output.decision == &#x27;reject&#x27;&quot;
+    cancel: The code plan was rejected.
+
+  - id: implement
+    depends_on: [approve-plan]
+    when: &quot;$approve-plan.output.decision == &#x27;approve&#x27;&quot;
+    loop:
+      command: implement
+      until_bash: ./scripts/verify.sh
+      max_iterations: 3
+      fresh_context: true
+
+  - id: checks
+    depends_on: [implement]
+    bash: |
+      ./scripts/verify.sh &amp;&amp; echo &quot;verify: passed&quot;
+      git log --oneline &quot;$BASE_BRANCH&quot;..HEAD
+      git diff --stat &quot;$BASE_BRANCH&quot;...HEAD
+
+  # ── Review: a second reader, then a person ────────────────────────────
+  - id: review
+    depends_on: [checks]
+    mutates_checkout: false
+    prompt: |
+      Review the change on this branch against $ARTIFACTS_DIR/requirements.md and
+      $ARTIFACTS_DIR/plan.md (git diff $BASE_BRANCH...HEAD). Do not edit anything.
+      Check each FR has code and a test, and look for anything the plan did not name.
+      Write $ARTIFACTS_DIR/review.md.
+    output_format:
+      type: object
+      properties:
+        verdict: { type: string, enum: [READY, NOT-READY] }
+        findings: { type: string }
+      required: [verdict, findings]
+      additionalProperties: false
+
+  - id: approve-change
+    depends_on: [review]
+    wait:
+      form: approval
+      attention: |
+        Review verdict: $review.output.verdict
+        $review.output.findings
+
+        Checks:
+        $checks.output
+
+        Approve to push the branch, or reject to stop.
+
+  - id: stop-change
+    depends_on: [approve-change]
+    when: &quot;$approve-change.output.decision == &#x27;reject&#x27;&quot;
+    cancel: The change was rejected at review.
+
+  # ── Ship ──────────────────────────────────────────────────────────────
+  - id: push
+    depends_on: [approve-change]
+    when: &quot;$approve-change.output.decision == &#x27;approve&#x27;&quot;
+    bash: |
+      git push -u origin HEAD 2&gt;&amp;1
+      echo &quot;Open the PR: $(git rev-parse --abbrev-ref HEAD) -&gt; $BASE_BRANCH&quot;
+&#x27;@ -replace &quot;`r&quot;, &quot;&quot;) + &quot;`n&quot;)
+[IO.File]::WriteAllText(&quot;$PWD\.gitattributes&quot;, (@&#x27;
+# verify.sh runs under bash in every Archon worktree: keep it LF even where git converts to CRLF.
+*.sh text eol=lf
+*.cmd text eol=crlf
+&#x27;@ -replace &quot;`r&quot;, &quot;&quot;) + &quot;`n&quot;)
+[IO.File]::WriteAllText(&quot;$PWD\CLAUDE.md&quot;, (@&#x27;
+# priorauth-api
+
+A Spring Boot 4.1 REST API on Java 21, built with Maven. It serves the pending list the reviewer screen reads.
+Work on it is run through Archon: the team&#x27;s workflows live in `.archon/workflows/`, requests in `docs-in/`.
+
+| Owns                              | Verify with              | Branch pattern     | PR base |
+|-----------------------------------|--------------------------|--------------------|---------|
+| the API the reviewer screen reads | `./scripts/verify.sh`    | request-age/&lt;slug&gt; | main    |
+
+## How we run Archon here
+
+- One request = one run of `request-to-pr` = one branch = one PR. Name the request file in the run message.
+- Tests only through `./scripts/verify.sh` (`scripts\verify.cmd` by hand on Windows); never ad hoc.
+- Never add a dependency to pom.xml without saying so in the plan.
+- Write what a person must read (scan, questions, requirements, plan, review) into `$ARTIFACTS_DIR`, not into the repo.
+- Commit the code on the run&#x27;s branch when the checks pass; pushing is the workflow&#x27;s last node, opening the PR is ours.
+- Before proposing a version or a tag, check the existing tags and the version in pom.xml.
+
+## How to change code
+
+1. Ask, don&#x27;t assume. If something is unclear, put it in the questions; state the assumptions you make.
+2. Smallest complete change. Prefer what already exists (this codebase, the JDK, an installed dependency) over new code; no features, options or abstractions nobody asked for. Deleting beats adding.
+3. Surgical. Touch only what the approved plan names and match the surrounding style. Mention unrelated problems, don&#x27;t fix them.
+4. Prove it. New branching, parsing, money or security logic gets a test; run the verify script before saying done.
+5. Never cut validation at trust boundaries, error handling that prevents data loss, security, accessibility, or anything the request asked for.
+6. End each summary with what you skipped or did not check, and any risk.
+&#x27;@ -replace &quot;`r&quot;, &quot;&quot;) + &quot;`n&quot;)
+[IO.File]::WriteAllText(&quot;$PWD\docs-in\request.md&quot;, (@&#x27;
+# Request age on the pending list (API)
+
+From: Ravi Menon (Nurse Manager, Utilization Management) · Slack #prior-auth-platform · Tue 13 Oct, 09:10
+
+&gt; The nightly report shows the AGE column now, thank you. The reviewer screen still shows nothing, and it reads from
+&gt; priorauth-api. Can the pending list the API returns carry the same business-day age and the over-5 flag, so the
+&gt; screen can show it? Same rule as the report: weekends and our holidays do not count. Nothing else changes.
+
+Attachments: none. Repo: priorauth-api (the API behind the reviewer screen).
+&#x27;@ -replace &quot;`r&quot;, &quot;&quot;) + &quot;`n&quot;)
+[IO.File]::WriteAllText(&quot;$PWD\scripts\verify.sh&quot;, (@&#x27;
+#!/usr/bin/env bash
+# The one verification command for this repo. Archon runs it in loop until_bash and bash nodes.
+set -uo pipefail
+cd &quot;$(dirname &quot;$0&quot;)/..&quot;
+mvn -q test
+&#x27;@ -replace &quot;`r&quot;, &quot;&quot;) + &quot;`n&quot;)
+[IO.File]::WriteAllText(&quot;$PWD\scripts\verify.cmd&quot;, &quot;@echo off`r`nrem Windows twin of verify.sh, for running the checks by hand in cmd or PowerShell.`r`ncd /d `&quot;%~dp0..`&quot; &amp;&amp; mvn -q test`r`n&quot;)</pre><pre class="os-mac">mkdir -p .archon .archon/workflows/team/request-to-pr .archon/workflows/team/request-to-pr/commands docs-in scripts
+cat &gt; .archon/config.yaml &lt;&lt;&#x27;EOF&#x27;
+# Archon settings for this repo (committed; every clone and every worktree reads them).
+assistant: claude          # workflows use Claude Code unless a workflow or node says otherwise
+
+worktree:
+  baseBranch: main         # each run&#x27;s branch is cut from main
+EOF
+cat &gt; .archon/workflows/team/request-to-pr/commands/implement.md &lt;&lt;&#x27;EOF&#x27;
+---
+description: Implement the approved plan; one pass of the implement loop.
+---
+The request: $USER_MESSAGE
+
+Implement the approved plan in $ARTIFACTS_DIR/plan.md against $ARTIFACTS_DIR/requirements.md,
+following CLAUDE.md. Notes from the person who approved the plan: $approve-plan.output.text
+
+If an earlier pass ran, this is what it reported (fix what it left failing):
+$LOOP_PREV_OUTPUT
+
+Run ./scripts/verify.sh. When it passes, commit the change on the current branch with a message
+that names the request and the requirement IDs. Write $ARTIFACTS_DIR/implementation.md: the files
+changed, the tests added, the verify result, and what you skipped or did not check.
+Return the verify result and the commit hash.
+EOF
+cat &gt; .archon/workflows/team/request-to-pr/commands/scan.md &lt;&lt;&#x27;EOF&#x27;
+---
+description: Read the request and the code; write what a planner needs to know. Changes nothing.
+---
+The request: $USER_MESSAGE
+
+Read the request file it names (in docs-in/), then the code: the build file, the entry points, the
+classes the request touches, the tests, the configuration and the data files.
+
+Write $ARTIFACTS_DIR/scan.md with:
+- what the repo is and how it is built and tested (the verify command from CLAUDE.md);
+- the classes and files the request touches, with one line each on what they do now;
+- what is missing for the request (data, rules, configuration);
+- risks: callers or tests that a change could break.
+
+Do not change any file in the repository. Return a five-line summary.
+EOF
+cat &gt; .archon/workflows/team/request-to-pr/request-to-pr.yaml &lt;&lt;&#x27;EOF&#x27;
+name: request-to-pr
+description: &gt;-
+  Take one request from docs-in/ to a pushed branch: scan the repo, ask the questions a person must
+  answer, write the requirements (revised until approved), plan, implement until ./scripts/verify.sh
+  passes, review, and push after a final approval. Use for one small change to priorauth-api.
+  NOT for: bugs whose cause is unknown (use archon-investigate first).
+
+nodes:
+  # ── Plan: read before anything is decided ─────────────────────────────
+  - id: scan
+    command: scan
+    mutates_checkout: false
+
+  - id: questions
+    depends_on: [scan]
+    mutates_checkout: false
+    prompt: |
+      The request: $USER_MESSAGE
+      The scan of the repo is in $ARTIFACTS_DIR/scan.md.
+
+      List only the questions a person must answer before requirements can be written
+      (rules, numbers, names, data sources). Number them; give each lettered options
+      (A, B, C, X = other) and say which you would pick and why. Write them to
+      $ARTIFACTS_DIR/questions.md and return the same text.
+    output_format:
+      type: object
+      properties:
+        questions: { type: string }
+      required: [questions]
+      additionalProperties: false
+
+  - id: answer
+    depends_on: [questions]
+    wait:
+      attention: |
+        Answer these before requirements are written (one message, e.g. &quot;1 A: ... 2 B: ...&quot;):
+
+        $questions.output.questions
+
+  - id: requirements
+    depends_on: [answer]
+    loop_group:
+      max_iterations: 3
+      until_bash: &#x27;decision=$review-requirements.output.decision; [ &quot;$decision&quot; = &quot;approve&quot; ]&#x27;
+      nodes:
+        - id: write-requirements
+          mutates_checkout: false
+          prompt: |
+            The request: $USER_MESSAGE
+            Scan: $ARTIFACTS_DIR/scan.md   Questions: $ARTIFACTS_DIR/questions.md
+            The person&#x27;s answers: $answer.output.text
+            Changes asked for on the previous version, if any: $LOOP_PREV.review-requirements.output.text
+
+            Write (or revise) $ARTIFACTS_DIR/requirements.md: numbered functional requirements
+            (FR1...), non-functional ones (NFR1...), assumptions (A-01...), and a worked check on
+            the sample data as of 2026-10-13. Return a short summary of what it says, and of what
+            changed if this is a revision.
+        - id: review-requirements
+          depends_on: [write-requirements]
+          wait:
+            form: approval
+            attention: |
+              Approve the requirements, or reject with the changes you want.
+
+              $write-requirements.output
+
+  # ── Build: plan, approve, implement until the checks pass ─────────────
+  - id: plan
+    depends_on: [requirements]
+    mutates_checkout: false
+    prompt: |
+      Read $ARTIFACTS_DIR/requirements.md and the code. Write $ARTIFACTS_DIR/plan.md:
+      the files to add or change, the tests to add, and the order. Follow CLAUDE.md.
+    output_format:
+      type: object
+      properties:
+        summary: { type: string }
+        files: { type: array, items: { type: string } }
+        tests: { type: string }
+      required: [summary, files, tests]
+      additionalProperties: false
+
+  - id: approve-plan
+    depends_on: [plan]
+    wait:
+      form: approval
+      attention: |
+        Approve the code plan before any code is written.
+
+        $plan.output.summary
+        Tests: $plan.output.tests
+
+  - id: stop-plan
+    depends_on: [approve-plan]
+    when: &quot;$approve-plan.output.decision == &#x27;reject&#x27;&quot;
+    cancel: The code plan was rejected.
+
+  - id: implement
+    depends_on: [approve-plan]
+    when: &quot;$approve-plan.output.decision == &#x27;approve&#x27;&quot;
+    loop:
+      command: implement
+      until_bash: ./scripts/verify.sh
+      max_iterations: 3
+      fresh_context: true
+
+  - id: checks
+    depends_on: [implement]
+    bash: |
+      ./scripts/verify.sh &amp;&amp; echo &quot;verify: passed&quot;
+      git log --oneline &quot;$BASE_BRANCH&quot;..HEAD
+      git diff --stat &quot;$BASE_BRANCH&quot;...HEAD
+
+  # ── Review: a second reader, then a person ────────────────────────────
+  - id: review
+    depends_on: [checks]
+    mutates_checkout: false
+    prompt: |
+      Review the change on this branch against $ARTIFACTS_DIR/requirements.md and
+      $ARTIFACTS_DIR/plan.md (git diff $BASE_BRANCH...HEAD). Do not edit anything.
+      Check each FR has code and a test, and look for anything the plan did not name.
+      Write $ARTIFACTS_DIR/review.md.
+    output_format:
+      type: object
+      properties:
+        verdict: { type: string, enum: [READY, NOT-READY] }
+        findings: { type: string }
+      required: [verdict, findings]
+      additionalProperties: false
+
+  - id: approve-change
+    depends_on: [review]
+    wait:
+      form: approval
+      attention: |
+        Review verdict: $review.output.verdict
+        $review.output.findings
+
+        Checks:
+        $checks.output
+
+        Approve to push the branch, or reject to stop.
+
+  - id: stop-change
+    depends_on: [approve-change]
+    when: &quot;$approve-change.output.decision == &#x27;reject&#x27;&quot;
+    cancel: The change was rejected at review.
+
+  # ── Ship ──────────────────────────────────────────────────────────────
+  - id: push
+    depends_on: [approve-change]
+    when: &quot;$approve-change.output.decision == &#x27;approve&#x27;&quot;
+    bash: |
+      git push -u origin HEAD 2&gt;&amp;1
+      echo &quot;Open the PR: $(git rev-parse --abbrev-ref HEAD) -&gt; $BASE_BRANCH&quot;
+EOF
+cat &gt; .gitattributes &lt;&lt;&#x27;EOF&#x27;
+# verify.sh runs under bash in every Archon worktree: keep it LF even where git converts to CRLF.
+*.sh text eol=lf
+*.cmd text eol=crlf
+EOF
+cat &gt; CLAUDE.md &lt;&lt;&#x27;EOF&#x27;
+# priorauth-api
+
+A Spring Boot 4.1 REST API on Java 21, built with Maven. It serves the pending list the reviewer screen reads.
+Work on it is run through Archon: the team&#x27;s workflows live in `.archon/workflows/`, requests in `docs-in/`.
+
+| Owns                              | Verify with              | Branch pattern     | PR base |
+|-----------------------------------|--------------------------|--------------------|---------|
+| the API the reviewer screen reads | `./scripts/verify.sh`    | request-age/&lt;slug&gt; | main    |
+
+## How we run Archon here
+
+- One request = one run of `request-to-pr` = one branch = one PR. Name the request file in the run message.
+- Tests only through `./scripts/verify.sh` (`scripts\verify.cmd` by hand on Windows); never ad hoc.
+- Never add a dependency to pom.xml without saying so in the plan.
+- Write what a person must read (scan, questions, requirements, plan, review) into `$ARTIFACTS_DIR`, not into the repo.
+- Commit the code on the run&#x27;s branch when the checks pass; pushing is the workflow&#x27;s last node, opening the PR is ours.
+- Before proposing a version or a tag, check the existing tags and the version in pom.xml.
+
+## How to change code
+
+1. Ask, don&#x27;t assume. If something is unclear, put it in the questions; state the assumptions you make.
+2. Smallest complete change. Prefer what already exists (this codebase, the JDK, an installed dependency) over new code; no features, options or abstractions nobody asked for. Deleting beats adding.
+3. Surgical. Touch only what the approved plan names and match the surrounding style. Mention unrelated problems, don&#x27;t fix them.
+4. Prove it. New branching, parsing, money or security logic gets a test; run the verify script before saying done.
+5. Never cut validation at trust boundaries, error handling that prevents data loss, security, accessibility, or anything the request asked for.
+6. End each summary with what you skipped or did not check, and any risk.
+EOF
+cat &gt; docs-in/request.md &lt;&lt;&#x27;EOF&#x27;
+# Request age on the pending list (API)
+
+From: Ravi Menon (Nurse Manager, Utilization Management) · Slack #prior-auth-platform · Tue 13 Oct, 09:10
+
+&gt; The nightly report shows the AGE column now, thank you. The reviewer screen still shows nothing, and it reads from
+&gt; priorauth-api. Can the pending list the API returns carry the same business-day age and the over-5 flag, so the
+&gt; screen can show it? Same rule as the report: weekends and our holidays do not count. Nothing else changes.
+
+Attachments: none. Repo: priorauth-api (the API behind the reviewer screen).
+EOF
+cat &gt; scripts/verify.sh &lt;&lt;&#x27;EOF&#x27;
+#!/usr/bin/env bash
+# The one verification command for this repo. Archon runs it in loop until_bash and bash nodes.
+set -uo pipefail
+cd &quot;$(dirname &quot;$0&quot;)/..&quot;
+mvn -q test
+EOF
+chmod +x scripts/verify.sh</pre><button class="copy" type="button">copy</button></div></div><div class="open"><div class="tabs" role="tablist"><button class="tab" role="tab" aria-selected="true" data-pane="team-1">config.yaml</button><button class="tab" role="tab" aria-selected="false" data-pane="team-2">implement.md</button><button class="tab" role="tab" aria-selected="false" data-pane="team-3">scan.md</button><button class="tab" role="tab" aria-selected="false" data-pane="team-4">request-to-pr.yaml</button><button class="tab" role="tab" aria-selected="false" data-pane="team-5">.gitattributes</button><button class="tab" role="tab" aria-selected="false" data-pane="team-6">CLAUDE.md</button><button class="tab" role="tab" aria-selected="false" data-pane="team-7">request.md</button><button class="tab" role="tab" aria-selected="false" data-pane="team-8">verify.cmd</button><button class="tab" role="tab" aria-selected="false" data-pane="team-9">verify.sh</button></div><div class="pane is-on" id="team-1"><div class="code code--wrap"><div class="code__bar"><span class="path">.archon/config.yaml</span><span></span></div><textarea class="src" data-lang="yaml"># Archon settings for this repo (committed; every clone and every worktree reads them).
+assistant: claude          # workflows use Claude Code unless a workflow or node says otherwise
+
+worktree:
+  baseBranch: main         # each run&#x27;s branch is cut from main
+</textarea></div></div><div class="pane" id="team-2"><div class="code code--wrap"><div class="code__bar"><span class="path">.archon/workflows/team/request-to-pr/commands/implement.md</span><span></span></div><textarea class="src" data-lang="md">---
+description: Implement the approved plan; one pass of the implement loop.
+---
+The request: $USER_MESSAGE
+
+Implement the approved plan in $ARTIFACTS_DIR/plan.md against $ARTIFACTS_DIR/requirements.md,
+following CLAUDE.md. Notes from the person who approved the plan: $approve-plan.output.text
+
+If an earlier pass ran, this is what it reported (fix what it left failing):
+$LOOP_PREV_OUTPUT
+
+Run ./scripts/verify.sh. When it passes, commit the change on the current branch with a message
+that names the request and the requirement IDs. Write $ARTIFACTS_DIR/implementation.md: the files
+changed, the tests added, the verify result, and what you skipped or did not check.
+Return the verify result and the commit hash.
+</textarea></div></div><div class="pane" id="team-3"><div class="code code--wrap"><div class="code__bar"><span class="path">.archon/workflows/team/request-to-pr/commands/scan.md</span><span></span></div><textarea class="src" data-lang="md">---
+description: Read the request and the code; write what a planner needs to know. Changes nothing.
+---
+The request: $USER_MESSAGE
+
+Read the request file it names (in docs-in/), then the code: the build file, the entry points, the
+classes the request touches, the tests, the configuration and the data files.
+
+Write $ARTIFACTS_DIR/scan.md with:
+- what the repo is and how it is built and tested (the verify command from CLAUDE.md);
+- the classes and files the request touches, with one line each on what they do now;
+- what is missing for the request (data, rules, configuration);
+- risks: callers or tests that a change could break.
+
+Do not change any file in the repository. Return a five-line summary.
+</textarea></div></div><div class="pane" id="team-4"><div class="code code--wrap"><div class="code__bar"><span class="path">.archon/workflows/team/request-to-pr/request-to-pr.yaml</span><span></span></div><textarea class="src" data-lang="yaml">name: request-to-pr
+description: &gt;-
+  Take one request from docs-in/ to a pushed branch: scan the repo, ask the questions a person must
+  answer, write the requirements (revised until approved), plan, implement until ./scripts/verify.sh
+  passes, review, and push after a final approval. Use for one small change to priorauth-api.
+  NOT for: bugs whose cause is unknown (use archon-investigate first).
+
+nodes:
+  # ── Plan: read before anything is decided ─────────────────────────────
+  - id: scan
+    command: scan
+    mutates_checkout: false
+
+  - id: questions
+    depends_on: [scan]
+    mutates_checkout: false
+    prompt: |
+      The request: $USER_MESSAGE
+      The scan of the repo is in $ARTIFACTS_DIR/scan.md.
+
+      List only the questions a person must answer before requirements can be written
+      (rules, numbers, names, data sources). Number them; give each lettered options
+      (A, B, C, X = other) and say which you would pick and why. Write them to
+      $ARTIFACTS_DIR/questions.md and return the same text.
+    output_format:
+      type: object
+      properties:
+        questions: { type: string }
+      required: [questions]
+      additionalProperties: false
+
+  - id: answer
+    depends_on: [questions]
+    wait:
+      attention: |
+        Answer these before requirements are written (one message, e.g. &quot;1 A: ... 2 B: ...&quot;):
+
+        $questions.output.questions
+
+  - id: requirements
+    depends_on: [answer]
+    loop_group:
+      max_iterations: 3
+      until_bash: &#x27;decision=$review-requirements.output.decision; [ &quot;$decision&quot; = &quot;approve&quot; ]&#x27;
+      nodes:
+        - id: write-requirements
+          mutates_checkout: false
+          prompt: |
+            The request: $USER_MESSAGE
+            Scan: $ARTIFACTS_DIR/scan.md   Questions: $ARTIFACTS_DIR/questions.md
+            The person&#x27;s answers: $answer.output.text
+            Changes asked for on the previous version, if any: $LOOP_PREV.review-requirements.output.text
+
+            Write (or revise) $ARTIFACTS_DIR/requirements.md: numbered functional requirements
+            (FR1...), non-functional ones (NFR1...), assumptions (A-01...), and a worked check on
+            the sample data as of 2026-10-13. Return a short summary of what it says, and of what
+            changed if this is a revision.
+        - id: review-requirements
+          depends_on: [write-requirements]
+          wait:
+            form: approval
+            attention: |
+              Approve the requirements, or reject with the changes you want.
+
+              $write-requirements.output
+
+  # ── Build: plan, approve, implement until the checks pass ─────────────
+  - id: plan
+    depends_on: [requirements]
+    mutates_checkout: false
+    prompt: |
+      Read $ARTIFACTS_DIR/requirements.md and the code. Write $ARTIFACTS_DIR/plan.md:
+      the files to add or change, the tests to add, and the order. Follow CLAUDE.md.
+    output_format:
+      type: object
+      properties:
+        summary: { type: string }
+        files: { type: array, items: { type: string } }
+        tests: { type: string }
+      required: [summary, files, tests]
+      additionalProperties: false
+
+  - id: approve-plan
+    depends_on: [plan]
+    wait:
+      form: approval
+      attention: |
+        Approve the code plan before any code is written.
+
+        $plan.output.summary
+        Tests: $plan.output.tests
+
+  - id: stop-plan
+    depends_on: [approve-plan]
+    when: &quot;$approve-plan.output.decision == &#x27;reject&#x27;&quot;
+    cancel: The code plan was rejected.
+
+  - id: implement
+    depends_on: [approve-plan]
+    when: &quot;$approve-plan.output.decision == &#x27;approve&#x27;&quot;
+    loop:
+      command: implement
+      until_bash: ./scripts/verify.sh
+      max_iterations: 3
+      fresh_context: true
+
+  - id: checks
+    depends_on: [implement]
+    bash: |
+      ./scripts/verify.sh &amp;&amp; echo &quot;verify: passed&quot;
+      git log --oneline &quot;$BASE_BRANCH&quot;..HEAD
+      git diff --stat &quot;$BASE_BRANCH&quot;...HEAD
+
+  # ── Review: a second reader, then a person ────────────────────────────
+  - id: review
+    depends_on: [checks]
+    mutates_checkout: false
+    prompt: |
+      Review the change on this branch against $ARTIFACTS_DIR/requirements.md and
+      $ARTIFACTS_DIR/plan.md (git diff $BASE_BRANCH...HEAD). Do not edit anything.
+      Check each FR has code and a test, and look for anything the plan did not name.
+      Write $ARTIFACTS_DIR/review.md.
+    output_format:
+      type: object
+      properties:
+        verdict: { type: string, enum: [READY, NOT-READY] }
+        findings: { type: string }
+      required: [verdict, findings]
+      additionalProperties: false
+
+  - id: approve-change
+    depends_on: [review]
+    wait:
+      form: approval
+      attention: |
+        Review verdict: $review.output.verdict
+        $review.output.findings
+
+        Checks:
+        $checks.output
+
+        Approve to push the branch, or reject to stop.
+
+  - id: stop-change
+    depends_on: [approve-change]
+    when: &quot;$approve-change.output.decision == &#x27;reject&#x27;&quot;
+    cancel: The change was rejected at review.
+
+  # ── Ship ──────────────────────────────────────────────────────────────
+  - id: push
+    depends_on: [approve-change]
+    when: &quot;$approve-change.output.decision == &#x27;approve&#x27;&quot;
+    bash: |
+      git push -u origin HEAD 2&gt;&amp;1
+      echo &quot;Open the PR: $(git rev-parse --abbrev-ref HEAD) -&gt; $BASE_BRANCH&quot;
+</textarea></div></div><div class="pane" id="team-5"><div class="code code--wrap"><div class="code__bar"><span class="path">.gitattributes</span><span></span></div><textarea class="src" data-lang="bash"># verify.sh runs under bash in every Archon worktree: keep it LF even where git converts to CRLF.
+*.sh text eol=lf
+*.cmd text eol=crlf
+</textarea></div></div><div class="pane" id="team-6"><div class="code code--wrap"><div class="code__bar"><span class="path">CLAUDE.md</span><span></span></div><textarea class="src" data-lang="md"># priorauth-api
+
+A Spring Boot 4.1 REST API on Java 21, built with Maven. It serves the pending list the reviewer screen reads.
+Work on it is run through Archon: the team&#x27;s workflows live in `.archon/workflows/`, requests in `docs-in/`.
+
+| Owns                              | Verify with              | Branch pattern     | PR base |
+|-----------------------------------|--------------------------|--------------------|---------|
+| the API the reviewer screen reads | `./scripts/verify.sh`    | request-age/&lt;slug&gt; | main    |
+
+## How we run Archon here
+
+- One request = one run of `request-to-pr` = one branch = one PR. Name the request file in the run message.
+- Tests only through `./scripts/verify.sh` (`scripts\verify.cmd` by hand on Windows); never ad hoc.
+- Never add a dependency to pom.xml without saying so in the plan.
+- Write what a person must read (scan, questions, requirements, plan, review) into `$ARTIFACTS_DIR`, not into the repo.
+- Commit the code on the run&#x27;s branch when the checks pass; pushing is the workflow&#x27;s last node, opening the PR is ours.
+- Before proposing a version or a tag, check the existing tags and the version in pom.xml.
+
+## How to change code
+
+1. Ask, don&#x27;t assume. If something is unclear, put it in the questions; state the assumptions you make.
+2. Smallest complete change. Prefer what already exists (this codebase, the JDK, an installed dependency) over new code; no features, options or abstractions nobody asked for. Deleting beats adding.
+3. Surgical. Touch only what the approved plan names and match the surrounding style. Mention unrelated problems, don&#x27;t fix them.
+4. Prove it. New branching, parsing, money or security logic gets a test; run the verify script before saying done.
+5. Never cut validation at trust boundaries, error handling that prevents data loss, security, accessibility, or anything the request asked for.
+6. End each summary with what you skipped or did not check, and any risk.
+</textarea></div></div><div class="pane" id="team-7"><div class="code code--wrap"><div class="code__bar"><span class="path">docs-in/request.md</span><span></span></div><textarea class="src" data-lang="md"># Request age on the pending list (API)
+
+From: Ravi Menon (Nurse Manager, Utilization Management) · Slack #prior-auth-platform · Tue 13 Oct, 09:10
+
+&gt; The nightly report shows the AGE column now, thank you. The reviewer screen still shows nothing, and it reads from
+&gt; priorauth-api. Can the pending list the API returns carry the same business-day age and the over-5 flag, so the
+&gt; screen can show it? Same rule as the report: weekends and our holidays do not count. Nothing else changes.
+
+Attachments: none. Repo: priorauth-api (the API behind the reviewer screen).
+</textarea></div></div><div class="pane" id="team-8"><div class="code code--wrap"><div class="code__bar"><span class="path">scripts/verify.cmd</span><span></span></div><textarea class="src" data-lang="bash">@echo off
+rem Windows twin of verify.sh, for running the checks by hand in cmd or PowerShell.
+cd /d &quot;%~dp0..&quot; &amp;&amp; mvn -q test
+</textarea></div></div><div class="pane" id="team-9"><div class="code code--wrap"><div class="code__bar"><span class="path">scripts/verify.sh</span><span></span></div><textarea class="src" data-lang="bash">#!/usr/bin/env bash
+# The one verification command for this repo. Archon runs it in loop until_bash and bash nodes.
+set -uo pipefail
+cd &quot;$(dirname &quot;$0&quot;)/..&quot;
+mvn -q test
+</textarea></div></div></div><div class="gwrap"><table class="kv"><thead><tr><th>File</th><th>What it is for</th></tr></thead><tbody><tr><td><code>.archon/workflows/team/request-to-pr/request-to-pr.yaml</code></td><td>the team's process: 15 nodes, 4 waits for people</td></tr><tr><td><code>…/commands/scan.md</code>, <code>implement.md</code></td><td>the prompts of the <code>scan</code> node and each <code>implement</code> pass</td></tr><tr><td><code>.archon/config.yaml</code></td><td><code>assistant: claude</code>; runs branch from <code>main</code></td></tr><tr><td><code>CLAUDE.md</code></td><td>the agent's standing rules; Claude Code reads it in every AI node</td></tr><tr><td><code>scripts/verify.sh</code> (+ <code>verify.cmd</code>)</td><td>the one check: the implement loop ends when it exits 0</td></tr><tr><td><code>.gitattributes</code></td><td>keeps <code>verify.sh</code> LF: a worktree is a fresh checkout, and with <code>core.autocrlf=true</code> bash would get CRLF and fail</td></tr><tr><td><code>docs-in/request.md</code></td><td>Ravi's request, named in the run message</td></tr></tbody></table></div><div class="plain"><div><b>In plain words.</b> The workflow is the recipe, <code>CLAUDE.md</code> the kitchen rules every cook reads, and <code>verify.sh</code> the thermometer: the dish is done when it says so, not when the cook thinks so.</div></div>
+</section>
+<section class="step" id="s07" data-step="7" data-phase="The repo" style="--c:var(--plan)">
+  <div class="step__head"><span class="step__n">7</span><div><span class="chip">check before spending</span><h2>Validate the workflow, then dry-run it</h2><p class="step__why">Two free checks: the file parses and its references resolve; the graph walks the way you think.</p></div><span class="who">Kiran · 1 min</span></div>
+<div class="io"><div class="box you"><div class="box__bar">You type <span class="tag">any shell</span></div><pre>archon validate workflows request-to-pr</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Archon returns <span class="tag">real</span></div><pre>Validating workflows in C:/work/archon-java/priorauth-api
+
+  request-to-pr                            ok
+
+Results: 1 valid, 0 with errors</pre></div></div><div class="io"><div class="box you"><div class="box__bar">You type <span class="tag">any shell</span></div><pre>archon workflow run request-to-pr --dry-run --default-stubs "Implement the request in docs-in/request.md"</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Archon returns <span class="tag">real · no run, no model call</span></div><pre>Discovery: root=C:/work/archon-java/priorauth-api workflows=26 bundled=25 global=0 project=1 installed=0
+Dry-run: request-to-pr
+STUBBED   scan (command)
+…
+STUBBED   questions (prompt)
+…
+PAUSED    answer (wait) — durable wait
+…
+Simulation outcome: paused</pre></div></div><div class="note">Run with no name, <code>archon validate workflows</code> also checks the 25 bundled ones; on Windows 24 of them warn <code>Runtime 'bun' is not available on PATH</code> for their <code>script:</code> nodes. In the course run the bundled <code>archon-plan</code> and <code>archon-implement</code> ran their script nodes anyway; install <a href="https://bun.sh">Bun</a> if a bundled workflow's script node fails.</div>
+</section>
+<section class="step" id="s08" data-step="8" data-phase="The repo" style="--c:var(--plan)">
+  <div class="step__head"><span class="step__n">8</span><div><span class="chip">ours</span><h2>Commit the team's files</h2><p class="step__why">Worktrees are cut from the branch, so a run only sees what is committed.</p></div><span class="who">Kiran · 1 min</span></div>
+<div class="io"><div class="box you"><div class="box__bar">You type <span class="tag">any shell</span></div><pre>git add -A
+git status --short
+git commit -m "Add the team's Archon files: CLAUDE.md, verify scripts, request-to-pr workflow"
+git push origin main</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">git returns <span class="tag">real · git status --short</span></div><pre>A  .archon/config.yaml
+A  .archon/workflows/team/request-to-pr/commands/implement.md
+A  .archon/workflows/team/request-to-pr/commands/scan.md
+A  .archon/workflows/team/request-to-pr/request-to-pr.yaml
+A  .gitattributes
+A  CLAUDE.md
+A  docs-in/request.md
+A  scripts/verify.cmd
+A  scripts/verify.sh</pre></div></div><div class="note">If the run must see a file that is git-ignored (a <code>.env</code>, local fixtures), list it under <code>worktree.copyFiles</code> in <code>.archon/config.yaml</code>; anything that needs installing goes in <code>worktree.postCreate</code>. This repo needs neither.</div><div class="io"><div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">Git Bash</span><span class="os-mac">Terminal</span></span></div><pre class="os-win">./scripts/verify.sh</pre><pre class="os-mac">./scripts/verify.sh</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">bash returns <span class="tag">real · at v1.0.2, before the change</span></div><pre>…
+verify: passed</pre></div></div>
+</section>
+<div class="phase" style="--c:var(--build)"><i></i>First run<span>steps 9–10 · the Web UI, and where PRs come from</span></div>
+<section class="step" id="s09" data-step="9" data-phase="First run" style="--c:var(--build)">
+  <div class="step__head"><span class="step__n">9</span><div><span class="chip">the Web UI</span><h2>Open the Web UI</h2><p class="step__why">The same runs as the CLI, with the graph, the log, the artifacts and approve/reject buttons.</p></div><span class="who">Kiran · 2 min</span></div>
+<div class="io"><div class="box you"><div class="box__bar">You type <span class="tag">any shell · leave it running</span></div><pre>archon serve</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Archon returns <span class="tag">real · from the server's log and /api/health</span></div><pre>server_listening  port 3090  hostname 0.0.0.0
+server_ready      activePlatforms: ["Web"]
+
+GET /api/health →
+{&quot;status&quot;: &quot;ok&quot;, &quot;adapter&quot;: &quot;web&quot;, &quot;version&quot;: &quot;0.13.2&quot;, &quot;activePlatforms&quot;: [&quot;Web&quot;], &quot;runningWorkflows&quot;: 0}</pre></div></div><figure class="dia"><img src="img/webui-runs.png" alt="Archon Web UI: the priorauth-api project with the course's three runs" style="width:100%;border-radius:10px;border:1px solid var(--line)"><figcaption>The project page after the course run: request-to-pr (cancelled at the last gate), archon-implement (the fix), archon-plan (the comparison). Real screenshot; display paths mapped.</figcaption></figure><figure class="dia"><img src="img/webui-graph.png" alt="Archon Web UI: the graph of the request-to-pr run" style="width:100%;border-radius:10px;border:1px solid var(--line)"><figcaption>The run page's Graph tab for request-to-pr. Log and Artifacts are the other tabs.</figcaption></figure><div class="note"><b>It listens on every interface (0.0.0.0), and a solo install has no login.</b> On a shared network, anyone who can reach port 3090 can see and answer your runs: keep a firewall on, or set up the docs' authentication before using it anywhere but your own laptop. The first <code>archon serve</code> downloads the server (92 MB) and the web UI (1.8 MB) into <code>~/.archon/server/</code> and <code>~/.archon/web-dist/</code>, checksums verified; <code>archon serve --download-only</code> does just that.</div>
+</section>
+<section class="step" id="s10" data-step="10" data-phase="First run" style="--c:var(--build)">
+  <div class="step__head"><span class="step__n">10</span><div><span class="chip">ours</span><h2>Where pull requests come from</h2><p class="step__why">Archon's own workflow can push a branch. Opening and merging the PR is a forge's job: gh, or a forge plugin.</p></div><span class="who">Kiran · reference</span></div>
+<div class="gwrap"><table><thead><tr><th>Who opens the PR</th><th>What it needs</th><th>In this course</th></tr></thead><tbody><tr><td>You, by hand</td><td>nothing</td><td>the course's way: the run pushes (or Kiran does), Kiran opens the PR <span class="lbl lbl-real">real</span></td></tr><tr><td>The bundled <code>archon-pr</code> / <code>archon-ship</code></td><td><code>gh auth login</code> (default), or <code>ARCHON_SDLC_FORGE=forge</code> + <code>archon plugin add coleam00/Archon/plugins/forge-github</code></td><td><span class="lbl lbl-doc">documented</span></td></tr><tr><td>Queues (<code>archon-intake</code> → <code>build-queue</code> → <code>merge-queue</code>)</td><td>gh, a maintainers file on the default branch, CI checks on PRs</td><td><span class="lbl lbl-doc">documented</span></td></tr></tbody></table></div><div class="box claude"><div class="box__bar">Archon returns <span class="tag">real · archon complete, with no gh login</span></div><pre>Warning: gh error: Command failed: gh pr list --head request-age/age-api --state open --json number,title
+To get started with GitHub CLI, please run:  gh auth login
+Alternatively, populate the GH_TOKEN environment variable with a GitHub API authentication token.
+ — skipping open PR check</pre></div><div class="note">Without a <code>gh</code> login Archon still works; it only skips what needs GitHub, and says so (here <code>archon complete</code> skipped its open-PR check).</div>
+</section>
+<div class="phase" style="--c:var(--review)"><i></i>Reference<span>~/.archon and the config files</span></div>
+<section class="card" id="home">
+  <h2>~/.archon, folder by folder</h2>
+<p>Every file under <code>~/.archon</code> after the course (install, three runs, the Web UI), counted by <code>capture_cli.py</code> (1049 files, real). Nothing here is committed.</p><div class="gwrap"><table class="kv"><thead><tr><th>Path</th><th>Files</th><th>What it is</th></tr></thead><tbody><tr><td><code>archon.db</code></td><td>1</td><td>SQLite: projects, runs, events, sessions, costs</td></tr><tr><td><code>bin/</code></td><td>1</td><td>the CLI binary</td></tr><tr><td><code>cache/workflow-scripts</code></td><td>82</td><td>bundled workflows' scripts, unpacked</td></tr><tr><td><code>config.yaml</code></td><td>1</td><td>your defaults (all commented out at first)</td></tr><tr><td><code>install.json</code></td><td>1</td><td>which binary and version</td></tr><tr><td><code>logs/</code></td><td>1</td><td>output of detached runs</td></tr><tr><td><code>plugins/</code></td><td>1</td><td>provider plugins and their install receipts</td></tr><tr><td><code>plugins/installed</code></td><td>1</td><td>provider plugins and their install receipts</td></tr><tr><td><code>server/0.13.2</code></td><td>1</td><td>the Web UI server, downloaded by archon serve</td></tr><tr><td><code>tier-notice.json</code></td><td>1</td><td>remembers that the tier notice was shown</td></tr><tr><td><code>update-check.json</code></td><td>1</td><td>last update check</td></tr><tr><td><code>web-dist/0.13.2</code></td><td>7</td><td>the Web UI files</td></tr><tr><td><code>workspaces/_local</code></td><td>631</td><td>one folder per project: worktrees, logs, artifacts, state</td></tr><tr><td><code>workspaces/varasrinivas</code></td><td>319</td><td>one folder per project: worktrees, logs, artifacts, state</td></tr></tbody></table></div>
+</section>
+<section class="card" id="config">
+  <h2>The two config.yaml files</h2>
+<p>Archon reads the repo's <code>.archon/config.yaml</code> over your <code>~/.archon/config.yaml</code>. The home one, as the installer wrote it (real):</p><div class="open"><div class="tabs" role="tablist"><button class="tab" role="tab" aria-selected="true" data-pane="cfg-1">~/.archon/config.yaml</button><button class="tab" role="tab" aria-selected="false" data-pane="cfg-2">repo .archon/config.yaml</button></div><div class="pane is-on" id="cfg-1"><div class="code code--wrap"><div class="code__bar"><span class="path">~/.archon/config.yaml</span><span>written by the install · real</span></div><textarea class="src" data-lang="yaml"># Archon Global Configuration
+# See: https://github.com/coleam00/Archon/blob/main/docs/configuration.md
+
+# Bot display name (shown in messages)
+# botName: Archon
+
+# Default AI assistant (must match a registered provider, e.g. claude, codex)
+# defaultAssistant: claude
+
+# Assistant defaults
+# assistants:
+#   claude:
+#     model: sonnet
+#   codex:
+#     model: gpt-5.6-sol
+#     modelReasoningEffort: medium
+#     webSearchMode: disabled
+#     additionalDirectories:
+#       - /absolute/path/to/other/repo
+
+# Model tier presets (usable as model: small / medium / large)
+# tiers:
+#   large: { provider: claude, model: opus }
+#   medium: { provider: codex, model: gpt-5.6-terra, effort: high }
+#   small: { provider: pi, model: minimax-m3 }
+
+# Streaming mode per platform (stream or batch)
+# streaming:
+#   telegram: stream
+#   discord: batch
+#   slack: batch
+
+# Concurrency settings
+# concurrency:
+#   maxConversations: 10
+#   providers:        # optional cap on simultaneous attempts per provider; unlisted = unlimited
+#     pi: 1
+</textarea></div></div><div class="pane" id="cfg-2"><div class="code code--wrap"><div class="code__bar"><span class="path">.archon/config.yaml</span><span>the team's · committed</span></div><textarea class="src" data-lang="yaml"># Archon settings for this repo (committed; every clone and every worktree reads them).
+assistant: claude          # workflows use Claude Code unless a workflow or node says otherwise
+
+worktree:
+  baseBranch: main         # each run&#x27;s branch is cut from main
+</textarea></div></div></div>
+</section>
+<section class="card" id="real">
+  <h2>What is real here</h2>
+<p>Every output on this page is real, from Archon 0.13.2 on Windows 10 (3 Nov 2026): the installer, <code>version</code>, <code>doctor</code>, <code>telemetry status</code>, the Git Bash probe, the clone, <code>validate</code>, the dry run, <code>git status</code>, <code>verify.sh</code>, <code>archon serve</code> and the Web UI screenshots. macOS commands are the documented equivalents and were not run. Items marked <span class="lbl lbl-doc">documented</span> are from the docs. The cast is fictional.</p>
+</section>
+
+</main>
+</div>
+
+<footer class="foot">Set up Archon · Archon 0.13.2 · next: <a href="archon-hello-world-java/archon-hello-world-java-run.html">the hello-world run</a> · <a href="archon-introduction.html">introduction</a> · <a href="index.html">all course pages</a> · <a href="#top">Back to top</a></footer>
+<script>
+(function () {
+  'use strict';
+  var root = document.documentElement, toggle = document.getElementById('themeToggle');
+  function applyTheme(t) { if (t === 'dark') root.setAttribute('data-theme', 'dark'); else root.removeAttribute('data-theme'); toggle.textContent = t === 'dark' ? 'Light mode' : 'Dark mode'; toggle.setAttribute('aria-pressed', t === 'dark' ? 'true' : 'false'); }
+  var saved = null; try { saved = localStorage.getItem('arc-theme'); } catch (e) {}
+  applyTheme(saved || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+  toggle.addEventListener('click', function () { var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'; applyTheme(next); try { localStorage.setItem('arc-theme', next); } catch (e) {} });
+
+  var osBtn = document.getElementById('osToggle');
+  function applyOs(o) { if (o === 'mac') root.setAttribute('data-os', 'mac'); else root.removeAttribute('data-os'); osBtn.textContent = o === 'mac' ? 'macOS' : 'Windows'; osBtn.setAttribute('aria-label', 'Commands shown for ' + osBtn.textContent + '; click to switch'); }
+  var savedOs = null; try { savedOs = localStorage.getItem('arc-os'); } catch (e) {}
+  applyOs(savedOs || (/Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent) ? 'mac' : 'win'));
+  osBtn.addEventListener('click', function () { var next = root.getAttribute('data-os') === 'mac' ? 'win' : 'mac'; applyOs(next); try { localStorage.setItem('arc-os', next); } catch (e) {} });
+
+  /* icons on the boxes */
+  var ICON = {
+    you: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="6" width="19" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M8 14h8"/></svg>',
+    claude: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>',
+    disk: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>',
+    plain: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a7 7 0 0 0-4 12.7V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.3A7 7 0 0 0 12 2z"/><path d="M9 21h6"/></svg>'
+  };
+  ['you', 'claude', 'disk'].forEach(function (k) {
+    document.querySelectorAll('.box.' + k + ' > .box__bar').forEach(function (bar) { if (!bar.querySelector('svg')) bar.insertAdjacentHTML('afterbegin', ICON[k]); });
+  });
+  document.querySelectorAll('.plain').forEach(function (p) { if (!p.querySelector('svg')) p.insertAdjacentHTML('afterbegin', ICON.plain); });
+
+  /* tabs */
+  document.querySelectorAll('.tabs').forEach(function (tabs) {
+    var host = tabs.parentElement, btns = Array.prototype.slice.call(tabs.querySelectorAll('.tab'));
+    btns.forEach(function (b) { b.addEventListener('click', function () {
+      btns.forEach(function (x) { x.setAttribute('aria-selected', x === b ? 'true' : 'false'); });
+      Array.prototype.forEach.call(host.querySelectorAll(':scope > .pane'), function (p) { p.classList.toggle('is-on', p.id === b.getAttribute('data-pane')); });
+    }); });
+  });
+
+  /* copy buttons */
+  function copyText(btn, text) {
+    var done = function () { var old = btn.textContent; btn.textContent = 'copied'; setTimeout(function () { btn.textContent = old; }, 1200); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, done); else done();
+  }
+  document.querySelectorAll('.you .copy').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var pre = Array.prototype.slice.call(btn.parentElement.querySelectorAll('pre')).filter(function (x) { return x.offsetParent !== null; })[0]; if (!pre) return;
+      var clone = pre.cloneNode(true); clone.querySelectorAll('.c').forEach(function (c) { c.remove(); });
+      copyText(btn, clone.textContent.replace(/\n{2,}/g, '\n').trim());
+    });
+  });
+  document.querySelectorAll('.cmd .copy').forEach(function (btn) {
+    btn.addEventListener('click', function () { var c = btn.parentElement.querySelector('code[data-copy]'); if (c) copyText(btn, c.textContent.trim()); });
+  });
+
+  /* syntax highlighting for the embedded files */
+  function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  var KW = {
+    java: 'package import public private protected static final class record interface enum extends implements new return if else for while do try catch finally throw throws this super void int long boolean double float char byte short var null true false instanceof switch case default break continue',
+    bash: 'cd set exit echo'
+  };
+  function kw(list) { return new RegExp('(?:' + list.trim().split(/\s+/).join('|') + ')(?![\\w$])', 'y'); }
+  function rules(lang) {
+    switch (lang) {
+      case 'java': return [['c', /\/\/.*/y], ['c', /\/\*[\s\S]*?\*\//y], ['s', /"(?:[^"\\\n]|\\.)*"/y], ['a', /@[A-Za-z_][\w.]*/y], ['n', /(?<![\w.])\d+(?:\.\d+)?[LlFfDd]?(?![\w])/y], ['k', kw(KW.java)]];
+      case 'jsonl': case 'json': return [['k', /"(?:[^"\\]|\\.)*"(?=\s*:)/y], ['s', /"(?:[^"\\]|\\.)*"/y], ['n', /(?<![\w.])-?\d+(?:\.\d+)?(?![\w])|\b(?:true|false|null)\b/y]];
+      case 'md': return [['k', /^#{1,6} .*$/my], ['s', /`[^`\n]+`/y], ['a', /\*\*[^*\n]+\*\*/y], ['c', /^\|[-:| ]+\|$/my], ['p', /\|/y]];
+      case 'yaml': return [['c', /#.*/y], ['k', /^[ \t]*[\w.-]+(?=:)/my], ['s', /"(?:[^"\\\n]|\\.)*"|'(?:[^'\n])*'/y], ['n', /(?<![\w.])-?\d+(?:\.\d+)?(?![\w])|\b(?:true|false)\b/y]];
+      case 'bash': return [['c', /#.*/y], ['s', /"(?:[^"\\\n]|\\.)*"/y], ['n', /\$\{[^}]*\}|\$[\w#@?]+|\$\(.*?\)/y], ['k', kw(KW.bash)]];
+      case 'xml': return [['c', /<!--[\s\S]*?-->/y], ['c', /<\?[\s\S]*?\?>/y], ['t', /<\/?[\w:.-]+|\/?>/y], ['s', /"(?:[^"\\\n]|\\.)*"/y]];
+      default: return [];
+    }
+  }
+  function highlight(src, lang) {
+    var R = rules(lang), out = '', i = 0, n = src.length;
+    while (i < n) {
+      var hit = null, cls = '';
+      for (var k = 0; k < R.length; k++) { R[k][1].lastIndex = i; var m = R[k][1].exec(src); if (m && m.index === i && m[0].length) { hit = m[0]; cls = R[k][0]; break; } }
+      if (hit) { out += '<span class="tok-' + cls + '">' + esc(hit) + '</span>'; i += hit.length; }
+      else {
+        var j = i + 1;
+        if (src[i] !== '\n') {
+          while (j < n && !/[\w"'`#@\/\-$*{,\n|<>]/.test(src[j])) j++;
+          if (/\w/.test(src[i])) { j = i; while (j < n && /[\w$]/.test(src[j])) j++; }
+        }
+        out += esc(src.slice(i, j)); i = j;
+      }
+    }
+    return out;
+  }
+  function highlightDiff(src, sub) {
+    return src.split('\n').map(function (line, idx, arr) {
+      var nl = idx < arr.length - 1 ? '\n' : '';
+      if (/^(@@|---|\+\+\+)/.test(line)) return '<span class="tok-c">' + esc(line) + '</span>' + nl;
+      if (line[0] === '+' || line[0] === '-') return '<span class="' + (line[0] === '+' ? 'ln-add' : 'ln-del') + '">' + esc(line[0]) + highlight(line.slice(1), sub) + '</span>';
+      return highlight(line, sub) + nl;
+    }).join('');
+  }
+  document.querySelectorAll('textarea.src').forEach(function (ta) {
+    var lang = ta.getAttribute('data-lang') || '', pre = document.createElement('pre');
+    pre.setAttribute('tabindex', '0');
+    pre.innerHTML = lang === 'diff' ? highlightDiff(ta.value, ta.getAttribute('data-sub') || 'java') : highlight(ta.value, lang);
+    if (/^(json|jsonl|md|yaml|bash|text)$/.test(lang)) ta.parentNode.classList.add('code--wrap');
+    ta.parentNode.insertBefore(pre, ta.nextSibling);
+  });
+
+  /* scroll-spy: rail, progress */
+  var steps = Array.prototype.slice.call(document.querySelectorAll('.step[data-step]'));
+  var links = {}; document.querySelectorAll('.rl').forEach(function (a) { links[a.getAttribute('data-step')] = a; });
+  var progText = document.getElementById('progText'), progBar = document.getElementById('progBar'), progPhase = document.getElementById('progPhase'), TOTAL = steps.length, current = -1;
+  function setCurrent(idx) {
+    if (idx === current) return; current = idx;
+    steps.forEach(function (s, i) {
+      var a = links[s.getAttribute('data-step')]; if (!a) return;
+      a.classList.toggle('is-on', i === idx); a.classList.toggle('is-done', i < idx);
+      if (i === idx) a.setAttribute('aria-current', 'step'); else a.removeAttribute('aria-current');
+    });
+    if (idx < 0) { progText.textContent = 'Step 0 of ' + TOTAL; progBar.style.width = '0'; progPhase.textContent = 'Start at the top'; return; }
+    var s = steps[idx]; progText.textContent = 'Step ' + s.getAttribute('data-step') + ' of ' + TOTAL; progBar.style.width = ((idx + 1) / TOTAL * 100) + '%';
+    var lk = links[s.getAttribute('data-step')]; progPhase.textContent = s.getAttribute('data-phase') + ' · ' + (lk ? lk.querySelector('span').textContent : '');
+    var a = links[s.getAttribute('data-step')]; if (a && window.innerWidth <= 900) { var r = a.getBoundingClientRect(), p = a.parentElement.getBoundingClientRect(); if (r.left < p.left || r.right > p.right) a.scrollIntoView({ block: 'nearest', inline: 'center' }); }
+  }
+  function spy() {
+    var line = 130, idx = -1;
+    for (var i = 0; i < steps.length; i++) { if (steps[i].getBoundingClientRect().top <= line) idx = i; else break; }
+    setCurrent(idx);
+  }
+  var ticking = false;
+  window.addEventListener('scroll', function () { if (!ticking) { ticking = true; requestAnimationFrame(function () { spy(); ticking = false; }); } }, { passive: true });
+  window.addEventListener('resize', spy);
+  spy();
+})();
+</script>
+</body>
+</html>

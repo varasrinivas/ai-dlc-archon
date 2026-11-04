@@ -1,0 +1,711 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Archon Introduction</title>
+<meta name="description" content="Start here for Archon 0.13.2: what it is, where you type, the files in a repo and in ~/.archon, which bundled workflow fits which work, what you type at each pause, and every command, from real output.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@600;700;800&family=Red+Hat+Text:wght@400;500;600&family=Red+Hat+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script>document.documentElement.classList.add('js');</script>
+<style>
+:root{
+  --bg:#F3F6F9; --bg-2:#E8EDF3; --panel:#FFFFFF; --ink:#141C25; --ink-2:#48566A; --ink-3:#7A8797; --line:#D9E1EA; --line-2:#B9C5D3;
+  --you:#1D4ED8; --you-soft:#E9EFFD; --you-ink:#15317E;
+  --setup:#5B6B7F; --plan:#0E7490; --build:#C2410C; --review:#6D28D9; --ship:#15803D; --gate:#D97706; --gate-soft:#FEF3C7; --gate-ink:#4A2E04; --ok:#15803D; --new:#15803D; --bad:#B91C1C;
+  --console:#0B1220; --console-ink:#E6EDF5; --c-muted:#8A9BB0; --c-str:#9FE1B0; --c-num:#F8C77A; --c-kw:#8CC4FF; --c-anno:#F0A6D2; --c-add:#10351F; --c-del:#4A1A1A; --c-prompt:#B5F5C8; --c-status:#7DD3FC;
+  --radius:14px; --shadow:0 1px 0 rgba(20,28,37,.04),0 14px 34px -24px rgba(20,28,37,.45);
+  --font-display:"Red Hat Display","Segoe UI",system-ui,sans-serif; --font-text:"Red Hat Text","Segoe UI",system-ui,sans-serif; --font-mono:"Red Hat Mono",ui-monospace,Consolas,Menlo,monospace;
+}
+[data-theme="dark"]{
+  --bg:#0F141A; --bg-2:#161D26; --panel:#171F29; --ink:#E7EDF3; --ink-2:#B1BDCA; --ink-3:#7E8B98; --line:#273240; --line-2:#3A4858;
+  --you:#8AB4FF; --you-soft:#15223D; --you-ink:#C9DAFF;
+  --setup:#9AA8B8; --plan:#38BDF8; --build:#FB923C; --review:#A78BFA; --ship:#4ADE80; --gate:#FBBF24; --gate-soft:#3A2A0A; --gate-ink:#FDE9B3; --ok:#4ADE80; --new:#4ADE80;
+  --console:#070C14; --shadow:0 1px 0 rgba(0,0,0,.4),0 14px 34px -24px rgba(0,0,0,.9);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 var(--font-text);-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-family:var(--font-display);line-height:1.15;margin:0 0 .4em;letter-spacing:-.01em}
+h1{font-size:clamp(1.9rem,4vw,2.9rem);font-weight:800}
+h2{font-size:1.45rem;font-weight:700}
+h3{font-size:1.12rem;font-weight:700}
+p{margin:0 0 .9em}
+a{color:inherit}
+code{font-family:var(--font-mono);font-size:.86em;background:rgba(120,140,170,.16);padding:.1em .38em;border-radius:6px;overflow-wrap:anywhere}
+pre{margin:0;font-family:var(--font-mono)}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--you);outline-offset:2px}
+.sr{position:absolute;left:-9999px}
+
+/* header */
+.top{position:sticky;top:0;z-index:40;background:color-mix(in srgb,var(--panel) 92%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top__in{max-width:1240px;margin:0 auto;padding:10px 20px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center}
+.brand{font-family:var(--font-display);font-weight:800;font-size:1.02rem;line-height:1.15}
+.brand small{display:block;font:500 .74rem/1.2 var(--font-text);color:var(--ink-3)}
+.prog{display:flex;align-items:center;gap:10px;min-width:0;overflow:hidden;font-size:.86rem;color:var(--ink-2)}
+.prog b{color:var(--ink);white-space:nowrap}
+.prog .bar{flex:1 1 0;height:8px;border-radius:99px;background:var(--bg-2);overflow:hidden;min-width:0}
+.prog .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--plan),var(--build),var(--review),var(--ship));transition:width .3s}
+.prog .ph{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.btn{border:1.5px solid var(--line-2);background:var(--panel);border-radius:10px;padding:7px 12px;font-weight:600;font-size:.86rem;cursor:pointer}
+.btn:hover{border-color:var(--ink-3)}
+@media (max-width:640px){.prog .ph{display:none}.brand small{display:none}.top__in{gap:8px;padding:8px 14px;grid-template-columns:minmax(0,auto) minmax(0,1fr) auto}.brand{min-width:0;overflow-wrap:anywhere}}
+
+/* shell */
+.shell{max-width:1240px;margin:0 auto;padding:0 20px 90px;display:grid;grid-template-columns:250px minmax(0,1fr);gap:28px;align-items:start}
+.rail{position:sticky;top:66px;max-height:calc(100vh - 80px);overflow:auto;padding:14px 0 20px}
+.rail h4{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin:14px 0 6px 10px}
+.rail h4:first-child{margin-top:0}
+.rl{display:grid;grid-template-columns:26px minmax(0,1fr);gap:8px;align-items:center;padding:6px 10px;border-radius:10px;text-decoration:none;color:var(--ink-2);font-size:.86rem;line-height:1.25}
+.rl b{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--bg-2);color:var(--ink-2);font:600 .74rem var(--font-mono);border:2px solid transparent}
+.rl:hover{background:var(--bg-2)}
+.rl.is-on{background:var(--panel);color:var(--ink);box-shadow:var(--shadow)}
+.rl.is-on b{border-color:var(--c);color:var(--c)}
+.rl.is-done b{background:var(--c);color:#fff;border-color:var(--c)}
+@media (max-width:900px){
+  .shell{grid-template-columns:minmax(0,1fr);gap:0}
+  .rail{position:sticky;top:58px;z-index:30;max-height:none;overflow-x:auto;overflow-y:hidden;display:flex;gap:6px;padding:8px 0;background:var(--bg);border-bottom:1px solid var(--line);margin:0 -20px 8px;padding-left:20px;padding-right:20px;scrollbar-width:thin}
+  .rail h4{display:none}
+  .rl{flex:0 0 auto;grid-template-columns:22px auto;padding:5px 9px;border:1px solid var(--line);background:var(--panel);white-space:nowrap}
+  .rl span{max-width:150px;overflow:hidden;text-overflow:ellipsis}
+}
+
+/* hero */
+.hero{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:28px;align-items:start;padding:40px 0 24px}
+.lead{font-size:1.1rem;color:var(--ink-2);max-width:62ch}
+.facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 18px;margin:18px 0 22px}
+.facts div{font-size:.86rem;color:var(--ink-2)}
+.facts b{display:block;font-family:var(--font-display);font-size:1.5rem;color:var(--ink);line-height:1.1}
+.slack{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.slack__bar{display:flex;justify-content:space-between;padding:9px 16px;background:var(--bg-2);font:500 .78rem var(--font-mono);color:var(--ink-2)}
+.slack__body{padding:16px 18px}
+.slack__who{display:flex;gap:10px;align-items:center;margin-bottom:10px}
+.slack__who i{width:38px;height:38px;border-radius:9px;background:var(--plan);color:#fff;display:grid;place-items:center;font:700 .9rem var(--font-display);font-style:normal}
+.slack__who b{display:block;line-height:1.2}.slack__who small{color:var(--ink-3)}
+.slack__body p{font-size:1rem}
+.legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin:0 0 30px}
+.legend>div{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:.86rem;color:var(--ink-2);display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:start}.legend>div>div{min-width:0}
+.legend b{display:block;color:var(--ink);font-size:.9rem}
+.legend svg{width:26px;height:26px;flex:none}
+@media (max-width:900px){.hero{grid-template-columns:minmax(0,1fr);padding-top:22px}.facts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* cards and steps */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px 24px;margin:0 0 18px}
+.phase{display:flex;align-items:center;gap:10px;margin:40px 0 14px;padding-top:18px;border-top:2px solid var(--line);color:var(--ink);font-family:var(--font-display);font-weight:800;font-size:1.3rem}
+.phase i{width:14px;height:14px;border-radius:50%;background:var(--c);flex:none}
+.phase span{font:500 .92rem var(--font-text);color:var(--ink-3)}
+.step{background:var(--panel);border:1px solid var(--line);border-top:5px solid var(--c);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px 24px;margin:0 0 20px;scroll-margin-top:84px}
+.step__head{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:start;margin-bottom:10px}
+.step__n{display:inline-grid;place-items:center;width:42px;height:42px;border-radius:12px;background:var(--c);color:#fff;font:800 1.15rem var(--font-display)}
+.chip{display:inline-block;font:600 .72rem/1.3 var(--font-mono);letter-spacing:.02em;padding:4px 9px;border-radius:99px;border:1.5px solid var(--c);color:var(--c);margin:0 6px 8px 0;overflow-wrap:anywhere}
+.chip--ours{border-color:var(--ink-3);color:var(--ink-3);border-style:dashed}
+.step h2{font-size:1.32rem;margin:0 0 .25em}
+.step__why{color:var(--ink-2);font-size:.98rem;margin:0}
+.who{font:500 .78rem/1.3 var(--font-mono);color:var(--ink-3);text-align:right;white-space:nowrap}
+@media (max-width:640px){.step__head{grid-template-columns:auto minmax(0,1fr)}.who{grid-column:1/-1;text-align:left}.step{padding:18px 16px}.card{padding:18px 16px}}
+
+.io{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:14px;margin:14px 0 0;align-items:start}
+@media (max-width:820px){.io{grid-template-columns:minmax(0,1fr)}}
+.io--stack{grid-template-columns:minmax(0,1fr)}.io--stack .you{max-width:760px}.io--stack .claude pre{max-height:none}
+.box{border-radius:12px;overflow:hidden;border:1px solid var(--line);min-width:0}
+.box__bar{display:flex;align-items:center;gap:8px;padding:8px 12px;font:600 .76rem var(--font-mono);letter-spacing:.02em}
+.box__bar svg{width:16px;height:16px;flex:none}
+.box__bar .tag{margin-left:auto;font-weight:500;opacity:.8}
+.box pre{padding:12px 14px;font-size:.84rem;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere;overflow:auto;max-height:560px}
+.you{background:var(--you-soft);border-color:color-mix(in srgb,var(--you) 40%,transparent)}
+.you .box__bar{background:color-mix(in srgb,var(--you) 14%,transparent);color:var(--you-ink)}
+.you pre{color:var(--you-ink);font-weight:500}
+.you pre .k{color:var(--ink-3);font-weight:400}
+.you pre .c{color:var(--ink-3);font-weight:400;font-style:italic}
+.you .copy{margin:0 12px 10px;border:1.5px solid color-mix(in srgb,var(--you) 50%,transparent);background:var(--panel);border-radius:8px;padding:4px 10px;font:600 .76rem var(--font-mono);cursor:pointer}
+.you .copy:hover{background:var(--you);color:#fff}
+.you .none{padding:12px 14px;font-size:.9rem;color:var(--ink-2)}
+.claude{background:var(--console);border-color:#1F2B3D}
+.claude .box__bar{background:#121C2C;color:#C7D4E3}
+.claude pre{color:var(--console-ink)}
+.claude .s{color:var(--c-status)}.claude .q{color:var(--c-prompt)}.claude .m{color:var(--c-muted)}.claude b{color:#fff;font-weight:600}.claude .ok{color:#86EFAC}.claude .w{color:#FCD34D}
+.disk{margin-top:12px;background:var(--bg-2);border-color:var(--line)}
+.disk .box__bar{background:color-mix(in srgb,var(--setup) 18%,transparent);color:var(--ink-2)}
+.disk pre{color:var(--ink-2);font-size:.76rem;max-height:none;white-space:pre}
+.disk .n{color:var(--new);font-weight:600}.disk .m{color:var(--ink-3)}.disk b{color:var(--ink);font-weight:600}.disk .d{color:var(--ink-3);text-decoration:line-through}
+.disk .ex{color:var(--ink-3)}
+@media (max-width:640px){.disk .box__bar::after{content:"swipe sideways for the notes";margin-left:auto;font-weight:500;opacity:.7}}
+.open{margin-top:12px}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 8px}
+.tab{border:1.5px solid var(--line-2);background:var(--panel);border-radius:99px;padding:5px 11px;font:500 .76rem var(--font-mono);cursor:pointer;color:var(--ink-2);max-width:100%;overflow-wrap:anywhere}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.pane{display:none}.pane.is-on{display:block}
+.code{border-radius:12px;overflow:hidden;border:1px solid var(--line)}
+.code__bar{display:flex;justify-content:space-between;gap:10px;padding:7px 12px;background:var(--bg-2);border-left:5px solid var(--c);font:500 .74rem var(--font-mono);color:var(--ink-2)}
+.code__bar .path{color:var(--ink);font-weight:600;overflow-wrap:anywhere}
+.code pre{background:var(--console);color:var(--console-ink);padding:12px 14px;font-size:.8rem;line-height:1.55;overflow:auto;white-space:pre;margin:0}
+.code--wrap pre{white-space:pre-wrap;overflow-wrap:anywhere}
+.code textarea.src{display:none}
+.tok-c{color:var(--c-muted);font-style:italic}.tok-s{color:var(--c-str)}.tok-n{color:var(--c-num)}.tok-k{color:var(--c-kw)}.tok-a{color:var(--c-anno)}.tok-p{color:var(--c-muted)}.tok-t{color:var(--c-kw)}
+.ln-add{display:block;background:var(--c-add)}.ln-del{display:block;background:var(--c-del)}
+.gate{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:start;background:var(--gate-soft);border:1.5px solid var(--gate);border-radius:12px;padding:12px 14px;margin-top:12px;color:var(--gate-ink)}
+.gate i{width:18px;height:18px;background:var(--gate);transform:rotate(45deg);margin:4px 3px 0;flex:none;border-radius:3px}
+.gate b{display:block;margin-bottom:2px}.gate p{margin:0;font-size:.94rem}.gate .by{font:500 .76rem var(--font-mono);opacity:.85;margin-top:4px}
+.plain{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:start;margin-top:12px;padding:11px 14px;border-radius:12px;background:var(--bg-2);border:1px dashed var(--line-2);font-size:.94rem;color:var(--ink-2)}
+.plain svg{width:24px;height:24px;color:var(--c);flex:none;margin-top:2px}
+.plain b{color:var(--ink)}
+.note{background:var(--bg-2);border-left:4px solid var(--ink-3);border-radius:10px;padding:12px 14px;font-size:.94rem;margin-top:12px}
+.note b{color:var(--ink)}
+.three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:12px}
+.three>div{background:var(--bg-2);border-radius:12px;padding:10px 12px;font-size:.9rem}
+.three b{display:block;font-size:.76rem;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3);margin-bottom:4px}
+@media (max-width:760px){.three{grid-template-columns:minmax(0,1fr)}}
+table{border-collapse:collapse;width:100%;font-size:.9rem;margin:10px 0}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--bg-2);font-weight:600}
+td code{font-size:.82em}td:first-child{white-space:nowrap}
+@media (max-width:640px){table{display:block;overflow-x:auto}}
+.setup{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
+.srow{display:grid;grid-template-columns:34px minmax(0,1fr);gap:12px;align-items:start;background:var(--bg-2);border-radius:12px;padding:12px 14px}
+.srow>b{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--setup);color:#fff;font:700 .9rem var(--font-display)}
+.srow .io{margin-top:8px}
+.srow .box pre{max-height:220px}
+.pills{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.pill{font:500 .74rem var(--font-mono);padding:4px 9px;border-radius:99px;border:1.5px solid var(--line-2);color:var(--ink-3);text-decoration:line-through;background:var(--panel)}
+.pill.on{text-decoration:none;color:var(--c);border-color:var(--c);font-weight:600}
+.os-mac{display:none}
+[data-os="mac"] .os-win{display:none}
+[data-os="mac"] .os-mac{display:revert}
+.top__btns{display:flex;gap:8px}
+@media (max-width:640px){.top__btns{gap:4px}.top__btns .btn{padding:5px 8px;font-size:.74rem}}
+.goal-rule{margin:10px 0 0;padding-left:1.3em}.goal-rule li{margin:4px 0}
+.cal{display:grid;grid-template-columns:repeat(13,minmax(0,1fr));gap:4px;margin:12px 0 4px;font:500 .74rem var(--font-mono);text-align:center}
+.cal div{border:1px solid var(--line);border-radius:8px;padding:6px 2px;background:var(--panel);min-width:0}
+.cal div b{display:block;font:700 .95rem var(--font-display);color:var(--ink)}
+.cal div i{display:block;font-style:normal;color:var(--ink-3)}
+.cal .wk,.cal .hol{background:var(--bg-2);color:var(--ink-3)}.cal .wk b,.cal .hol b{color:var(--ink-3)}
+.cal .hol{border-style:dashed}
+.cal .arr{border-color:var(--plan)}.cal .over{border-color:var(--bad);border-width:2px}.cal .over i{color:var(--bad);font-weight:600}
+@media (max-width:760px){.cal{grid-template-columns:repeat(7,minmax(0,1fr))}}
+.box pre .plus{color:var(--c-str);font-weight:600}
+.cmd{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;background:var(--bg-2);border-radius:10px;padding:10px 12px;margin:8px 0}
+.cmd code[data-copy]{display:block;background:none;padding:0;font-size:.84rem;overflow-wrap:anywhere}
+.cmd small{display:block;color:var(--ink-3);margin-top:3px}
+.cmd .copy{border:1.5px solid var(--line-2);background:var(--panel);border-radius:8px;padding:5px 10px;font:600 .76rem var(--font-mono);cursor:pointer}
+.cmd .copy:hover{background:var(--ink);color:var(--bg)}
+dl.gloss{display:grid;grid-template-columns:minmax(0,1fr);gap:0;margin:0}
+dl.gloss div{display:grid;grid-template-columns:190px minmax(0,1fr);gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:.94rem}
+dl.gloss dt{font-weight:600;color:var(--ink)}dl.gloss dd{margin:0;color:var(--ink-2)}
+@media (max-width:640px){dl.gloss div{grid-template-columns:minmax(0,1fr);gap:2px}}
+.foot{max-width:1240px;margin:0 auto;padding:20px 20px 60px;font-size:.84rem;color:var(--ink-3);border-top:1px solid var(--line)}
+
+figure.dia{margin:14px 0}figure.dia figcaption{font-size:.82rem;color:var(--ink-3);text-align:center;margin-top:4px}
+.gwrap{overflow-x:auto;max-width:100%}.gwrap figure.dia{min-width:760px}.gwrap table{display:table}
+.kv{table-layout:fixed}.kv td:first-child,.kv th:first-child{width:34%}.kv td:first-child code{white-space:normal;overflow-wrap:anywhere}
+.ref-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:12px}
+@media (max-width:760px){.ref-grid{grid-template-columns:minmax(0,1fr)}}
+.ref-grid>div{background:var(--bg-2);border-radius:12px;padding:12px 14px;font-size:.92rem}
+.ref-grid h3{margin:0 0 4px;font:700 1rem var(--font-display)}
+.ref-grid h3 small{font:500 .78rem var(--font-mono);color:var(--ink-3);margin-left:6px}
+.ref-grid p{margin:0 0 6px}.ref-grid ul{margin:0;padding-left:1.1em}.ref-grid li{margin:2px 0}
+.filter{width:100%;padding:9px 12px;border:1.5px solid var(--line-2);border-radius:10px;background:var(--panel);color:var(--ink);font:500 .92rem var(--font-mono);margin:10px 0}
+.flist{max-height:560px;overflow:auto;border:1px solid var(--line);border-radius:10px}.flist table{margin:0}
+.flist td:first-child{font-family:var(--font-mono);font-size:.8rem;white-space:nowrap}.flist td:last-child{font-size:.86rem;color:var(--ink-2)}
+.tag-yes{color:var(--ok);font-weight:600}.tag-no{color:var(--ink-3)}
+.lbl{display:inline-block;font:600 .72rem var(--font-mono);padding:1px 7px;border-radius:999px;vertical-align:2px;margin-left:4px}
+.lbl-real{background:color-mix(in srgb,var(--ok) 16%,transparent);color:var(--ok)}
+.lbl-doc{background:color-mix(in srgb,var(--gate) 18%,transparent);color:var(--gate-ink)}
+[data-theme="dark"] .lbl-doc{color:var(--gate)}
+@media (max-width:680px){.who,.box__bar .tag{white-space:normal;overflow-wrap:anywhere;min-width:0}.box__bar{flex-wrap:wrap}}
+.node{display:inline-block;font:600 .8rem var(--font-mono);padding:1px 8px;border-radius:6px;border:1.5px solid var(--c,var(--line-2));color:var(--ink)}
+</style>
+</head>
+<body>
+<a class="sr" href="#main">Skip to content</a>
+<header class="top"><div class="top__in">
+  <div class="brand">Archon introduction<small>workflows · pauses · commands · files</small></div>
+  <div class="prog" aria-live="polite"><b id="progText">Step 0 of 13</b><div class="bar"><i id="progBar"></i></div><span class="ph" id="progPhase">Start at the top</span></div>
+  <div class="top__btns"><button class="btn" id="osToggle" type="button" title="Show the commands for your computer">Windows</button><button class="btn" id="themeToggle" type="button" aria-pressed="false">Dark mode</button></div>
+</div></header>
+
+<div class="shell">
+<nav class="rail" aria-label="Steps">
+  <h4>Meet Archon</h4>
+  <a class="rl" href="#s01" data-step="1" style="--c:var(--setup)"><b>1</b><span>What Archon is</span></a>
+  <a class="rl" href="#s02" data-step="2" style="--c:var(--setup)"><b>2</b><span>How one node runs</span></a>
+  <a class="rl" href="#s03" data-step="3" style="--c:var(--setup)"><b>3</b><span>A workflow is a graph</span></a>
+  <a class="rl" href="#s04" data-step="4" style="--c:var(--setup)"><b>4</b><span>The people</span></a>
+  <h4>Set up</h4>
+  <a class="rl" href="#s05" data-step="5" style="--c:var(--plan)"><b>5</b><span>Where you type</span></a>
+  <a class="rl" href="#s06" data-step="6" style="--c:var(--plan)"><b>6</b><span>Set up once</span></a>
+  <h4>The repo</h4>
+  <a class="rl" href="#s07" data-step="7" style="--c:var(--build)"><b>7</b><span>Files in a repo</span></a>
+  <a class="rl" href="#s08" data-step="8" style="--c:var(--build)"><b>8</b><span>The fields you will use</span></a>
+  <h4>Doing the work</h4>
+  <a class="rl" href="#s09" data-step="9" style="--c:var(--review)"><b>9</b><span>Which workflow</span></a>
+  <a class="rl" href="#s10" data-step="10" style="--c:var(--review)"><b>10</b><span>At each pause</span></a>
+  <a class="rl" href="#s11" data-step="11" style="--c:var(--review)"><b>11</b><span>workflow run flags</span></a>
+  <a class="rl" href="#s12" data-step="12" style="--c:var(--review)"><b>12</b><span>After a run</span></a>
+  <h4>Reference</h4>
+  <a class="rl" href="#s13" data-step="13" style="--c:var(--ship)"><b>13</b><span>Every command</span></a>
+  <h4>Reference</h4>
+  <a class="rl" href="#real" style="--c:var(--review)"><b>·</b><span>Where this comes from</span></a>
+</nav>
+
+<main id="main">
+<section class="hero" id="top">
+  <div>
+    <h1>Archon in one page: what it is, where you type, which workflow, what you answer.</h1>
+    <p class="lead">Archon 0.13.2 turns how your team works into a YAML file and runs it with the agent you already use. This page is the map: the idea, the files, the commands and the pauses, each from Archon's own output. Then <a href="archon-workspace-setup.html">set it up</a> and <a href="archon-hello-world-java/archon-hello-world-java-run.html">run one real request</a>.</p>
+    <div class="facts">
+      <div><b>1</b>workflow file = the team's process</div>
+      <div><b>25</b>workflows bundled (the sdlc pack)</div>
+      <div><b>10</b>node kinds: agent, code, wait …</div>
+      <div><b>4</b>answer forms at a wait</div>
+      <div><b>1</b>worktree and branch per run</div>
+      <div><b>0</b>files the repo must have to start</div>
+    </div>
+  </div>
+  <aside class="slack" aria-label="The short version">
+    <div class="slack__bar"><span>The short version</span><span>Archon 0.13.2</span></div>
+    <div class="slack__body">
+      <p style="margin:0 0 8px"><b>Write</b> <code>.archon/workflows/…/x.yaml</code><br><span style="color:var(--ink-3)">nodes, depends_on, waits, checks</span></p>
+      <p style="margin:0 0 8px"><b>Run</b> <code>archon workflow run x "…"</code><br><span style="color:var(--ink-3)">in its own worktree and branch</span></p>
+      <p style="margin:0 0 8px"><b>Answer</b> <code>archon workflow approve &lt;run&gt; "…"</code><br><span style="color:var(--ink-3)">reject is an answer too</span></p>
+      <p style="margin:0"><b>Read</b> <code>archon workflow artifacts &lt;run&gt;</code><br><span style="color:var(--ink-3)">the files each node wrote</span></p>
+    </div>
+  </aside>
+</section>
+<div class="phase" style="--c:var(--setup)"><i></i>Meet Archon<span>steps 1–4 · the idea, one node, one workflow, the people</span></div>
+<section class="step" id="s01" data-step="1" data-phase="Meet Archon" style="--c:var(--setup)">
+  <div class="step__head"><span class="step__n">1</span><div><span class="chip">the idea</span><h2>What Archon is, in four sentences</h2><p class="step__why">Before any command: what kind of tool this is, so the rest of the page has somewhere to land.</p></div><span class="who">read · 2 min</span></div>
+
+<p>Archon is an open-source <b>workflow engine for AI coding</b>: you write how a kind of work gets done as a <b>YAML workflow</b>, and Archon runs it the same way every time. A workflow is a graph of <b>nodes</b>; an AI node hands a prompt to the agent you already use (Claude Code, Codex or Pi), a code node runs a command, and a <b>wait</b> node stops until a person answers. Each run works in its own <b>git worktree and branch</b>, and keeps a transcript, the files each node wrote and what it cost. Archon 0.13.2 (29 Oct 2026) ships 25 workflows of its own, the <code>sdlc</code> pack, and you add yours in the repo's <code>.archon/</code> folder.</p>
+<div class="gwrap"><table><thead><tr><th>Node body</th><th>What it does</th><th>Costs model tokens?</th></tr></thead><tbody><tr><td><code>prompt:</code> / <code>command:</code></td><td>Sends an inline prompt, or a Markdown command file, to the agent</td><td>yes</td></tr><tr><td><code>loop:</code> / <code>loop_group:</code></td><td>Repeats an agent step (or a small graph) until a check passes</td><td>yes</td></tr><tr><td><code>bash:</code> / <code>script:</code></td><td>Runs a shell script, or TypeScript (bun) / Python (uv)</td><td>no</td></tr><tr><td><code>wait:</code></td><td>Pauses for a time, an event, or a person's answer</td><td>no</td></tr><tr><td><code>cancel:</code></td><td>Ends the run with a reason</td><td>no</td></tr><tr><td><code>include:</code> / <code>workflow:</code></td><td>Reuses another workflow, inlined or as a child run</td><td>depends</td></tr></tbody></table></div>
+<div class="plain"><div><b>In plain words.</b> A coding agent on its own is a talented cook who improvises. Archon is the recipe card on the wall: the cook still cooks, but in the order the card says, and the chef tastes before anything leaves the kitchen.</div></div>
+<p style="font-size:.92rem;color:var(--ink-3)">Not the old Archon: until 2025 the name meant a knowledge-base and task MCP server (kept on the repo's <code>archive/v1-task-management-rag</code> branch). Everything here is the workflow engine.</p>
+
+</section>
+<section class="step" id="s02" data-step="2" data-phase="Meet Archon" style="--c:var(--setup)">
+  <div class="step__head"><span class="step__n">2</span><div><span class="chip">the idea</span><h2>How one node runs</h2><p class="step__why">Every workflow is built from this one move: a node gets inputs, does one job, and hands its output on.</p></div><span class="who">read · 2 min</span></div>
+<div class="gwrap"><figure class="dia"><svg viewBox="0 0 840 290" role="img" aria-label="How one node runs, and where a person comes in" style="width:100%;height:auto;font-family:var(--font-text);"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" style="fill:var(--ink-3)"/></marker></defs><rect x="20" y="30" width="180" height="120" rx="12" style="fill:var(--setup);fill-opacity:0.1;stroke:var(--setup);stroke-width:1.6"/><text x="110" y="54" text-anchor="middle" style="fill:var(--ink);font-size:14px;font-weight:700">Inputs</text><text x="110" y="80" text-anchor="middle" style="font-family:var(--font-mono);fill:var(--ink-2);font-size:11.5px;font-weight:400">$USER_MESSAGE</text><text x="110" y="100" text-anchor="middle" style="font-family:var(--font-mono);fill:var(--ink-2);font-size:11.5px;font-weight:400">$plan.output</text><text x="110" y="120" text-anchor="middle" style="font-family:var(--font-mono);fill:var(--ink-2);font-size:11.5px;font-weight:400">$ARTIFACTS_DIR/*.md</text><rect x="220" y="30" width="180" height="120" rx="12" style="fill:var(--plan);fill-opacity:0.1;stroke:var(--plan);stroke-width:1.6"/><text x="310" y="54" text-anchor="middle" style="fill:var(--ink);font-size:14px;font-weight:700">The node runs</text><text x="310" y="80" text-anchor="middle" style="font-family:var(--font-mono);fill:var(--ink-2);font-size:11.5px;font-weight:400">prompt / command → Claude Code</text><text x="310" y="100" text-anchor="middle" style="font-family:var(--font-mono);fill:var(--ink-2);font-size:11.5px;font-weight:400">bash / script → code</text><text x="310" y="120" text-anchor="middle" style="fill:var(--ink-2);font-size:11.5px;font-weight:400">in the run&#x27;s worktree</text><rect x="440" y="30" width="180" height="120" rx="12" style="fill:var(--build);fill-opacity:0.1;stroke:var(--build);stroke-width:1.6"/><text x="530" y="54" text-anchor="middle" style="fill:var(--ink);font-size:14px;font-weight:700">Its output</text><text x="530" y="80" text-anchor="middle" style="fill:var(--ink-2);font-size:11.5px;font-weight:400">final reply, or stdout</text><text x="530" y="100" text-anchor="middle" style="fill:var(--ink-2);font-size:11.5px;font-weight:400">JSON if output_format</text><text x="530" y="120" text-anchor="middle" style="fill:var(--ink-2);font-size:11.5px;font-weight:400">files in $ARTIFACTS_DIR</text><rect x="640" y="30" width="180" height="120" rx="12" style="fill:var(--review);fill-opacity:0.1;stroke:var(--review);stroke-width:1.6"/><text x="730" y="54" text-anchor="middle" style="fill:var(--ink);font-size:14px;font-weight:700">Next nodes</text><text x="730" y="80" text-anchor="middle" style="fill:var(--ink-2);font-size:11.5px;font-weight:400">when: reads the output</text><text x="730" y="100" text-anchor="middle" style="fill:var(--ink-2);font-size:11.5px;font-weight:400">depends_on joins</text><text x="730" y="120" text-anchor="middle" style="fill:var(--ink-2);font-size:11.5px;font-weight:400">loop: until_bash checks</text><path d="M200 90 L218 90" style="fill:none;stroke:var(--ink-3);stroke-width:1.5" marker-end="url(#ah)"/><path d="M420 90 L438 90" style="fill:none;stroke:var(--ink-3);stroke-width:1.5" marker-end="url(#ah)"/><path d="M620 90 L638 90" style="fill:none;stroke:var(--ink-3);stroke-width:1.5" marker-end="url(#ah)"/><rect x="330" y="190" width="200" height="56" rx="12" style="fill:var(--gate);fill-opacity:0.12;stroke:var(--gate);stroke-width:1.6;stroke-dasharray:5 4"/><text x="430" y="213" text-anchor="middle" style="fill:var(--ink);font-size:13px;font-weight:700">wait: a person answers</text><text x="430" y="232" text-anchor="middle" style="font-family:var(--font-mono);fill:var(--ink-2);font-size:11.5px;font-weight:400">approve · reject · text</text><path d="M530 150 C530 175, 470 175, 470 188" style="fill:none;stroke:var(--gate);stroke-width:1.5;stroke-dasharray:4 4" marker-end="url(#ah)"/><path d="M530 218 C640 218, 700 190, 700 152" style="fill:none;stroke:var(--gate);stroke-width:1.5;stroke-dasharray:4 4" marker-end="url(#ah)"/><text x="20" y="278" text-anchor="start" style="fill:var(--ink-3);font-size:12px;font-weight:400">A node never talks to the next node&#x27;s agent: it hands over through its output and the run&#x27;s artifact files.</text></svg><figcaption>How one node runs, and where a person comes in</figcaption></figure></div><div class="note">The agent in an AI node is a full Claude Code session in the run's worktree: it reads files, runs commands and edits code, and it reads the repo's <code>CLAUDE.md</code>. What it may do is set by the node (<code>allowed_tools</code>, <code>denied_tools</code>, <code>mutates_checkout: false</code>), not by Archon guessing.</div>
+</section>
+<section class="step" id="s03" data-step="3" data-phase="Meet Archon" style="--c:var(--setup)">
+  <div class="step__head"><span class="step__n">3</span><div><span class="chip">the idea</span><h2>A workflow is a graph you can read</h2><p class="step__why">The course's workflow, drawn from its YAML file. Read it once now; the hands-on run walks through every box.</p></div><span class="who">read · 3 min</span></div>
+<p>This is <code>request-to-pr</code>, the team's workflow the course runs on priorauth-api: 15 nodes, 4 of them are waits for a person. Arrows are <code>depends_on</code>; the labels on them are <code>when:</code> conditions; the dashed loop is the requirements being revised until approved.</p><div class="gwrap"><figure class="dia"><svg viewBox="0 0 820 898" role="img" aria-label="request-to-pr: the team&#x27;s workflow, drawn from its YAML" style="width:100%;height:auto;font-family:var(--font-text);"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" style="fill:var(--ink-3)"/></marker></defs><rect x="145" y="20" width="200" height="44" rx="9" style="fill:var(--plan);fill-opacity:0.13;stroke:var(--plan);stroke-width:1.6"/><text x="245.0" y="39" text-anchor="middle" style="font-family:var(--font-mono);fill:var(--ink);font-size:12.5px;font-weight:700">scan</text><text x="245.0" y="55" text-anchor="middle" style="fill:var(--ink-3);font-size:10.5px;font-weight:400">AI command</text><text x="359" y="46.0" text-anchor="start" style="fill:var(--ink-2);font-size:11px;font-weight:400">reads the repo, writes scan.md</text><rect x="145" y="90" width="200" height="44" rx="9" style="fill:var(--plan);fill-opacity:0.13;stroke:var(--plan);stroke-width:1.6"/><text x="245.0" y="109" text-anchor="middle" style="font-family:var(--font-mono);fill:var(--ink);font-size:12.5px;font-weight:700">questions</text><text x="245.0" y="125" text-anchor="middle" style="fill:var(--ink-3);font-size:10.5px;font-weight:400">AI prompt</text><text x="359" y="116.0" text-anchor="start" style="fill:var(--ink-2);font-size:11px;font-weight:400">asks what only people can decide</text><rect x="145" y="160" width="200" height="44" rx="9" style="fill:var(--gate);fill-opacity:0.13;stroke:var(--gate);stroke-width:1.6;stroke-dasharray:5 4"/><text x="245.0" y="179" text-anchor="middle" style="font-family:var(--font-mono);fill:var(--ink);font-size:12.5px;font-weight:700">answer</text><text x="245.0" y="195" text-anchor="middle" style="fill:var(--ink-3);font-size:10.5px;font-weight:400">wait</text><text x="359" y="186.0" text-anchor="start" style="fill:var(--ink-2);font-size:11px;font-weight:400">Kiran answers for Ravi and Meena</text><rect x="40" y="230" width="450" height="118" rx="12" style="fill:var(--build);fill-opacity:0.05;stroke:var(--build);stroke-width:1.6"/><text x="52" y="248" text-anchor="start" style="fill:var(--build);font-size:12px;font-weight:700">requirements  ·  loop_group</text><rect x="55" y="262" width="200" height="44" rx="9" style="fill:var(--plan);fill-opacity:0.13;stroke:var(--plan);stroke-width:1.6"/><text x="155.0" y="281" text-anchor="middle" style="font-family:var(--font-mono);fill:var(--ink);font-size:12.5px;font-weight:700">write-requirements</text><text x="155.0" y="297" text-anchor="middle" style="fill:var(--ink-3);font-size:10.5px;font-weight:400">AI prompt</text><rect x="275" y="262" width="200" height="44" rx="9" style="fill:var(--gate);fill-opacity:0.13;stroke:var(--gate);stroke-width:1.6;stroke-dasharray:5 4"/><text x="375.0" y="281" text-anchor="middle" style="font-family:var(--font-mono);fill:var(--ink);font-size:12.5px;font-weight:700">review-requirements</text><text x="375.0" y="297" text-anchor="middle" style="fill:var(--ink-3);font-size:10.5px;font-weight:400">wait</text><path d="M255 284.0 L271 284.0" style="fill:none;stroke:var(--ink-3);stroke-width:1.5" marker-end="url(#ah)"/><path d="M375.0 306 C375.0 322, 155.0 322, 155.0 309" style="fill:none;stroke:var(--gate);stroke-width:1.5;stroke-dasharray:4 4" marker-end="url(#ah)"/><text x="225.0" y="333" text-anchor="middle" style="fill:var(--gate);font-size:10px;font-weight:600">reject → revise</text><rect x="145" y="374" width="200" height="44" rx="9" style="fill:var(--plan);fill-opacity:0.13;stroke:var(--plan);stroke-width:1.6"/><text x="245.0" y="393" text-anchor="middle" style="font-family:var(--font-mono);fill:var(--ink);font-size:12.5px;font-weight:700">plan</text><text x="245.0" y="409" text-anchor="middle" style="fill:var(--ink-3);font-size:10.5px;font-weight:400">AI prompt</text><text x="359" y="400.0" text-anchor="start" style="fill:var(--ink-2);font-size:11px;font-weight:400">files, tests, order → plan.md</text><rect x="145" y="444" width="200" height="44" rx="9" style="fill:var(--gate);fill-opacity:0.13;stroke:var(--gate);stroke-width:1.6;stroke-dasharray:5 4"/><text x="245.0" y="463" text-anchor="middle" style="font-family:var(--font-mono);fill:var(--ink);font-size:12.5px;font-weight:700">approve-plan</text><text x="245.0" y="479" text-anchor="middle" style="fill:var(--ink-3);font-size:10.5px;font-weight:400">wait</text><text x="359" y="470.0" text-anchor="start" style="fill:var(--ink-2);font-size:11px;font-weight:400">Meena approves the plan</text><rect x="30" y="514" width="200" height="44" rx="9" style="fill:var(--bad);fill-opacity:0.13;stroke:var(--bad);stroke-width:1.6"/><text x="130.0" y="533" text-anchor="middle" style="font-family:var(--font-mono);fill:var(--ink);font-size:12.5px;font-weight:700">stop-plan</text><text x="130.0" y="549" text-anchor="middle" style="fill:var(--ink-3);font-size:10.5px;font-weight:400">cancel</text><rect x="260" y="514" width="200" height="44" rx="9" style="fill:var(--build);fill-opacity:0.13;stroke:var(--build);stroke-width:1.6"/><text x="360.0" y="533" text-anchor="middle" style="font-family:var(--font-mono);fill:var(--ink);font-size:12.5px;font-weight:700">implement</text><text x="360.0" y="549" text-anchor="middle" style="fill:var(--ink-3);font-size:10.5px;font-weight:400">AI loop</text><rect x="145" y="584" width="200" height="44" rx="9" style="fill:var(--ship);fill-opacity:0.13;stroke:var(--ship);stroke-width:1.6"/><text x="245.0" y="603" text-anchor="middle" style="font-family:var(--font-mono);fill:var(--ink);font-size:12.5px;font-weight:700">checks</text><text x="245.0" y="619" text-anchor="middle" style="fill:var(--ink-3);font-size:10.5px;font-weight:400">bash</text><text x="359" y="610.0" text-anchor="start" style="fill:var(--ink-2);font-size:11px;font-weight:400">verify + git log + diffstat</text><rect x="145" y="654" width="200" height="44" rx="9" style="fill:var(--plan);fill-opacity:0.13;stroke:var(--plan);stroke-width:1.6"/><text x="245.0" y="673" text-anchor="middle" style="font-family:var(--font-mono);fill:var(--ink);font-size:12.5px;font-weight:700">review</text><text x="245.0" y="689" text-anchor="middle" style="fill:var(--ink-3);font-size:10.5px;font-weight:400">AI prompt</text><text x="359" y="680.0" text-anchor="start" style="fill:var(--ink-2);font-size:11px;font-weight:400">a second agent, read-only: READY / NOT-READY</text><rect x="145" y="724" width="200" height="44" rx="9" style="fill:var(--gate);fill-opacity:0.13;stroke:var(--gate);stroke-width:1.6;stroke-dasharray:5 4"/><text x="245.0" y="743" text-anchor="middle" style="font-family:var(--font-mono);fill:var(--ink);font-size:12.5px;font-weight:700">approve-change</text><text x="245.0" y="759" text-anchor="middle" style="fill:var(--ink-3);font-size:10.5px;font-weight:400">wait</text><text x="359" y="750.0" text-anchor="start" style="fill:var(--ink-2);font-size:11px;font-weight:400">approve to push</text><rect x="30" y="794" width="200" height="44" rx="9" style="fill:var(--bad);fill-opacity:0.13;stroke:var(--bad);stroke-width:1.6"/><text x="130.0" y="813" text-anchor="middle" style="font-family:var(--font-mono);fill:var(--ink);font-size:12.5px;font-weight:700">stop-change</text><text x="130.0" y="829" text-anchor="middle" style="fill:var(--ink-3);font-size:10.5px;font-weight:400">cancel</text><rect x="260" y="794" width="200" height="44" rx="9" style="fill:var(--ship);fill-opacity:0.13;stroke:var(--ship);stroke-width:1.6"/><text x="360.0" y="813" text-anchor="middle" style="font-family:var(--font-mono);fill:var(--ink);font-size:12.5px;font-weight:700">push</text><text x="360.0" y="829" text-anchor="middle" style="fill:var(--ink-3);font-size:10.5px;font-weight:400">bash</text><text x="474" y="820.0" text-anchor="start" style="fill:var(--ink-2);font-size:11px;font-weight:400">git push -u origin HEAD</text><path d="M245.0 64 C245.0 78, 245.0 76, 245.0 87" style="fill:none;stroke:var(--ink-3);stroke-width:1.5" marker-end="url(#ah)"/><path d="M245.0 134 C245.0 148, 245.0 146, 245.0 157" style="fill:none;stroke:var(--ink-3);stroke-width:1.5" marker-end="url(#ah)"/><path d="M245.0 204 C245.0 218, 265.0 216, 265.0 227" style="fill:none;stroke:var(--ink-3);stroke-width:1.5" marker-end="url(#ah)"/><path d="M265.0 348 C265.0 362, 245.0 360, 245.0 371" style="fill:none;stroke:var(--ink-3);stroke-width:1.5" marker-end="url(#ah)"/><path d="M245.0 418 C245.0 432, 245.0 430, 245.0 441" style="fill:none;stroke:var(--ink-3);stroke-width:1.5" marker-end="url(#ah)"/><path d="M245.0 488 C245.0 502, 130.0 500, 130.0 511" style="fill:none;stroke:var(--ink-3);stroke-width:1.5" marker-end="url(#ah)"/><text x="122.0" y="506" text-anchor="end" style="fill:var(--gate);font-size:10px;font-weight:600">reject</text><path d="M245.0 488 C245.0 502, 360.0 500, 360.0 511" style="fill:none;stroke:var(--ink-3);stroke-width:1.5" marker-end="url(#ah)"/><text x="368.0" y="506" text-anchor="start" style="fill:var(--gate);font-size:10px;font-weight:600">approve</text><path d="M360.0 558 C360.0 572, 245.0 570, 245.0 581" style="fill:none;stroke:var(--ink-3);stroke-width:1.5" marker-end="url(#ah)"/><path d="M245.0 628 C245.0 642, 245.0 640, 245.0 651" style="fill:none;stroke:var(--ink-3);stroke-width:1.5" marker-end="url(#ah)"/><path d="M245.0 698 C245.0 712, 245.0 710, 245.0 721" style="fill:none;stroke:var(--ink-3);stroke-width:1.5" marker-end="url(#ah)"/><path d="M245.0 768 C245.0 782, 130.0 780, 130.0 791" style="fill:none;stroke:var(--ink-3);stroke-width:1.5" marker-end="url(#ah)"/><text x="122.0" y="786" text-anchor="end" style="fill:var(--gate);font-size:10px;font-weight:600">reject</text><path d="M245.0 768 C245.0 782, 360.0 780, 360.0 791" style="fill:none;stroke:var(--ink-3);stroke-width:1.5" marker-end="url(#ah)"/><text x="368.0" y="786" text-anchor="start" style="fill:var(--gate);font-size:10px;font-weight:600">approve</text><rect x="30" y="872" width="14" height="14" rx="3" style="fill:var(--plan);fill-opacity:0.13;stroke:var(--plan);stroke-width:1.6"/><text x="50" y="883" text-anchor="start" style="fill:var(--ink-3);font-size:11px;font-weight:400">AI prompt</text><rect x="142" y="872" width="14" height="14" rx="3" style="fill:var(--build);fill-opacity:0.13;stroke:var(--build);stroke-width:1.6"/><text x="162" y="883" text-anchor="start" style="fill:var(--ink-3);font-size:11px;font-weight:400">AI loop</text><rect x="254" y="872" width="14" height="14" rx="3" style="fill:var(--ship);fill-opacity:0.13;stroke:var(--ship);stroke-width:1.6"/><text x="274" y="883" text-anchor="start" style="fill:var(--ink-3);font-size:11px;font-weight:400">bash</text><rect x="366" y="872" width="14" height="14" rx="3" style="fill:var(--gate);fill-opacity:0.13;stroke:var(--gate);stroke-width:1.6;stroke-dasharray:5 4"/><text x="386" y="883" text-anchor="start" style="fill:var(--ink-3);font-size:11px;font-weight:400">wait</text><rect x="478" y="872" width="14" height="14" rx="3" style="fill:var(--bad);fill-opacity:0.13;stroke:var(--bad);stroke-width:1.6"/><text x="498" y="883" text-anchor="start" style="fill:var(--ink-3);font-size:11px;font-weight:400">cancel</text></svg><figcaption>request-to-pr: the team&#x27;s workflow, drawn from its YAML</figcaption></figure></div><div class="open"><div class="tabs" role="tablist"><button class="tab" role="tab" aria-selected="true" data-pane="wf-1">request-to-pr.yaml</button></div><div class="pane is-on" id="wf-1"><div class="code code--wrap"><div class="code__bar"><span class="path">.archon/workflows/team/request-to-pr/request-to-pr.yaml</span><span>the team's workflow · real file</span></div><textarea class="src" data-lang="yaml">name: request-to-pr
+description: &gt;-
+  Take one request from docs-in/ to a pushed branch: scan the repo, ask the questions a person must
+  answer, write the requirements (revised until approved), plan, implement until ./scripts/verify.sh
+  passes, review, and push after a final approval. Use for one small change to priorauth-api.
+  NOT for: bugs whose cause is unknown (use archon-investigate first).
+
+nodes:
+  # ── Plan: read before anything is decided ─────────────────────────────
+  - id: scan
+    command: scan
+    mutates_checkout: false
+
+  - id: questions
+    depends_on: [scan]
+    mutates_checkout: false
+    prompt: |
+      The request: $USER_MESSAGE
+      The scan of the repo is in $ARTIFACTS_DIR/scan.md.
+
+      List only the questions a person must answer before requirements can be written
+      (rules, numbers, names, data sources). Number them; give each lettered options
+      (A, B, C, X = other) and say which you would pick and why. Write them to
+      $ARTIFACTS_DIR/questions.md and return the same text.
+    output_format:
+      type: object
+      properties:
+        questions: { type: string }
+      required: [questions]
+      additionalProperties: false
+
+  - id: answer
+    depends_on: [questions]
+    wait:
+      attention: |
+        Answer these before requirements are written (one message, e.g. &quot;1 A: ... 2 B: ...&quot;):
+
+        $questions.output.questions
+
+  - id: requirements
+    depends_on: [answer]
+    loop_group:
+      max_iterations: 3
+      until_bash: &#x27;decision=$review-requirements.output.decision; [ &quot;$decision&quot; = &quot;approve&quot; ]&#x27;
+      nodes:
+        - id: write-requirements
+          mutates_checkout: false
+          prompt: |
+            The request: $USER_MESSAGE
+            Scan: $ARTIFACTS_DIR/scan.md   Questions: $ARTIFACTS_DIR/questions.md
+            The person&#x27;s answers: $answer.output.text
+            Changes asked for on the previous version, if any: $LOOP_PREV.review-requirements.output.text
+
+            Write (or revise) $ARTIFACTS_DIR/requirements.md: numbered functional requirements
+            (FR1...), non-functional ones (NFR1...), assumptions (A-01...), and a worked check on
+            the sample data as of 2026-10-13. Return a short summary of what it says, and of what
+            changed if this is a revision.
+        - id: review-requirements
+          depends_on: [write-requirements]
+          wait:
+            form: approval
+            attention: |
+              Approve the requirements, or reject with the changes you want.
+
+              $write-requirements.output
+
+  # ── Build: plan, approve, implement until the checks pass ─────────────
+  - id: plan
+    depends_on: [requirements]
+    mutates_checkout: false
+    prompt: |
+      Read $ARTIFACTS_DIR/requirements.md and the code. Write $ARTIFACTS_DIR/plan.md:
+      the files to add or change, the tests to add, and the order. Follow CLAUDE.md.
+    output_format:
+      type: object
+      properties:
+        summary: { type: string }
+        files: { type: array, items: { type: string } }
+        tests: { type: string }
+      required: [summary, files, tests]
+      additionalProperties: false
+
+  - id: approve-plan
+    depends_on: [plan]
+    wait:
+      form: approval
+      attention: |
+        Approve the code plan before any code is written.
+
+        $plan.output.summary
+        Tests: $plan.output.tests
+
+  - id: stop-plan
+    depends_on: [approve-plan]
+    when: &quot;$approve-plan.output.decision == &#x27;reject&#x27;&quot;
+    cancel: The code plan was rejected.
+
+  - id: implement
+    depends_on: [approve-plan]
+    when: &quot;$approve-plan.output.decision == &#x27;approve&#x27;&quot;
+    loop:
+      command: implement
+      until_bash: ./scripts/verify.sh
+      max_iterations: 3
+      fresh_context: true
+
+  - id: checks
+    depends_on: [implement]
+    bash: |
+      ./scripts/verify.sh &amp;&amp; echo &quot;verify: passed&quot;
+      git log --oneline &quot;$BASE_BRANCH&quot;..HEAD
+      git diff --stat &quot;$BASE_BRANCH&quot;...HEAD
+
+  # ── Review: a second reader, then a person ────────────────────────────
+  - id: review
+    depends_on: [checks]
+    mutates_checkout: false
+    prompt: |
+      Review the change on this branch against $ARTIFACTS_DIR/requirements.md and
+      $ARTIFACTS_DIR/plan.md (git diff $BASE_BRANCH...HEAD). Do not edit anything.
+      Check each FR has code and a test, and look for anything the plan did not name.
+      Write $ARTIFACTS_DIR/review.md.
+    output_format:
+      type: object
+      properties:
+        verdict: { type: string, enum: [READY, NOT-READY] }
+        findings: { type: string }
+      required: [verdict, findings]
+      additionalProperties: false
+
+  - id: approve-change
+    depends_on: [review]
+    wait:
+      form: approval
+      attention: |
+        Review verdict: $review.output.verdict
+        $review.output.findings
+
+        Checks:
+        $checks.output
+
+        Approve to push the branch, or reject to stop.
+
+  - id: stop-change
+    depends_on: [approve-change]
+    when: &quot;$approve-change.output.decision == &#x27;reject&#x27;&quot;
+    cancel: The change was rejected at review.
+
+  # ── Ship ──────────────────────────────────────────────────────────────
+  - id: push
+    depends_on: [approve-change]
+    when: &quot;$approve-change.output.decision == &#x27;approve&#x27;&quot;
+    bash: |
+      git push -u origin HEAD 2&gt;&amp;1
+      echo &quot;Open the PR: $(git rev-parse --abbrev-ref HEAD) -&gt; $BASE_BRANCH&quot;
+</textarea></div></div></div>
+</section>
+<section class="step" id="s04" data-step="4" data-phase="Meet Archon" style="--c:var(--setup)">
+  <div class="step__head"><span class="step__n">4</span><div><span class="chip">the people</span><h2>The people in this course</h2><p class="step__why">The same fictional team as the AI-DLC course, so the two runs compare one to one.</p></div><span class="who">read · 1 min</span></div>
+<div class="gwrap"><table><thead><tr><th>Person</th><th>Role</th><th>In the run</th></tr></thead><tbody><tr><td>Ravi Menon</td><td>Nurse manager (the business)</td><td>Sent the request in Slack; his answers are in the first wait</td></tr><tr><td>Kiran Rao</td><td>Developer</td><td>Runs Archon in a terminal; answers the waits; opens the PR</td></tr><tr><td>Meena Iyer</td><td>Tech lead</td><td>Rejects the first requirements with the screen team's names; approves the plan and the change</td></tr></tbody></table></div><div class="note">Archon doesn't know who anyone is on a CLI-only install: an answer records the surface and the time, and the text says who decided. The course writes the names into the answer text, as the team's CLAUDE.md asks.</div>
+</section>
+<div class="phase" style="--c:var(--plan)"><i></i>Set up<span>steps 5–6 · where you type, once per machine</span></div>
+<section class="step" id="s05" data-step="5" data-phase="Set up" style="--c:var(--plan)">
+  <div class="step__head"><span class="step__n">5</span><div><span class="chip">where you type</span><h2>Three places you type, and one you don't</h2><p class="step__why">Archon runs the agent for you. You type into Archon, not into Claude Code.</p></div><span class="who">read · 2 min</span></div>
+<div class="gwrap"><table><thead><tr><th>Where</th><th>What you do there</th><th>In this course</th></tr></thead><tbody><tr><td>Terminal: <code>archon …</code></td><td>Start runs, see the attention queue, answer waits, read artifacts and logs</td><td>every step <span class="lbl lbl-real">real</span></td></tr><tr><td>Web UI: <code>archon serve</code> → <code>http://localhost:3090</code></td><td>The same runs, with the graph, the events, and approve/reject buttons</td><td>setup page step 7 <span class="lbl lbl-doc">documented</span></td></tr><tr><td>Chat: Slack, Telegram, Discord (plugins); <code>archon chat</code></td><td>Ask the orchestrator to pick and start a workflow; answer waits in the thread</td><td><span class="lbl lbl-doc">documented</span></td></tr><tr><td>Claude Code itself</td><td>Nothing during a run. Archon starts its own Claude Code sessions with your login</td><td>—</td></tr></tbody></table></div><div class="plain"><div><b>In plain words.</b> Archon is the dispatcher with the job sheets; Claude Code is the technician it sends out. You talk to the dispatcher.</div></div>
+</section>
+<section class="step" id="s06" data-step="6" data-phase="Set up" style="--c:var(--plan)">
+  <div class="step__head"><span class="step__n">6</span><div><span class="chip">once per machine</span><h2>Set up once</h2><p class="step__why">Install the binary, connect the agent, check. The setup page shows each command's real output.</p></div><span class="who">about 5 minutes</span></div>
+<div class="io"><div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">PowerShell</span><span class="os-mac">Terminal</span></span></div><pre class="os-win">irm https://archon.diy/install.ps1 | iex
+archon provider add claude
+archon doctor</pre><pre class="os-mac">curl -fsSL https://archon.diy/install | bash
+archon provider add claude
+archon doctor</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Archon returns <span class="tag">archon doctor · 0.13.2 · real</span></div><pre>archon doctor — verifying your setup
+
+✓ Config files: valid (default assistant: claude)
+✓ Installed providers: claude (0.13.2)
+✓ claude: Claude binary: C:\Users\you\.local\bin\claude.exe (via autodetect, spawns OK)
+○ GitHub App: App mode not configured
+✓ Assistant login: claude: usable
+✓ Provider support: claude is supported
+✓ Database: reachable (sqlite); schema created by 0.13.2, last applied by 0.13.2
+○ Folder project: cwd is not a registered folder project
+○ AI credentials: none connected — run: archon ai login &lt;vendor&gt;  or  archon ai key set &lt;vendor&gt;
+✓ Workspace: C:\Users\you\.archon is writable
+✓ Bundled defaults: 25 workflow(s), 27 command(s) loaded
+○ Archon skill: not installed (run `archon skill add .` if you use Claude Code or Codex skills)
+○ Telemetry: disabled (ARCHON_TELEMETRY_DISABLED=1)
+○ Slack: no SLACK_BOT_TOKEN set
+○ Telegram: no TELEGRAM_BOT_TOKEN set
+
+All checks passed.</pre></div></div><div class="note">The installer verifies the binary's checksum, puts it in <code>~/.archon/bin</code> and adds that folder to your user PATH (open a new terminal). It asks which providers to add; <code>archon provider add claude</code> does the same later. Claude Code must already be installed and signed in. Full walk-through: <a href="archon-workspace-setup.html">set up Archon for a repo</a>.</div>
+</section>
+<div class="phase" style="--c:var(--build)"><i></i>The repo<span>steps 7–8 · the files and the fields</span></div>
+<section class="step" id="s07" data-step="7" data-phase="The repo" style="--c:var(--build)">
+  <div class="step__head"><span class="step__n">7</span><div><span class="chip">the files</span><h2>Files in a repo, and in ~/.archon</h2><p class="step__why">Two places: what the team commits, and what stays on your machine.</p></div><span class="who">read · 3 min</span></div>
+<div class="io io--stack"><div class="box disk"><div class="box__bar">In the repo (committed)</div><pre>priorauth-api/                       <b>the repo is the project: no workspace folder around it</b>
+├── <span class="n">.archon/</span>                         committed: the team's Archon files
+│   ├── <span class="n">config.yaml</span>                  assistant: claude · worktree.baseBranch: main
+│   └── workflows/
+│       └── team/                    <span class="m">a pack (any name)</span>
+│           └── request-to-pr/       <span class="m">one workflow per folder</span>
+│               ├── <span class="n">request-to-pr.yaml</span>
+│               └── commands/
+│                   ├── <span class="n">scan.md</span>          <span class="m">the prompt of the scan node</span>
+│                   └── <span class="n">implement.md</span>     <span class="m">the prompt of each implement pass</span>
+├── <span class="n">CLAUDE.md</span>                        the team's rules; Claude Code reads it in every AI node
+├── <span class="n">.gitattributes</span>                   keeps verify.sh LF in every worktree
+├── <span class="n">scripts/verify.sh</span>, verify.cmd     the one check (until_bash and the checks node)
+├── <span class="n">docs-in/request.md</span>               Ravi's request, named in the run message
+└── pom.xml, src/ …                  the code</pre></div><div class="box disk"><div class="box__bar">In your home folder (not committed)</div><pre>~/.archon/                           <b>yours, never committed</b> (C:\Users\you\.archon on Windows)
+├── bin/archon.exe                   the CLI
+├── plugins/                         provider plugins (archon-provider-claude.exe)
+├── config.yaml                      your defaults: assistant, tiers, concurrency
+├── install.json                     which binary and version
+├── archon.db                        SQLite: projects, runs, events, costs
+└── workspaces/_local/priorauth-api/ one folder per project
+    ├── worktrees/request-age/age-api/   the run's checkout, on branch request-age/age-api
+    ├── logs/&lt;run-id&gt;.jsonl            the transcript
+    └── artifacts/runs/&lt;run-id&gt;/        scan.md, questions.md, requirements.md, plan.md …</pre></div></div><div class="gwrap"><table class="kv"><thead><tr><th>File</th><th>Needed?</th><th>Why</th></tr></thead><tbody><tr><td><code>.archon/workflows/…/*.yaml</code></td><td>only for your own workflows</td><td>The bundled 25 need nothing in the repo</td></tr><tr><td><code>.archon/config.yaml</code></td><td>optional</td><td>Repo defaults; wins over <code>~/.archon/config.yaml</code>. Worktree settings (<code>copyFiles</code>, <code>postCreate</code>) are read only from here</td></tr><tr><td><code>CLAUDE.md</code></td><td>optional, recommended</td><td>The agent's standing rules for this repo, in every AI node</td></tr><tr><td><code>.archon/.env</code></td><td>optional, never commit</td><td>Credentials for this repo (<code>archon setup --scope project</code>)</td></tr><tr><td><code>.gitattributes</code></td><td>on Windows with autocrlf</td><td>A worktree is a fresh checkout: without <code>*.sh text eol=lf</code> bash gets CRLF scripts</td></tr></tbody></table></div><div class="note">Workflow commands need a git repository: outside one, <code>archon workflow list</code> says <code>Error: Not in a git repository.</code> (or register a plain folder with <code>--folder</code>).</div>
+</section>
+<section class="step" id="s08" data-step="8" data-phase="The repo" style="--c:var(--build)">
+  <div class="step__head"><span class="step__n">8</span><div><span class="chip">authoring</span><h2>The fields you will use</h2><p class="step__why">A short list from the workflow-language reference: enough to read any workflow and write a first one.</p></div><span class="who">reference</span></div>
+<div class="gwrap"><table class="kv"><thead><tr><th>Field</th><th>What it does</th></tr></thead><tbody><tr><td><code>name</code>, <code>description</code>, <code>nodes</code></td><td>required. The description is what <code>workflow list</code> shows and what chat reads to pick a workflow: say when to use it and when not</td></tr><tr><td><code>provider</code>, <code>model</code>, <code>effort</code></td><td>defaults for every AI node (a node can override)</td></tr><tr><td><code>worktree.enabled</code></td><td><code>false</code> = always in the live checkout; <code>true</code> = always a worktree; omit to let the caller choose</td></tr><tr><td><code>inputs</code></td><td>named inputs, passed with <code>--input name=value</code>, read as <code>$INPUTS.name</code></td></tr><tr><td><code>budget</code></td><td>a ceiling on the run's total spend</td></tr><tr><td>node: <code>id</code>, <code>depends_on</code>, <code>when</code>, <code>trigger_rule</code></td><td>the graph</td></tr><tr><td>node: <code>output_format</code></td><td>JSON Schema the AI reply must match; fields readable as <code>$id.output.field</code></td></tr><tr><td>node: <code>mutates_checkout: false</code></td><td>the engine fails the node if it changed the checkout</td></tr><tr><td>node: <code>allowed_tools</code>, <code>denied_tools</code>, <code>context: fresh</code>, <code>retry</code>, <code>idle_timeout</code></td><td>how the agent runs</td></tr><tr><td>loop: <code>max_iterations</code> + <code>until_bash</code> / <code>until_field</code> / <code>until</code></td><td>when a loop is done (at least one; <code>until_bash</code> is the strongest)</td></tr><tr><td>wait: <code>attention</code>, <code>form</code>, <code>options</code></td><td>the question and the answer it accepts</td></tr></tbody></table></div><div class="io"><div class="box you"><div class="box__bar">You type <span class="tag">any shell</span></div><pre>archon validate workflows request-to-pr
+archon workflow run request-to-pr --dry-run --default-stubs "Implement the request in docs-in/request.md"</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Archon returns <span class="tag">real · dry run, no model call</span></div><pre>Discovery: root=C:/work/archon-java/priorauth-api workflows=26 bundled=25 global=0 project=1 installed=0
+Dry-run: request-to-pr
+
+STUBBED   scan (command)
+  runs on: claude (default assistant) / (provider default) (unset)
+  resolved: ---
+description: Read the request and the code; write what a planner needs to know. Changes nothing.
+---
+The request: Implement docs-in/request.md
+
+Read the request file it names (in docs-in/), then the code: the build file, the entry points, the
+classes the request touches, the tests, the configuration and the data files.
+
+Write C:\Users\you\.archon\temp\dry-run-bc9da6ea-0cd1-448b-b756-2ddb5a6dc69e\artifacts/scan.md with:
+- what the repo is and how it is built and tested (the verify command from CLAUDE.md);
+- the classes and files the request touches, with one line each on what they do now;
+- what is missing for the request (data, rules, configuration);
+- ri
+…
+PAUSED    answer (wait) — durable wait
+…
+Simulation outcome: paused</pre></div></div><div class="note"><code>--dry-run</code> walks the graph with stub outputs: it starts no run and calls no model, and stops at the first wait (add <code>--pause-at-gates</code> to stop at approval gates too). Check every new workflow this way before it costs anything.</div>
+</section>
+<div class="phase" style="--c:var(--review)"><i></i>Doing the work<span>steps 9–12 · which workflow, each pause, run flags, after a run</span></div>
+<section class="step" id="s09" data-step="9" data-phase="Doing the work" style="--c:var(--review)">
+  <div class="step__head"><span class="step__n">9</span><div><span class="chip">which workflow</span><h2>Which workflow for which work</h2><p class="step__why">Archon 0.13.2 ships 25 workflows. Most are building blocks of the sdlc factory; a handful are useful on their own.</p></div><span class="who">reference</span></div>
+
+<div class="gwrap"><table><thead><tr><th>If you want to…</th><th>Run</th><th>Changes the repo?</th></tr></thead><tbody><tr><td>find the cause of a bug, or answer a question about the code</td><td><code>archon-investigate</code></td><td>no</td></tr><tr><td>turn a decided request into a plan</td><td><code>archon-plan</code></td><td>no (pauses if it has questions)</td></tr><tr><td>build decided work until checks pass</td><td><code>archon-implement</code></td><td>commits; opens no PR</td></tr><tr><td>take an issue or request all the way to a reviewed PR</td><td><code>archon-ship</code></td><td>branch, PR (needs <code>gh</code>)</td></tr><tr><td>review a PR or a diff</td><td><code>archon-review</code></td><td>no (one PR comment)</td></tr><tr><td>run the project's own checks and get a verdict</td><td><code>archon-validate</code></td><td>no</td></tr><tr><td>your team's own steps, gates and checks</td><td>your workflow in <code>.archon/workflows/</code></td><td>as you wrote it</td></tr></tbody></table></div>
+<p>The full catalog, with each workflow's own words (from <code>archon workflow list --json</code> and <code>workflow list &lt;name&gt; --full</code>, real):</p>
+<div class="flist"><div class="gwrap"><table><thead><tr><th>Workflow</th><th>Description</th><th>Use when</th></tr></thead><tbody><tr><td><code>archon-attention</code></td><td>The attention pause every public SDLC stage shares; a building block, not a workflow to run.</td><td>—</td></tr><tr><td><code>archon-build-queue</code></td><td>The build queue: takes intake&#x27;s triaged work items to a reviewed, ready pull request and stops only for decisions that belong to a person.</td><td>a trigger binding the operator installed starts it (see the SDLC pack README, &quot;Build queue&quot;).</td></tr><tr><td><code>archon-deliver</code></td><td>The delivery tail, autonomous on its green path: capped rounds of implement, draft PR, review, simplify and one CI agent that marks the PR ready on green</td><td>decided work should become a reviewed, ready-to-merge PR — &quot;deliver this plan&quot;, &quot;take this to a PR&quot;, &quot;build and ship this&quot;.</td></tr><tr><td><code>archon-deliver-block</code></td><td>The delivery tail, autonomous on its green path.</td><td>—</td></tr><tr><td><code>archon-discoveries</code></td><td>Drain the discoveries finished runs recorded outside their own scope.</td><td>an operator drains discoveries by hand, or a schedule binding the operator installed starts it (see the SDLC pack README, &quot;Discoveries&quot;). The pack installs no binding.</td></tr><tr><td><code>archon-forge-check</code></td><td>Check that the pack&#x27;s selected forge source (ARCHON_SDLC_FORGE, gh by default) can act for this checkout, without starting any delivery.</td><td>setting up the pack on a checkout, switching ARCHON_SDLC_FORGE, or a delivery run refused at its forge node.</td></tr><tr><td><code>archon-implement</code></td><td>Implement a change and keep working until it is complete and the focused checks on what it changed pass.</td><td>the work is already decided and needs building — &quot;implement this plan&quot;, &quot;apply these review findings&quot;, &quot;build what this describes&quot;, &quot;fix this CI failure&quot;.</td></tr><tr><td><code>archon-intake</code></td><td>The standing front of the label-driven pack.</td><td>trigger bindings start it on issue lifecycle and label events (see the SDLC pack README, &quot;Intake&quot;).</td></tr><tr><td><code>archon-investigate</code></td><td>Establish the proven causal chain for a bug, unexplained behavior, or open question — to the root cause whose fix prevents the symptom, never the first</td><td>the cause is not yet known — &quot;investigate this issue&quot;, &quot;why does this fail&quot;, &quot;root-cause this before we fix it&quot;.</td></tr><tr><td><code>archon-merge-queue</code></td><td>The merge queue: merges the pull requests the build queue finished, and stops only for decisions that belong to a person.</td><td>a trigger binding the operator installed starts it (see the SDLC pack README, &quot;Merge queue&quot;).</td></tr><tr><td><code>archon-plan</code></td><td>Turn decided intent — a feature request, an investigation report, an idea — into an implementable plan: the approach chosen with alternatives rejected for</td><td>what to build is known but how is not yet decided — &quot;plan this feature&quot;, &quot;turn this investigation into a plan&quot;, &quot;how should we build this&quot;.</td></tr><tr><td><code>archon-plan-block</code></td><td>Turn decided intent — a feature request, an investigation report, an idea — into an implementable plan: the approach chosen with alternatives rejected for</td><td>—</td></tr><tr><td><code>archon-pr</code></td><td>Open a pull request for the committed work on the current branch — draft by default when composed, template-aware, with the body built from the run&#x27;s artifacts</td><td>committed work on a branch needs a PR — &quot;open a PR&quot;, &quot;create a draft PR for this branch&quot;.</td></tr><tr><td><code>archon-review</code></td><td>Review a change through parallel specialist lenses and produce one evidence-based verdict, held to the accepted contract (archon-review-block).</td><td>changes need judging — &quot;review this PR&quot;, &quot;review my changes&quot;, &quot;is this ready to merge&quot;.</td></tr><tr><td><code>archon-review-block</code></td><td>Review a change through parallel specialist lenses and produce one evidence-based verdict.</td><td>—</td></tr><tr><td><code>archon-review-eval</code></td><td>One review-lens eval sample: the shipped review, then the simplify pass over the same change whatever the review decided, so every lens is measured on its own.</td><td>the review-lens bench runs a sample.</td></tr><tr><td><code>archon-review-eval-judge</code></td><td>Judge one review-lens eval sample: for each defect the change was planted with, and each known defect of the change, which lenses stated it and which review</td><td>the review-lens bench judges a sample.</td></tr><tr><td><code>archon-ship</code></td><td>Ground an issue or request against the current repository before spending on it, then take the least speculative path: investigate an unknown cause, plan an</td><td>an issue or request should be taken from current-truth check through to a reviewed PR — &quot;fix this issue&quot;, &quot;implement issue #123&quot;, &quot;take this work item to a PR&quot;.</td></tr><tr><td><code>archon-ship-block</code></td><td>Ground an issue or request against the current repository before spending on it, then take the least speculative path: investigate an unknown cause, plan an</td><td>—</td></tr><tr><td><code>archon-simplify</code></td><td>Judge whether a change delivers its outcome through more structure than it needs, and name the smaller shape.</td><td>a change needs its structure judged — &quot;is this overbuilt&quot;, &quot;simplify review&quot;.</td></tr><tr><td><code>archon-triage</code></td><td>Ground one work item against the current repository before deciding what kind of work it needs, judge whether it is a contract a run can start from, then route</td><td>an issue, plan, report, or request may be stale or may prescribe an unverified solution — &quot;triage this issue&quot;, &quot;what does this need next&quot;, &quot;is this ready to build&quot;.</td></tr><tr><td><code>archon-triage-block</code></td><td>Ground one work item against the current repository before deciding what kind of work it needs.</td><td>—</td></tr><tr><td><code>archon-upkeep</code></td><td>Keep one dependency current: ground the update request against the repository as it exists (locked version, blast radius, breaking changes that touch real</td><td>a dependency or security advisory should become a reviewed, ready-to-merge PR — &quot;update sharp&quot;, &quot;address the undici advisory&quot;, &quot;bump X to latest&quot;.</td></tr><tr><td><code>archon-validate</code></td><td>Discover and run the project&#x27;s own checks — types, lint, tests, build, whatever the repository itself defines — and report a structured verdict.</td><td>the current state of the checkout needs a validation verdict — &quot;run the checks&quot;, &quot;is this green&quot;, &quot;validate this&quot;.</td></tr><tr><td><code>archon-worktree-cleanup</code></td><td>Remove merged worktrees, and their local branches, across every project registered on this install.</td><td>a schedule binding the operator installed starts it (see the SDLC pack README, &quot;Worktree cleanup&quot;), or an operator runs it by hand. The pack installs no binding.</td></tr></tbody></table></div></div>
+<div class="note">0.12.0 removed the older <code>archon-fix-github-issue</code>, <code>archon-idea-to-pr</code>, <code>archon-smart-pr-review</code> and <code>archon-assist</code>, and 0.13.1 made names exact (<code>review</code> no longer finds <code>archon-review</code>). Tutorials that use them are out of date.</div>
+
+</section>
+<section class="step" id="s10" data-step="10" data-phase="Doing the work" style="--c:var(--review)">
+  <div class="step__head"><span class="step__n">10</span><div><span class="chip">at a pause</span><h2>What you type at each pause</h2><p class="step__why">A wait node stops the run and puts it in the attention queue. The form it declares says what it accepts.</p></div><span class="who">reference</span></div>
+<div class="gwrap"><table><thead><tr><th>Form</th><th>You answer with</th><th>The next node reads</th></tr></thead><tbody><tr><td><code>message</code> (default)</td><td><code>archon workflow answer &lt;run&gt; --occurrence &lt;id&gt; --text "…"</code> (or <code>approve &lt;run&gt; "…"</code>)</td><td><code>$id.output.text</code></td></tr><tr><td><code>approval</code></td><td><code>archon workflow approve &lt;run&gt; "…"</code> · <code>archon workflow reject &lt;run&gt; "…"</code></td><td><code>$id.output.decision</code>, <code>.text</code></td></tr><tr><td><code>select</code></td><td><code>archon workflow respond &lt;run&gt; &lt;option-id&gt; "…"</code></td><td><code>$id.output.decision</code>, <code>.text</code></td></tr><tr><td><code>multi_select</code></td><td><code>archon workflow answer &lt;run&gt; --occurrence &lt;id&gt; --choose a --choose b</code></td><td><code>$id.output.decisions</code>, <code>.text</code></td></tr></tbody></table></div><div class="io"><div class="box you"><div class="box__bar">You type <span class="tag">find what is waiting</span></div><pre>archon workflow attention
+archon workflow wait &lt;run-id&gt; --json</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Archon returns <span class="tag">real · printed under every pause in the course run</span></div><pre>Approve: `archon workflow approve cd54631b99f7e43dc9739bb63499690f [text]`
+Reject: `archon workflow reject cd54631b99f7e43dc9739bb63499690f [text]`
+Abandon: `archon workflow abandon cd54631b99f7e43dc9739bb63499690f`
+Workflow paused — waiting for approval.</pre></div></div><div class="plain"><div><b>In plain words.</b> <b>Reject is an answer, not a stop.</b> The run carries on with decision <code>reject</code>; the workflow decides what that means. In <code>request-to-pr</code>, a rejected requirements draft is revised (the loop_group), a rejected plan or change goes to a <code>cancel:</code> node.</div></div><div class="note">Answering from the CLI continues the run in that terminal until the next pause or the end. Add <code>--json</code> to record the answer and return at once; <code>archon serve</code> or <code>archon workflow wake</code> then continues it.</div>
+</section>
+<section class="step" id="s11" data-step="11" data-phase="Doing the work" style="--c:var(--review)">
+  <div class="step__head"><span class="step__n">11</span><div><span class="chip">starting a run</span><h2>Every <code>workflow run</code> flag</h2><p class="step__why">From the real <code>archon workflow run --help</code>. The ones the course uses are first.</p></div><span class="who">reference</span></div>
+<div class="gwrap"><table class="kv"><thead><tr><th>Flag</th><th>What it does</th></tr></thead><tbody><tr><td><code>--project &lt;id|name&gt;</code></td><td>Bind to a registered repository (see project list). Source/config come from --cwd; isolated execution uses the registered checkout. Use --no-worktree to execute in --cwd. Cannot combine with --folder, --base-branch, --resume, --dry-run.</td></tr><tr><td><code>--branch, -b &lt;name&gt;</code></td><td>Create worktree for branch (or reuse existing)</td></tr><tr><td><code>--from, --from-branch &lt;name&gt; Create new branch from specific start point</code></td><td></td></tr><tr><td><code>--base-branch &lt;name&gt;</code></td><td>Initial repository registration only; omit to follow the remote default. Use --base for a run override.</td></tr><tr><td><code>--base &lt;branch&gt;</code></td><td>Per-dispatch base override for epic slices (worktree cut-from + PR target)</td></tr><tr><td><code>--workflow-source &lt;path&gt;</code></td><td>Read the workflow, its commands and scripts from this directory instead of --cwd (which stays the workspace the run acts on)</td></tr><tr><td><code>--no-worktree</code></td><td>Run on branch directly without worktree isolation</td></tr><tr><td><code>--folder</code></td><td>Register the current directory (with or without git) as a folder project and run in place</td></tr><tr><td><code>--container</code></td><td>Run a folder project in container isolation</td></tr><tr><td><code>--input &lt;name&gt;=&lt;value&gt;</code></td><td>Supply a declared workflow input; repeat per input (mutually exclusive with --resume)</td></tr><tr><td><code>--model &lt;name&gt;=&lt;spec&gt;</code></td><td>Rebind small/medium/large or @alias for one run; repeat per binding</td></tr><tr><td><code>--config &lt;path&gt;</code></td><td>Load a sparse YAML config layer for one fresh workflow run</td></tr><tr><td><code>--config-from-run &lt;run-id&gt; Start a fresh run with the run config another run was started with</code></td><td></td></tr><tr><td><code>--resume</code></td><td>Resume the newest eligible failed, paused, or stale running run of this workflow Running is stale when activity is missing or older than one day; verify its owner is gone first. Mutually exclusive with --branch</td></tr><tr><td><code>--adopt &lt;run-id&gt;</code></td><td>Start a new run adopting a terminal run&#x27;s worktree/branch + artifacts ($ADOPTED_RUN_DIR)</td></tr><tr><td><code>--supersedes &lt;run-id&gt;</code></td><td>Record this fresh run as replacing the prior run&#x27;s open item (no lane inheritance)</td></tr><tr><td><code>--dry-run</code></td><td>Simulate workflow DAG control flow without creating a run or contacting a provider</td></tr><tr><td><code>--stubs &lt;path&gt;</code></td><td>YAML node-output map for --dry-run</td></tr><tr><td><code>--stubs-init &lt;path&gt;</code></td><td>Write a complete dry-run stub scaffold and exit</td></tr><tr><td><code>--default-stubs</code></td><td>Fill missing reached nodes with validated placeholders during --dry-run</td></tr><tr><td><code>--exec-code</code></td><td>Execute trusted bash/script nodes during --dry-run (default: require stubs)</td></tr><tr><td><code>--pause-at-gates</code></td><td>Stop a dry-run at approval gates instead of auto-approving</td></tr><tr><td><code>--detach</code></td><td>Run &#x27;workflow run&#x27;/&#x27;approve&#x27;/&#x27;reject&#x27;/&#x27;respond&#x27;/&#x27;resume&#x27; in a detached background child (resume returns after acceptance, before completion)</td></tr><tr><td><code>--conversation-id &lt;id&gt;</code></td><td>Correlation id for the run&#x27;s messages. It creates no conversation and no persist_session scope</td></tr></tbody></table></div><div class="note">The course starts its run with <code>archon workflow run request-to-pr --branch request-age/age-api --detach "Implement the request in docs-in/request.md"</code>: a named branch (so the worktree and the PR are easy to find), in the background (so the terminal is free while it works).</div>
+</section>
+<section class="step" id="s12" data-step="12" data-phase="Doing the work" style="--c:var(--review)">
+  <div class="step__head"><span class="step__n">12</span><div><span class="chip">after a run</span><h2>After a run, and between runs</h2><p class="step__why">Where to look, and how to tidy up.</p></div><span class="who">reference</span></div>
+<div class="gwrap"><table class="kv"><thead><tr><th>Command</th><th>What it shows or does</th></tr></thead><tbody><tr><td><code>archon workflow runs</code> · <code>status</code></td><td>recent runs of this project; running and paused ones</td></tr><tr><td><code>archon workflow get &lt;run-id&gt;</code></td><td>one run: status, worktree path, branch, cost, artifacts</td></tr><tr><td><code>archon workflow logs &lt;run-id&gt; --format text</code></td><td>the transcript as progress lines (<code>--follow</code> to stream)</td></tr><tr><td><code>archon workflow artifacts &lt;run-id&gt; [file]</code></td><td>the files the run wrote; print one</td></tr><tr><td><code>archon workflow resume &lt;run-id&gt;</code></td><td>continue a failed or paused run; finished nodes are replayed, not re-run</td></tr><tr><td><code>archon workflow cancel</code> · <code>abandon &lt;run-id&gt;</code></td><td>stop a run · mark it cancelled and remove its worktree (keeps the branch)</td></tr><tr><td><code>archon isolation list</code></td><td>every worktree Archon made</td></tr><tr><td><code>archon complete &lt;branch&gt;</code></td><td>remove a branch's worktree and local branch (the remote branch stays)</td></tr><tr><td><code>archon isolation cleanup [days]</code> · <code>--merged</code></td><td>remove old (default 7 days) or merged worktrees; keeps anything unpushed or uncommitted</td></tr></tbody></table></div>
+</section>
+<div class="phase" style="--c:var(--ship)"><i></i>Reference<span>every command and option</span></div>
+<section class="step" id="s13" data-step="13" data-phase="Reference" style="--c:var(--ship)">
+  <div class="step__head"><span class="step__n">13</span><div><span class="chip">every command</span><h2>Every command</h2><p class="step__why">All 63 entries of the real <code>archon help</code> in 0.13.2, and its global options.</p></div><span class="who">reference</span></div>
+<div class="flist"><div class="gwrap"><table class="kv"><thead><tr><th>Command</th><th>What it does</th></tr></thead><tbody><tr><td><code>state &lt;get|put|patch|log|delete|list&gt;</code></td><td>Read and audit durable project or install JSON documents</td></tr><tr><td><code>forge resolve</code></td><td>Resolve an explicit remote through optional forge plugins</td></tr><tr><td><code>forge checks</code></td><td>Observe checks for an explicit qualified pull request</td></tr><tr><td><code>user &lt;list|role|link&gt;</code></td><td>List users, link identities and manage roles as the operator</td></tr><tr><td><code>project list</code></td><td>List registered projects (id, kind, name, key, path)</td></tr><tr><td><code>trigger &lt;fire|drain|list|inspect|withdraw|recover-preparation|schedule&gt;</code></td><td>Start configured workflows and inspect durable resource admission</td></tr><tr><td><code>chat &lt;message&gt;</code></td><td>Send a message to the orchestrator</td></tr><tr><td><code>setup [--scope &lt;home|project&gt;] Interactive setup wizard for credentials and config</code></td><td></td></tr><tr><td><code>workflow list [name] [--full] [--json]</code></td><td>List compact workflow descriptions Use &lt;name&gt; --full for one exact description</td></tr><tr><td><code>workflow run &lt;name&gt; [msg]</code></td><td>Run a workflow with optional message</td></tr><tr><td><code>workflow status</code></td><td>Show running/paused workflows for this project</td></tr><tr><td><code>workflow runs</code></td><td>List recent runs (all statuses) for this project</td></tr><tr><td><code>workflow get &lt;run-id&gt;</code></td><td>Show detail for a single run (any status)</td></tr><tr><td><code>workflow artifacts &lt;run-id&gt; [path] List a run&#x27;s artifact files, or print one</code></td><td></td></tr><tr><td><code>workflow logs &lt;run-id&gt;</code></td><td>Print or follow a run&#x27;s JSONL transcript</td></tr><tr><td><code>workflow wait &lt;run-id&gt;</code></td><td>Block until the run ends or needs attention</td></tr><tr><td><code>workflow attention [&lt;run-id&gt;] List, count or stream the attention queue, or read the item one run stands for</code></td><td>(defaults to the current project)</td></tr><tr><td><code>workflow attention label &lt;run-id&gt; --occurrence &lt;id&gt;</code></td><td>Set or remove labels on the attention wait a run is paused at</td></tr><tr><td><code>workflow resume &lt;run-id&gt;</code></td><td>Resume a failed or paused run from completed nodes</td></tr><tr><td><code>workflow wake [--watch] [--json] Wake due continuations across this install</code></td><td></td></tr><tr><td><code>workflow signal &lt;full-run-id&gt; Signal and wake an event wait; use --occurrence for an exact match</code></td><td></td></tr><tr><td><code>workflow cancel &lt;run-id&gt;</code></td><td>Stop a running workflow (stops an owning process first)</td></tr><tr><td><code>workflow abandon &lt;run-id&gt;</code></td><td>Mark a run cancelled, stopping a live owner first</td></tr><tr><td><code>workflow end-turn &lt;run-id&gt; Record a request to end stalled tools or reported work</code></td><td></td></tr><tr><td><code>workflow respond &lt;run-id&gt; &lt;decision&gt; [text]</code></td><td>Resolve a paused gate with any of its declared decisions (&#x27;approve&#x27;/&#x27;reject&#x27; are sugar for the dedicated commands)</td></tr><tr><td><code>workflow answer &lt;run-id&gt; --occurrence &lt;id&gt;</code></td><td>Answer a paused attention wait in its declared form</td></tr><tr><td><code>workflow reset-sessions &lt;workflow-name&gt;</code></td><td>Delete persisted sessions for a workflow (omits --scope only with --yes; [--node &lt;id&gt;] [--json])</td></tr><tr><td><code>workflow event emit</code></td><td>Emit a workflow event into a run</td></tr><tr><td><code>workflow test [&lt;name&gt;|&lt;folder&gt;|&lt;path&gt;]</code></td><td>Run declared dry-run fixtures (fixtures/*.stubs.yaml) for a workflow, a workflow folder or pack (by name or directory path); relative paths resolve from the invoking directory before the repository root. With no target, runs every fixture. Never creates a run or contacts a provider; exec-code fixtures execute in a scratch worktree of HEAD</td></tr><tr><td><code>isolation list</code></td><td>List all active worktrees/environments</td></tr><tr><td><code>isolation cleanup [days]</code></td><td>Remove eligible worktrees by inactivity, containers by creation age (default: 7 days)</td></tr><tr><td><code>isolation cleanup --merged Remove environments with branches merged into the base branch</code></td><td></td></tr><tr><td><code>complete &lt;branch&gt; [...]</code></td><td>Remove worktree and local branch; retain remote branch</td></tr><tr><td><code>serve</code></td><td>Start the web UI server (binary installs download server and UI on first run)</td></tr><tr><td><code>skill add [path]</code></td><td>Add archon-cli into .claude/skills and .agents/skills</td></tr><tr><td><code>provider add &lt;id...&gt;</code></td><td>Add maintained providers matching this Archon release (connects your agent CLI or SDK)</td></tr><tr><td><code>plugin add &lt;owner/repo[/path][@tag]&gt;</code></td><td>Add a plugin from GitHub (default: binary plugins the latest release, workflow packs the default branch)</td></tr><tr><td><code>plugin update &lt;id&gt;[@tag]</code></td><td>Reinstall an installed plugin at a tag, or its latest release or default branch</td></tr><tr><td><code>plugin remove &lt;id&gt;</code></td><td>Delete the files an installed plugin wrote</td></tr><tr><td><code>plugin copy &lt;id&gt;</code></td><td>Copy an installed workflow pack into this project&#x27;s .archon/workflows/</td></tr><tr><td><code>plugin list</code></td><td>Show installed plugins with tag and commit</td></tr><tr><td><code>doctor</code></td><td>Verify installed provider diagnostics, DB, and adapters</td></tr><tr><td><code>auth github</code></td><td>Connect your GitHub identity via device flow (multi-user installs)</td></tr><tr><td><code>ai key set &lt;provider&gt;</code></td><td>Connect an AI provider API key (multi-user installs; key read from prompt/stdin)</td></tr><tr><td><code>ai login &lt;provider&gt;</code></td><td>Connect a Claude, ChatGPT/Codex, or Copilot subscription</td></tr><tr><td><code>ai list</code></td><td>List your connected AI provider keys</td></tr><tr><td><code>ai logout &lt;provider&gt;</code></td><td>Disconnect an AI provider key</td></tr><tr><td><code>ai tier set &lt;t&gt; &lt;p&gt; &lt;m&gt;</code></td><td>Set a model tier (small/medium/large) → provider/model [--effort &lt;e&gt;] [--scope user|install]</td></tr><tr><td><code>ai tier list [--json]</code></td><td>Show configured tiers (install + yours) vs built-in defaults</td></tr><tr><td><code>ai tier unset &lt;tier&gt;</code></td><td>Unset a tier override (built-ins: claude/codex only) [--scope user|install]</td></tr><tr><td><code>ai alias set &lt;@n&gt; &lt;p&gt; &lt;m&gt;</code></td><td>Set a @custom model alias [--effort &lt;e&gt;] [--scope user|install]</td></tr><tr><td><code>ai alias list [--json]</code></td><td>Show configured @custom aliases (install + yours)</td></tr><tr><td><code>ai alias unset &lt;@name&gt;</code></td><td>Remove a @custom alias [--scope user|install]</td></tr><tr><td><code>ai capacity [--json]</code></td><td>Show provider attempts holding concurrency.providers capacity</td></tr><tr><td><code>ai capacity release &lt;id&gt;</code></td><td>Release a held attempt whose owner process you verified is gone</td></tr><tr><td><code>ai default &lt;p&gt; [&lt;model&gt;]</code></td><td>Set the default assistant (+ chat model) [--scope user|install]</td></tr><tr><td><code>telemetry status</code></td><td>Show anonymous telemetry state (enabled, reason, ID, host)</td></tr><tr><td><code>telemetry reset</code></td><td>Rotate the anonymous install UUID</td></tr><tr><td><code>telemetry no-match</code></td><td>Record an agent decision that no workflow fits</td></tr><tr><td><code>validate workflows [name]</code></td><td>Validate workflow definitions and their references</td></tr><tr><td><code>validate commands [name]</code></td><td>Validate command files</td></tr><tr><td><code>version, --version, -V</code></td><td>Show version info (also -v when used alone)</td></tr><tr><td><code>help</code></td><td>Show this help message</td></tr></tbody></table></div></div><p style="margin-top:14px"><b>Options</b> (they apply to the commands named in each line):</p><div class="flist"><div class="gwrap"><table class="kv"><thead><tr><th>Option</th><th>What it does</th></tr></thead><tbody><tr><td><code>--chat-project-id &lt;id&gt;</code></td><td>Confine chat workflow commands to a registered project ID</td></tr><tr><td><code>--cwd &lt;path&gt;</code></td><td>Override working directory (default: current directory)</td></tr><tr><td><code>--project &lt;id|name&gt;</code></td><td>Bind to a registered repository (see project list). Source/config come from --cwd; isolated execution uses the registered checkout. Use --no-worktree to execute in --cwd. Cannot combine with --folder, --base-branch, --resume, --dry-run.</td></tr><tr><td><code>--branch, -b &lt;name&gt;</code></td><td>Create worktree for branch (or reuse existing)</td></tr><tr><td><code>--from, --from-branch &lt;name&gt; Create new branch from specific start point</code></td><td></td></tr><tr><td><code>--base-branch &lt;name&gt;</code></td><td>Initial repository registration only; omit to follow the remote default. Use --base for a run override.</td></tr><tr><td><code>--base &lt;branch&gt;</code></td><td>Per-dispatch base override for epic slices (worktree cut-from + PR target)</td></tr><tr><td><code>--workflow-source &lt;path&gt;</code></td><td>Read the workflow, its commands and scripts from this directory instead of --cwd (which stays the workspace the run acts on)</td></tr><tr><td><code>--no-worktree</code></td><td>Run on branch directly without worktree isolation</td></tr><tr><td><code>--folder</code></td><td>Register the current directory (with or without git) as a folder project and run in place</td></tr><tr><td><code>--container</code></td><td>Run a folder project in container isolation</td></tr><tr><td><code>--input &lt;name&gt;=&lt;value&gt;</code></td><td>Supply a declared workflow input; repeat per input (mutually exclusive with --resume)</td></tr><tr><td><code>--model &lt;name&gt;=&lt;spec&gt;</code></td><td>Rebind small/medium/large or @alias for one run; repeat per binding</td></tr><tr><td><code>--config &lt;path&gt;</code></td><td>Load a sparse YAML config layer for one fresh workflow run</td></tr><tr><td><code>--config-from-run &lt;run-id&gt; Start a fresh run with the run config another run was started with</code></td><td></td></tr><tr><td><code>--resume</code></td><td>Resume the newest eligible failed, paused, or stale running run of this workflow Running is stale when activity is missing or older than one day; verify its owner is gone first. Mutually exclusive with --branch</td></tr><tr><td><code>--adopt &lt;run-id&gt;</code></td><td>Start a new run adopting a terminal run&#x27;s worktree/branch + artifacts ($ADOPTED_RUN_DIR)</td></tr><tr><td><code>--supersedes &lt;run-id&gt;</code></td><td>Record this fresh run as replacing the prior run&#x27;s open item (no lane inheritance)</td></tr><tr><td><code>--dry-run</code></td><td>Simulate workflow DAG control flow without creating a run or contacting a provider</td></tr><tr><td><code>--stubs &lt;path&gt;</code></td><td>YAML node-output map for --dry-run</td></tr><tr><td><code>--stubs-init &lt;path&gt;</code></td><td>Write a complete dry-run stub scaffold and exit</td></tr><tr><td><code>--default-stubs</code></td><td>Fill missing reached nodes with validated placeholders during --dry-run</td></tr><tr><td><code>--exec-code</code></td><td>Execute trusted bash/script nodes during --dry-run (default: require stubs)</td></tr><tr><td><code>--pause-at-gates</code></td><td>Stop a dry-run at approval gates instead of auto-approving</td></tr><tr><td><code>--providers &lt;ids&gt;</code></td><td>Add comma-separated maintained providers, skipping the setup provider question</td></tr><tr><td><code>--spawn</code></td><td>Open setup wizard in a new terminal window (for setup command)</td></tr><tr><td><code>--quiet, -q</code></td><td>Log warnings and errors only (the default except for serve)</td></tr><tr><td><code>--verbose, -v</code></td><td>Show debug-level logs (on stderr; on stdout for serve)</td></tr><tr><td><code>--json</code></td><td>Output machine-readable JSON (list/status/get/artifacts/wait/attention/runs/approve/reject/respond/answer/cancel/abandon/resume, project list)</td></tr><tr><td><code>--events</code></td><td>For verbose JSON status/get: output raw event rows instead of node summaries</td></tr><tr><td><code>--occurrence &lt;id&gt;</code></td><td>For &#x27;workflow approve/reject/respond/answer/attention label&#x27;: refuse the write unless the run is still paused at this occurrence (the &#x27;occurrence&#x27; that &#x27;workflow wait --json&#x27; reports; required by answer and attention label)</td></tr><tr><td><code>--detach</code></td><td>Run &#x27;workflow run&#x27;/&#x27;approve&#x27;/&#x27;reject&#x27;/&#x27;respond&#x27;/&#x27;resume&#x27; in a detached background child (resume returns after acceptance, before completion)</td></tr><tr><td><code>--all</code></td><td>For &#x27;workflow status/runs&#x27;: list across all projects (ignore cwd scope)</td></tr><tr><td><code>--status &lt;status&gt;</code></td><td>For &#x27;workflow runs&#x27;: filter to one status (running, completed, failed, ...)</td></tr><tr><td><code>--open</code></td><td>For &#x27;workflow runs&#x27;: the open-work inbox — failed runs nothing has adopted or superseded</td></tr><tr><td><code>--limit &lt;n&gt;</code></td><td>For &#x27;workflow runs&#x27;: max rows (default 20)</td></tr><tr><td><code>--timeout &lt;seconds&gt;</code></td><td>For &#x27;workflow wait&#x27;: give up after N seconds (default: wait indefinitely)</td></tr><tr><td><code>--follow</code></td><td>For &#x27;workflow logs&#x27;: stream appended rows until the run ends</td></tr><tr><td><code>--format &lt;jsonl|text&gt;</code></td><td>For &#x27;workflow logs&#x27;: jsonl (default) prints the exact transcript; text renders it as progress lines for a human</td></tr><tr><td><code>--conversation-id &lt;id&gt;</code></td><td>Correlation id for the run&#x27;s messages. It creates no conversation and no persist_session scope</td></tr><tr><td><code>--port &lt;port&gt;</code></td><td>Override server port for &#x27;serve&#x27; (default: 3090)</td></tr><tr><td><code>--download-only</code></td><td>Download server and web UI without starting the server</td></tr><tr><td><code>--force</code></td><td>For &#x27;setup&#x27;: overwrite existing values instead of merging For &#x27;complete&#x27;: remove even when safety checks block it</td></tr></tbody></table></div></div>
+</section>
+<section class="card" id="real">
+  <h2>Where this comes from</h2>
+<p>Every Archon output on this page is real, from Archon 0.13.2 on Windows (3 Nov 2026), captured by <code>tools/capture_cli.py</code>: <code>archon help</code>, <code>workflow run --help</code>, <code>doctor</code>, <code>workflow list --json</code> and each bundled workflow's <code>--full</code> description, and a dry run. The pause commands are from the course's real run. Items marked <span class="lbl lbl-doc">documented</span> are from the Archon docs at the v0.13.2 tag and were not run here. The cast is fictional.</p>
+<p style="margin:0;font-size:.9rem;color:var(--ink-3)">Docs: <a href="https://archon.diy/reference/workflow-language/">workflow language</a> · <a href="https://archon.diy/reference/cli/">CLI</a> · <a href="https://archon.diy/guides/approval-nodes/">waits</a> · <a href="https://archon.diy/reference/sdlc-workflows/">sdlc workflows</a> · <a href="https://github.com/coleam00/Archon">github.com/coleam00/Archon</a>.</p>
+</section>
+
+</main>
+</div>
+
+<footer class="foot">Archon introduction · Archon 0.13.2 · next: <a href="archon-workspace-setup.html">set up Archon for a repo</a> · <a href="archon-concepts-explained.html">concepts</a> · <a href="index.html">all course pages</a> · <a href="#top">Back to top</a></footer>
+<script>
+(function () {
+  'use strict';
+  var root = document.documentElement, toggle = document.getElementById('themeToggle');
+  function applyTheme(t) { if (t === 'dark') root.setAttribute('data-theme', 'dark'); else root.removeAttribute('data-theme'); toggle.textContent = t === 'dark' ? 'Light mode' : 'Dark mode'; toggle.setAttribute('aria-pressed', t === 'dark' ? 'true' : 'false'); }
+  var saved = null; try { saved = localStorage.getItem('arc-theme'); } catch (e) {}
+  applyTheme(saved || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+  toggle.addEventListener('click', function () { var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'; applyTheme(next); try { localStorage.setItem('arc-theme', next); } catch (e) {} });
+
+  var osBtn = document.getElementById('osToggle');
+  function applyOs(o) { if (o === 'mac') root.setAttribute('data-os', 'mac'); else root.removeAttribute('data-os'); osBtn.textContent = o === 'mac' ? 'macOS' : 'Windows'; osBtn.setAttribute('aria-label', 'Commands shown for ' + osBtn.textContent + '; click to switch'); }
+  var savedOs = null; try { savedOs = localStorage.getItem('arc-os'); } catch (e) {}
+  applyOs(savedOs || (/Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent) ? 'mac' : 'win'));
+  osBtn.addEventListener('click', function () { var next = root.getAttribute('data-os') === 'mac' ? 'win' : 'mac'; applyOs(next); try { localStorage.setItem('arc-os', next); } catch (e) {} });
+
+  /* icons on the boxes */
+  var ICON = {
+    you: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="6" width="19" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M8 14h8"/></svg>',
+    claude: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>',
+    disk: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>',
+    plain: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a7 7 0 0 0-4 12.7V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.3A7 7 0 0 0 12 2z"/><path d="M9 21h6"/></svg>'
+  };
+  ['you', 'claude', 'disk'].forEach(function (k) {
+    document.querySelectorAll('.box.' + k + ' > .box__bar').forEach(function (bar) { if (!bar.querySelector('svg')) bar.insertAdjacentHTML('afterbegin', ICON[k]); });
+  });
+  document.querySelectorAll('.plain').forEach(function (p) { if (!p.querySelector('svg')) p.insertAdjacentHTML('afterbegin', ICON.plain); });
+
+  /* tabs */
+  document.querySelectorAll('.tabs').forEach(function (tabs) {
+    var host = tabs.parentElement, btns = Array.prototype.slice.call(tabs.querySelectorAll('.tab'));
+    btns.forEach(function (b) { b.addEventListener('click', function () {
+      btns.forEach(function (x) { x.setAttribute('aria-selected', x === b ? 'true' : 'false'); });
+      Array.prototype.forEach.call(host.querySelectorAll(':scope > .pane'), function (p) { p.classList.toggle('is-on', p.id === b.getAttribute('data-pane')); });
+    }); });
+  });
+
+  /* copy buttons */
+  function copyText(btn, text) {
+    var done = function () { var old = btn.textContent; btn.textContent = 'copied'; setTimeout(function () { btn.textContent = old; }, 1200); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, done); else done();
+  }
+  document.querySelectorAll('.you .copy').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var pre = Array.prototype.slice.call(btn.parentElement.querySelectorAll('pre')).filter(function (x) { return x.offsetParent !== null; })[0]; if (!pre) return;
+      var clone = pre.cloneNode(true); clone.querySelectorAll('.c').forEach(function (c) { c.remove(); });
+      copyText(btn, clone.textContent.replace(/\n{2,}/g, '\n').trim());
+    });
+  });
+  document.querySelectorAll('.cmd .copy').forEach(function (btn) {
+    btn.addEventListener('click', function () { var c = btn.parentElement.querySelector('code[data-copy]'); if (c) copyText(btn, c.textContent.trim()); });
+  });
+
+  /* syntax highlighting for the embedded files */
+  function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  var KW = {
+    java: 'package import public private protected static final class record interface enum extends implements new return if else for while do try catch finally throw throws this super void int long boolean double float char byte short var null true false instanceof switch case default break continue',
+    bash: 'cd set exit echo'
+  };
+  function kw(list) { return new RegExp('(?:' + list.trim().split(/\s+/).join('|') + ')(?![\\w$])', 'y'); }
+  function rules(lang) {
+    switch (lang) {
+      case 'java': return [['c', /\/\/.*/y], ['c', /\/\*[\s\S]*?\*\//y], ['s', /"(?:[^"\\\n]|\\.)*"/y], ['a', /@[A-Za-z_][\w.]*/y], ['n', /(?<![\w.])\d+(?:\.\d+)?[LlFfDd]?(?![\w])/y], ['k', kw(KW.java)]];
+      case 'jsonl': case 'json': return [['k', /"(?:[^"\\]|\\.)*"(?=\s*:)/y], ['s', /"(?:[^"\\]|\\.)*"/y], ['n', /(?<![\w.])-?\d+(?:\.\d+)?(?![\w])|\b(?:true|false|null)\b/y]];
+      case 'md': return [['k', /^#{1,6} .*$/my], ['s', /`[^`\n]+`/y], ['a', /\*\*[^*\n]+\*\*/y], ['c', /^\|[-:| ]+\|$/my], ['p', /\|/y]];
+      case 'yaml': return [['c', /#.*/y], ['k', /^[ \t]*[\w.-]+(?=:)/my], ['s', /"(?:[^"\\\n]|\\.)*"|'(?:[^'\n])*'/y], ['n', /(?<![\w.])-?\d+(?:\.\d+)?(?![\w])|\b(?:true|false)\b/y]];
+      case 'bash': return [['c', /#.*/y], ['s', /"(?:[^"\\\n]|\\.)*"/y], ['n', /\$\{[^}]*\}|\$[\w#@?]+|\$\(.*?\)/y], ['k', kw(KW.bash)]];
+      case 'xml': return [['c', /<!--[\s\S]*?-->/y], ['c', /<\?[\s\S]*?\?>/y], ['t', /<\/?[\w:.-]+|\/?>/y], ['s', /"(?:[^"\\\n]|\\.)*"/y]];
+      default: return [];
+    }
+  }
+  function highlight(src, lang) {
+    var R = rules(lang), out = '', i = 0, n = src.length;
+    while (i < n) {
+      var hit = null, cls = '';
+      for (var k = 0; k < R.length; k++) { R[k][1].lastIndex = i; var m = R[k][1].exec(src); if (m && m.index === i && m[0].length) { hit = m[0]; cls = R[k][0]; break; } }
+      if (hit) { out += '<span class="tok-' + cls + '">' + esc(hit) + '</span>'; i += hit.length; }
+      else {
+        var j = i + 1;
+        if (src[i] !== '\n') {
+          while (j < n && !/[\w"'`#@\/\-$*{,\n|<>]/.test(src[j])) j++;
+          if (/\w/.test(src[i])) { j = i; while (j < n && /[\w$]/.test(src[j])) j++; }
+        }
+        out += esc(src.slice(i, j)); i = j;
+      }
+    }
+    return out;
+  }
+  function highlightDiff(src, sub) {
+    return src.split('\n').map(function (line, idx, arr) {
+      var nl = idx < arr.length - 1 ? '\n' : '';
+      if (/^(@@|---|\+\+\+)/.test(line)) return '<span class="tok-c">' + esc(line) + '</span>' + nl;
+      if (line[0] === '+' || line[0] === '-') return '<span class="' + (line[0] === '+' ? 'ln-add' : 'ln-del') + '">' + esc(line[0]) + highlight(line.slice(1), sub) + '</span>';
+      return highlight(line, sub) + nl;
+    }).join('');
+  }
+  document.querySelectorAll('textarea.src').forEach(function (ta) {
+    var lang = ta.getAttribute('data-lang') || '', pre = document.createElement('pre');
+    pre.setAttribute('tabindex', '0');
+    pre.innerHTML = lang === 'diff' ? highlightDiff(ta.value, ta.getAttribute('data-sub') || 'java') : highlight(ta.value, lang);
+    if (/^(json|jsonl|md|yaml|bash|text)$/.test(lang)) ta.parentNode.classList.add('code--wrap');
+    ta.parentNode.insertBefore(pre, ta.nextSibling);
+  });
+
+  /* scroll-spy: rail, progress */
+  var steps = Array.prototype.slice.call(document.querySelectorAll('.step[data-step]'));
+  var links = {}; document.querySelectorAll('.rl').forEach(function (a) { links[a.getAttribute('data-step')] = a; });
+  var progText = document.getElementById('progText'), progBar = document.getElementById('progBar'), progPhase = document.getElementById('progPhase'), TOTAL = steps.length, current = -1;
+  function setCurrent(idx) {
+    if (idx === current) return; current = idx;
+    steps.forEach(function (s, i) {
+      var a = links[s.getAttribute('data-step')]; if (!a) return;
+      a.classList.toggle('is-on', i === idx); a.classList.toggle('is-done', i < idx);
+      if (i === idx) a.setAttribute('aria-current', 'step'); else a.removeAttribute('aria-current');
+    });
+    if (idx < 0) { progText.textContent = 'Step 0 of ' + TOTAL; progBar.style.width = '0'; progPhase.textContent = 'Start at the top'; return; }
+    var s = steps[idx]; progText.textContent = 'Step ' + s.getAttribute('data-step') + ' of ' + TOTAL; progBar.style.width = ((idx + 1) / TOTAL * 100) + '%';
+    var lk = links[s.getAttribute('data-step')]; progPhase.textContent = s.getAttribute('data-phase') + ' · ' + (lk ? lk.querySelector('span').textContent : '');
+    var a = links[s.getAttribute('data-step')]; if (a && window.innerWidth <= 900) { var r = a.getBoundingClientRect(), p = a.parentElement.getBoundingClientRect(); if (r.left < p.left || r.right > p.right) a.scrollIntoView({ block: 'nearest', inline: 'center' }); }
+  }
+  function spy() {
+    var line = 130, idx = -1;
+    for (var i = 0; i < steps.length; i++) { if (steps[i].getBoundingClientRect().top <= line) idx = i; else break; }
+    setCurrent(idx);
+  }
+  var ticking = false;
+  window.addEventListener('scroll', function () { if (!ticking) { ticking = true; requestAnimationFrame(function () { spy(); ticking = false; }); } }, { passive: true });
+  window.addEventListener('resize', spy);
+  spy();
+})();
+</script>
+</body>
+</html>

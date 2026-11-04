@@ -1,0 +1,3 @@
+# verify.sh runs under bash in every Archon worktree: keep it LF even where git converts to CRLF.
+*.sh text eol=lf
+*.cmd text eol=crlf

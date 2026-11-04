@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: priorauth-api
+server:
+  port: 8080
+priorauth:
+  aging:
+    threshold-days: 5

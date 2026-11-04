@@ -1,0 +1,155 @@
+name: request-to-pr
+description: >-
+  Take one request from docs-in/ to a pushed branch: scan the repo, ask the questions a person must
+  answer, write the requirements (revised until approved), plan, implement until ./scripts/verify.sh
+  passes, review, and push after a final approval. Use for one small change to priorauth-api.
+  NOT for: bugs whose cause is unknown (use archon-investigate first).
+
+nodes:
+  # ── Plan: read before anything is decided ─────────────────────────────
+  - id: scan
+    command: scan
+    mutates_checkout: false
+
+  - id: questions
+    depends_on: [scan]
+    mutates_checkout: false
+    prompt: |
+      The request: $USER_MESSAGE
+      The scan of the repo is in $ARTIFACTS_DIR/scan.md.
+
+      List only the questions a person must answer before requirements can be written
+      (rules, numbers, names, data sources). Number them; give each lettered options
+      (A, B, C, X = other) and say which you would pick and why. Write them to
+      $ARTIFACTS_DIR/questions.md and return the same text.
+    output_format:
+      type: object
+      properties:
+        questions: { type: string }
+      required: [questions]
+      additionalProperties: false
+
+  - id: answer
+    depends_on: [questions]
+    wait:
+      attention: |
+        Answer these before requirements are written (one message, e.g. "1 A: ... 2 B: ..."):
+
+        $questions.output.questions
+
+  - id: requirements
+    depends_on: [answer]
+    loop_group:
+      max_iterations: 3
+      until_bash: 'decision=$review-requirements.output.decision; [ "$decision" = "approve" ]'
+      nodes:
+        - id: write-requirements
+          mutates_checkout: false
+          prompt: |
+            The request: $USER_MESSAGE
+            Scan: $ARTIFACTS_DIR/scan.md   Questions: $ARTIFACTS_DIR/questions.md
+            The person's answers: $answer.output.text
+            Changes asked for on the previous version, if any: $LOOP_PREV.review-requirements.output.text
+
+            Write (or revise) $ARTIFACTS_DIR/requirements.md: numbered functional requirements
+            (FR1...), non-functional ones (NFR1...), assumptions (A-01...), and a worked check on
+            the sample data as of 2026-10-13. Return a short summary of what it says, and of what
+            changed if this is a revision.
+        - id: review-requirements
+          depends_on: [write-requirements]
+          wait:
+            form: approval
+            attention: |
+              Approve the requirements, or reject with the changes you want.
+
+              $write-requirements.output
+
+  # ── Build: plan, approve, implement until the checks pass ─────────────
+  - id: plan
+    depends_on: [requirements]
+    mutates_checkout: false
+    prompt: |
+      Read $ARTIFACTS_DIR/requirements.md and the code. Write $ARTIFACTS_DIR/plan.md:
+      the files to add or change, the tests to add, and the order. Follow CLAUDE.md.
+    output_format:
+      type: object
+      properties:
+        summary: { type: string }
+        files: { type: array, items: { type: string } }
+        tests: { type: string }
+      required: [summary, files, tests]
+      additionalProperties: false
+
+  - id: approve-plan
+    depends_on: [plan]
+    wait:
+      form: approval
+      attention: |
+        Approve the code plan before any code is written.
+
+        $plan.output.summary
+        Tests: $plan.output.tests
+
+  - id: stop-plan
+    depends_on: [approve-plan]
+    when: "$approve-plan.output.decision == 'reject'"
+    cancel: The code plan was rejected.
+
+  - id: implement
+    depends_on: [approve-plan]
+    when: "$approve-plan.output.decision == 'approve'"
+    loop:
+      command: implement
+      until_bash: ./scripts/verify.sh
+      max_iterations: 3
+      fresh_context: true
+
+  - id: checks
+    depends_on: [implement]
+    bash: |
+      ./scripts/verify.sh && echo "verify: passed"
+      git log --oneline "$BASE_BRANCH"..HEAD
+      git diff --stat "$BASE_BRANCH"...HEAD
+
+  # ── Review: a second reader, then a person ────────────────────────────
+  - id: review
+    depends_on: [checks]
+    mutates_checkout: false
+    prompt: |
+      Review the change on this branch against $ARTIFACTS_DIR/requirements.md and
+      $ARTIFACTS_DIR/plan.md (git diff $BASE_BRANCH...HEAD). Do not edit anything.
+      Check each FR has code and a test, and look for anything the plan did not name.
+      Write $ARTIFACTS_DIR/review.md.
+    output_format:
+      type: object
+      properties:
+        verdict: { type: string, enum: [READY, NOT-READY] }
+        findings: { type: string }
+      required: [verdict, findings]
+      additionalProperties: false
+
+  - id: approve-change
+    depends_on: [review]
+    wait:
+      form: approval
+      attention: |
+        Review verdict: $review.output.verdict
+        $review.output.findings
+
+        Checks:
+        $checks.output
+
+        Approve to push the branch, or reject to stop.
+
+  - id: stop-change
+    depends_on: [approve-change]
+    when: "$approve-change.output.decision == 'reject'"
+    cancel: The change was rejected at review.
+
+  # ── Ship ──────────────────────────────────────────────────────────────
+  - id: push
+    depends_on: [approve-change]
+    when: "$approve-change.output.decision == 'approve'"
+    bash: |
+      git push -u origin HEAD 2>&1
+      echo "Open the PR: $(git rev-parse --abbrev-ref HEAD) -> $BASE_BRANCH"

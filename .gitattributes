@@ -1,0 +1,5 @@
+# Served as-is by the course sites and downloaded by learners: keep LF everywhere,
+# so verify.sh runs on macOS and the spec keeps the fingerprint the page quotes.
+* text=auto eol=lf
+# Windows batch files want CRLF.
+*.cmd text eol=crlf

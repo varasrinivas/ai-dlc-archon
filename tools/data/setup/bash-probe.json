@@ -1,0 +1,8 @@
+{
+ "date": "2026-11-03",
+ "why": "Git for Windows on this machine is at D:\\Program Files\\Git, not a location Archon autodetects. A one-node workflow (bash: echo hello from $(uname -s)) was run with --no-worktree twice: without and with ARCHON_BASH_PATH.",
+ "workflow": "name: bash-probe\ndescription: one bash node\nnodes:\n  - id: hello\n    bash: echo hello from $(uname -s)\n",
+ "without": "[hello] Started\n[hello] Failed: Bash node 'hello' failed: bash executable not found at 'C:\\Program Files\\Git\\bin\\bash.exe'. Set ARCHON_BASH_PATH if Git Bash is installed elsewhere (e.g. user-scope installer at %LOCALAPPDATA%\\Programs\\Git\\bin\\bash.exe).\nError: Workflow failed: Workflow did not complete successfully",
+ "with": "Workflow completed successfully.",
+ "validate_catches_it": false
+}

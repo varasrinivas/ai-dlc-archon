@@ -1,0 +1,5 @@
+# Archon settings for this repo (committed; every clone and every worktree reads them).
+assistant: claude          # workflows use Claude Code unless a workflow or node says otherwise
+
+worktree:
+  baseBranch: main         # each run's branch is cut from main

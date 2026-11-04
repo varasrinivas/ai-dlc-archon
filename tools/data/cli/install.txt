@@ -1,0 +1,36 @@
+
+  +---------------------------------------+
+  |      Archon CLI Installer             |
+  |      Windows (PowerShell)             |
+  +---------------------------------------+
+
+[INFO]  Detecting architecture...
+[OK]    Architecture: x64
+[INFO]  Version     : latest
+[INFO]  Download URL: https://github.com/coleam00/Archon/releases/latest/download/archon-windows-x64.exe
+[INFO]  Downloading binary...
+[OK]    Downloaded successfully
+[INFO]  Verifying checksum...
+[OK]    Checksum verified
+[INFO]  Creating install directory: C:\Users\you\.archon\bin
+[INFO]  Installing to C:\Users\you\.archon\bin\archon.exe...
+[OK]    Installed to C:\Users\you\.archon\bin\archon.exe
+[OK]    Added C:\Users\you\.archon\bin to your user PATH
+[INFO]  Restart your terminal (or open a new one) for the PATH change to take effect
+
+[INFO]  Verifying installation...
+Archon CLI v0.13.2   Platform: win32-x64   Build: binary   Database: sqlite   Git commit: b8d01782
+[OK]    Installation complete!
+[INFO]  Adding a provider connects Archon to your agent CLI or SDK; it does not install that CLI.
+[INFO]  Adding providers: claude
+Installed coleam00/Archon/plugins/provider-claude from github.com/coleam00/Archon v0.13.2 (commit b8d01782fac602231a95685dabf42cc0edb0f1c1)
+  C:\Users\you\.archon\plugins\archon-provider-claude.exe  sha256 3ee501bc09e33ac5118d2c5e994886f615c21e5719a730f2496cdb45ead716f4
+  This runs code published by coleam00.
+[OK]    Providers installed: claude
+
+  Get started:
+    archon workflow list
+    archon workflow run archon-investigate "Why does the test suite fail?"
+
+  Note: Open a new terminal window so the updated PATH takes effect.
+

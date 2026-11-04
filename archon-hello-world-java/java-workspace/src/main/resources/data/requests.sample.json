@@ -1,0 +1,6 @@
+[
+  { "id": "PA-10231", "tenantId": "TX-01", "memberId": "M-88213", "service": "MRI lumbar spine",     "status": "PENDED",    "receivedAt": "2026-10-01" },
+  { "id": "PA-10244", "tenantId": "TX-01", "memberId": "M-57120", "service": "Physical therapy x12", "status": "IN_REVIEW", "receivedAt": "2026-10-06" },
+  { "id": "PA-10250", "tenantId": "TX-01", "memberId": "M-10934", "service": "CT abdomen",           "status": "APPROVED",  "receivedAt": "2026-10-07" },
+  { "id": "PA-10263", "tenantId": "TX-01", "memberId": "M-73301", "service": "CT abdomen",           "status": "PENDED",    "receivedAt": "2026-10-09" }
+]
