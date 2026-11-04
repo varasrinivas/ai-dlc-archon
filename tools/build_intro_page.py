@@ -169,9 +169,9 @@ FOLDER_TREE = """priorauth-workspace/                 <b>the root: a folder proj
 ├── <span class="n">.archon/workflows/…</span>              the team's workflows, read from the root
 ├── <span class="n">CLAUDE.md</span>                        the rules for work across both repos
 ├── <span class="n">docs-in/request.md</span>               the request, named in the run message
-├── priorauth-api/                   repo 1, a git repo of its own
-└── reviewer-ui/                     repo 2, a git repo of its own
-                                     <span class="m">the agent branches, commits and pushes in each</span>"""
+├── priorauth-aging/                 repo 1: the aging library, a git repo of its own
+└── priorauth-api/                   repo 2: the API, depends on the library
+                                     <span class="m">the agent branches and commits in each</span>"""
 multirepo_facts(CLI)
 _ISO = next(s for s in RUN if s["label"] == "isolation-list")
 assert "request-age/age-api" in _ISO["stdout"], "the run's worktree branch"
@@ -189,14 +189,14 @@ S.append(step(7, "The repo", "--build", "the files", "Files in a repo, and in ~/
               + note("Workflow commands need a git repository: outside one, <code>archon workflow list</code> says <code>" + x(CLI["outside-repo"]["out"].strip().splitlines()[0]) + "</code> (or register a plain folder with <code>--folder</code>).")
               + f'<h3 style="margin:22px 0 8px">A feature across two repos? A folder project {DOC}</h3>'
               + plain("This course's change touches one repo, so the team's files sit in that repo. When one feature spans two repos, put both under one root and give the root the <code>.archon/</code>: Archon calls that a <b>folder project</b>, and it plays the part of the AI-DLC workspace.")
-              + disk(FOLDER_TREE, "A folder project (from the Archon docs; not run in this course)")
+              + disk(FOLDER_TREE, "A folder project: the layout of the course's two-repo run")
               + table(["", "One repo (this course)", "A folder project"], [
                   ["Register", "the first run in the repo", "the first run with <code>--folder</code> from the root; later runs need no flag"],
                   ["The agent works in", "the run's worktree, on its own branch", "the root, in place: it sees every repo under it"],
                   ["Branches and the PR", "Archon makes the branch; the workflow pushes it", "the agent's job, in each repo (Archon makes no worktree or branch; <code>--branch</code> is rejected)"],
                   ["Isolation", "a worktree per run", "none, or <code>--container</code>: a Docker overlay, with an approval before writes reach the folders"],
                   ["Runs are stored in", "<code>~/.archon/workspaces/_local/priorauth-api/</code>", "<code>~/.archon/workspaces/_folder/&lt;slug&gt;/</code>"]], "kv")
-              + note("Archon does not give one run a worktree in each of two repos. The docs' advice: keep the root as a folder project for cross-repo work, and let each repo also be its own project (run from inside it) for a change that touches only that repo. Workflows can also live outside every repo: <code>~/.archon/workflows/</code> appear in all your projects (yours, not the team's), and <code>--workflow-source &lt;dir&gt;</code> reads the workflow from one folder and runs it against <code>--cwd</code>. All from the Archon " + VERSION + " docs and <code>workflow run --help</code>; this course ran only the one-repo case.")))
+              + note("Archon does not give one run a worktree in each of two repos. The docs' advice: keep the root as a folder project for cross-repo work, and let each repo also be its own project (run from inside it) for a change that touches only that repo. Workflows can also live outside every repo: <code>~/.archon/workflows/</code> appear in all your projects (yours, not the team's), and <code>--workflow-source &lt;dir&gt;</code> reads the workflow from one folder and runs it against <code>--cwd</code>. From the Archon " + VERSION + " docs and <code>workflow run --help</code>. The course ran one: <a href='archon-hello-world-java/archon-two-repos-run.html'>one bug fixed across two repos</a>, a real run with every command (not <code>--container</code>).")))
 
 FIELDS = [["<code>name</code>, <code>description</code>, <code>nodes</code>", "required. The description is what <code>workflow list</code> shows and what chat reads to pick a workflow: say when to use it and when not"],
           ["<code>provider</code>, <code>model</code>, <code>effort</code>", "defaults for every AI node (a node can override)"],

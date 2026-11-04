@@ -1,0 +1,233 @@
+[
+ {
+  "label": "starter",
+  "cmd": "git clone -q https://github.com/varasrinivas/aidlc-priorauth-api priorauth-api",
+  "sh": false,
+  "cwd": "C:\\work\\archon-multirepo\\build",
+  "start": "2026-11-04T13:12:39",
+  "seconds": 1.4,
+  "exit": 0,
+  "stdout": "",
+  "stderr": ""
+ },
+ {
+  "label": "starter-v110",
+  "cmd": "git switch -q -C main v1.1.0 && git remote remove origin && git tag | xargs git tag -d >/dev/null && git log --oneline -1",
+  "sh": true,
+  "cwd": "C:\\work\\archon-multirepo\\build\\priorauth-api",
+  "start": "2026-11-04T13:12:41",
+  "seconds": 0.4,
+  "exit": 0,
+  "stdout": "49fe266 Merge pull request #58 from acme-health/request-age/u1-age-api\n",
+  "stderr": ""
+ },
+ {
+  "label": "starter-files",
+  "cmd": "git ls-files",
+  "sh": false,
+  "cwd": "C:\\work\\archon-multirepo\\build\\priorauth-api",
+  "start": "2026-11-04T13:12:41",
+  "seconds": 0.0,
+  "exit": 0,
+  "stdout": ".gitignore\nREADME.md\npom.xml\nsrc/main/java/com/acmehealth/priorauth/PriorAuthApiApplication.java\nsrc/main/java/com/acmehealth/priorauth/aging/AgeBadge.java\nsrc/main/java/com/acmehealth/priorauth/aging/BusinessDays.java\nsrc/main/java/com/acmehealth/priorauth/aging/HolidayCalendar.java\nsrc/main/java/com/acmehealth/priorauth/api/PendingRequestResponse.java\nsrc/main/java/com/acmehealth/priorauth/api/PendingRequestsController.java\nsrc/main/java/com/acmehealth/priorauth/model/PriorAuthRequest.java\nsrc/main/java/com/acmehealth/priorauth/store/RequestStore.java\nsrc/main/resources/application.yml\nsrc/main/resources/data/holidays-TX-01-2026.json\nsrc/main/resources/data/requests.sample.json\nsrc/test/java/com/acmehealth/priorauth/aging/AgeBadgeTest.java\nsrc/test/java/com/acmehealth/priorauth/aging/BusinessDaysTest.java\nsrc/test/java/com/acmehealth/priorauth/api/PendingRequestsControllerTest.java\nsrc/test/java/com/acmehealth/priorauth/store/RequestStoreTest.java\n",
+  "stderr": ""
+ },
+ {
+  "label": "aging-repo",
+  "cmd": "git init -q -b main && git add -A && git -c user.name='Meena Iyer' -c user.email=meena@acme-health.example commit -q -m 'priorauth-aging 1.0.0: the aging package, split from priorauth-api 1.1.0' && git tag v1.0.0 && git log --oneline",
+  "sh": true,
+  "cwd": "C:\\work\\archon-multirepo\\build\\priorauth-aging",
+  "start": "2026-11-04T13:12:41",
+  "seconds": 0.5,
+  "exit": 0,
+  "stdout": "f6153ee priorauth-aging 1.0.0: the aging package, split from priorauth-api 1.1.0\n",
+  "stderr": "warning: in the working copy of 'README.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'pom.xml', LF will be replaced by CRLF the next time Git touches it\n"
+ },
+ {
+  "label": "api-split",
+  "cmd": "git rm -q src/main/java/com/acmehealth/priorauth/aging/AgeBadge.java src/main/java/com/acmehealth/priorauth/aging/BusinessDays.java src/main/java/com/acmehealth/priorauth/aging/HolidayCalendar.java src/main/resources/data/holidays-TX-01-2026.json src/test/java/com/acmehealth/priorauth/aging/AgeBadgeTest.java src/test/java/com/acmehealth/priorauth/aging/BusinessDaysTest.java",
+  "sh": false,
+  "cwd": "C:\\work\\archon-multirepo\\build\\priorauth-api",
+  "start": "2026-11-04T13:12:42",
+  "seconds": 0.1,
+  "exit": 0,
+  "stdout": "",
+  "stderr": ""
+ },
+ {
+  "label": "api-repo",
+  "cmd": "git add pom.xml && git -c user.name='Meena Iyer' -c user.email=meena@acme-health.example commit -q -m 'Move request aging to the priorauth-aging library (1.0.0); depend on it' && git tag v1.2.0 && git log --oneline -3",
+  "sh": true,
+  "cwd": "C:\\work\\archon-multirepo\\build\\priorauth-api",
+  "start": "2026-11-04T13:12:42",
+  "seconds": 0.4,
+  "exit": 0,
+  "stdout": "c2dc5d4 Move request aging to the priorauth-aging library (1.0.0); depend on it\n49fe266 Merge pull request #58 from acme-health/request-age/u1-age-api\nb477c4e request age and over-limit flag on the pending list (intent 261013-request-age-api, U1)\n",
+  "stderr": "warning: in the working copy of 'pom.xml', LF will be replaced by CRLF the next time Git touches it\n"
+ },
+ {
+  "label": "workspace-repo",
+  "cmd": "git init -q -b main && git add -A && git update-index --chmod=+x scripts/verify.sh && git -c user.name='Meena Iyer' -c user.email=meena@acme-health.example commit -q -m 'The priorauth workspace: CLAUDE.md, verify scripts, the fix-across-repos workflow' && git ls-files",
+  "sh": true,
+  "cwd": "C:\\work\\archon-multirepo\\build\\priorauth-workspace",
+  "start": "2026-11-04T13:12:43",
+  "seconds": 0.6,
+  "exit": 0,
+  "stdout": ".archon/config.yaml\n.archon/workflows/team/fix-across-repos/commands/implement.md\n.archon/workflows/team/fix-across-repos/commands/scan.md\n.archon/workflows/team/fix-across-repos/fix-across-repos.yaml\n.gitattributes\n.gitignore\nCLAUDE.md\ndocs-in/bug-report.md\ndocs-in/holidays-TX-01-2027.json\nscripts/verify.cmd\nscripts/verify.sh\n",
+  "stderr": "warning: in the working copy of '.archon/config.yaml', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of '.archon/workflows/team/fix-across-repos/commands/implement.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of '.archon/workflows/team/fix-across-repos/commands/scan.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of '.archon/workflows/team/fix-across-repos/fix-across-repos.yaml', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of '.gitattributes', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of '.gitignore', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'CLAUDE.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs-in/bug-report.md', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'docs-in/holidays-TX-01-2027.json', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'scripts/verify.cmd', LF will be replaced by CRLF the next time Git touches it\n"
+ },
+ {
+  "label": "remote-priorauth-aging",
+  "cmd": "git init -q --bare -b main C:\\work\\archon-multirepo\\remotes\\priorauth-aging.git",
+  "sh": false,
+  "cwd": "C:\\work\\archon-multirepo",
+  "start": "2026-11-04T13:12:43",
+  "seconds": 0.1,
+  "exit": 0,
+  "stdout": "",
+  "stderr": ""
+ },
+ {
+  "label": "push-priorauth-aging",
+  "cmd": "git remote add origin 'C:/work/archon-multirepo/remotes/priorauth-aging.git' && git push -q -u origin main --tags 2>&1",
+  "sh": true,
+  "cwd": "C:\\work\\archon-multirepo\\build\\priorauth-aging",
+  "start": "2026-11-04T13:12:43",
+  "seconds": 0.8,
+  "exit": 0,
+  "stdout": "",
+  "stderr": ""
+ },
+ {
+  "label": "remote-priorauth-api",
+  "cmd": "git init -q --bare -b main C:\\work\\archon-multirepo\\remotes\\priorauth-api.git",
+  "sh": false,
+  "cwd": "C:\\work\\archon-multirepo",
+  "start": "2026-11-04T13:12:44",
+  "seconds": 0.0,
+  "exit": 0,
+  "stdout": "",
+  "stderr": ""
+ },
+ {
+  "label": "push-priorauth-api",
+  "cmd": "git remote add origin 'C:/work/archon-multirepo/remotes/priorauth-api.git' && git push -q -u origin main --tags 2>&1",
+  "sh": true,
+  "cwd": "C:\\work\\archon-multirepo\\build\\priorauth-api",
+  "start": "2026-11-04T13:12:44",
+  "seconds": 1.3,
+  "exit": 0,
+  "stdout": "",
+  "stderr": ""
+ },
+ {
+  "label": "remote-priorauth-workspace",
+  "cmd": "git init -q --bare -b main C:\\work\\archon-multirepo\\remotes\\priorauth-workspace.git",
+  "sh": false,
+  "cwd": "C:\\work\\archon-multirepo",
+  "start": "2026-11-04T13:12:45",
+  "seconds": 0.0,
+  "exit": 0,
+  "stdout": "",
+  "stderr": ""
+ },
+ {
+  "label": "push-priorauth-workspace",
+  "cmd": "git remote add origin 'C:/work/archon-multirepo/remotes/priorauth-workspace.git' && git push -q -u origin main --tags 2>&1",
+  "sh": true,
+  "cwd": "C:\\work\\archon-multirepo\\build\\priorauth-workspace",
+  "start": "2026-11-04T13:12:45",
+  "seconds": 0.6,
+  "exit": 0,
+  "stdout": "",
+  "stderr": ""
+ },
+ {
+  "label": "clone-workspace",
+  "cmd": "git clone -q C:\\work\\archon-multirepo\\remotes\\priorauth-workspace.git priorauth-workspace",
+  "sh": false,
+  "cwd": "C:\\work\\archon-multirepo",
+  "start": "2026-11-04T13:12:46",
+  "seconds": 0.2,
+  "exit": 0,
+  "stdout": "",
+  "stderr": ""
+ },
+ {
+  "label": "clone-priorauth-aging",
+  "cmd": "git clone -q C:\\work\\archon-multirepo\\remotes\\priorauth-aging.git priorauth-aging",
+  "sh": false,
+  "cwd": "C:\\work\\archon-multirepo\\priorauth-workspace",
+  "start": "2026-11-04T13:12:46",
+  "seconds": 0.2,
+  "exit": 0,
+  "stdout": "",
+  "stderr": ""
+ },
+ {
+  "label": "clone-priorauth-api",
+  "cmd": "git clone -q C:\\work\\archon-multirepo\\remotes\\priorauth-api.git priorauth-api",
+  "sh": false,
+  "cwd": "C:\\work\\archon-multirepo\\priorauth-workspace",
+  "start": "2026-11-04T13:12:46",
+  "seconds": 0.2,
+  "exit": 0,
+  "stdout": "",
+  "stderr": ""
+ },
+ {
+  "label": "identity",
+  "cmd": "for d in . priorauth-aging priorauth-api; do git -C $d config user.name 'Kiran Rao'; git -C $d config user.email kiran@acme-health.example; done; git status --short --ignored",
+  "sh": true,
+  "cwd": "C:\\work\\archon-multirepo\\priorauth-workspace",
+  "start": "2026-11-04T13:12:47",
+  "seconds": 0.5,
+  "exit": 0,
+  "stdout": "!! priorauth-aging/\n!! priorauth-api/\n",
+  "stderr": ""
+ },
+ {
+  "label": "tree",
+  "cmd": "ls -a; for d in priorauth-aging priorauth-api; do echo \"== $d\"; git -C $d log --oneline --decorate; grep -m2 -n '<version>' $d/pom.xml; done",
+  "sh": true,
+  "cwd": "C:\\work\\archon-multirepo\\priorauth-workspace",
+  "start": "2026-11-04T13:12:47",
+  "seconds": 0.2,
+  "exit": 0,
+  "stdout": ".\n..\n.archon\n.git\n.gitattributes\n.gitignore\nCLAUDE.md\ndocs-in\npriorauth-aging\npriorauth-api\nscripts\n== priorauth-aging\nf6153ee (HEAD -> main, tag: v1.0.0, origin/main, origin/HEAD) priorauth-aging 1.0.0: the aging package, split from priorauth-api 1.1.0\n11:    <version>4.1.1</version>\n17:  <version>1.0.0</version>\n== priorauth-api\nc2dc5d4 (HEAD -> main, tag: v1.2.0, origin/main, origin/HEAD) Move request aging to the priorauth-aging library (1.0.0); depend on it\n49fe266 Merge pull request #58 from acme-health/request-age/u1-age-api\nb477c4e request age and over-limit flag on the pending list (intent 261013-request-age-api, U1)\nd9aa178 priorauth-api 1.0.2: pending list for the reviewer screen\n11:    <version>4.1.1</version>\n17:  <version>1.2.0</version>\n",
+  "stderr": ""
+ },
+ {
+  "label": "validate",
+  "cmd": "archon validate workflows fix-across-repos",
+  "sh": false,
+  "cwd": "C:\\work\\archon-multirepo\\priorauth-workspace",
+  "start": "2026-11-04T13:12:47",
+  "seconds": 4.1,
+  "exit": 0,
+  "stdout": "\nValidating workflows in C:/work/archon-multirepo/priorauth-workspace\n\n  fix-across-repos                         ok\n\nResults: 1 valid, 0 with errors\n",
+  "stderr": ""
+ },
+ {
+  "label": "verify-before",
+  "cmd": "./scripts/verify.sh && echo 'verify: passed'",
+  "sh": true,
+  "cwd": "C:\\work\\archon-multirepo\\priorauth-workspace",
+  "start": "2026-11-04T13:12:52",
+  "seconds": 27.4,
+  "exit": 0,
+  "stdout": "13:13:15.376 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.acmehealth.priorauth.api.PendingRequestsControllerTest]: PendingRequestsControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.\n13:13:15.558 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.acmehealth.priorauth.PriorAuthApiApplication for test class com.acmehealth.priorauth.api.PendingRequestsControllerTest\n13:13:15.705 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.acmehealth.priorauth.api.PendingRequestsControllerTest]: PendingRequestsControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.\n13:13:15.721 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.acmehealth.priorauth.PriorAuthApiApplication for test class com.acmehealth.priorauth.api.PendingRequestsControllerTest\n\n  .   ____          _            __ _ _\n /\\\\ / ___'_ __ _ _(_)_ __  __ _ \\ \\ \\ \\\n( ( )\\___ | '_ | '_| | '_ \\/ _` | \\ \\ \\ \\\n \\\\/  ___)| |_)| | | | | || (_| |  ) ) ) )\n  '  |____| .__|_| |_|_| |_\\__, | / / / /\n =========|_|==============|___/=/_/_/_/\n\n :: Spring Boot ::                (v4.1.1)\n\n2026-11-04T13:13:16.301+05:30  INFO 4484 --- [priorauth-api] [           main] c.a.p.api.PendingRequestsControllerTest  : Starting PendingRequestsControllerTest using Java 21.0.10 with PID 4484 (started by you in C:\\work\\archon-multirepo\\priorauth-workspace\\priorauth-api)\n2026-11-04T13:13:16.302+05:30  INFO 4484 --- [priorauth-api] [           main] c.a.p.api.PendingRequestsControllerTest  : No active profile set, falling back to 1 default profile: \"default\"\n2026-11-04T13:13:17.975+05:30  INFO 4484 --- [priorauth-api] [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''\n2026-11-04T13:13:17.975+05:30  INFO 4484 --- [priorauth-api] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''\n2026-11-04T13:13:17.991+05:30  INFO 4484 --- [priorauth-api] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 16 ms\n2026-11-04T13:13:18.024+05:30  INFO 4484 --- [priorauth-api] [           main] c.a.p.api.PendingRequestsControllerTest  : Started PendingRequestsControllerTest in 2.219 seconds (process running for 3.836)\nverify: passed\n",
+  "stderr": "Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org.mockito/org/mockito/Mockito.html#0.3\nOpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended\nWARNING: A Java agent has been loaded dynamically (C:\\Users\\you\\.m2\\repository\\net\\bytebuddy\\byte-buddy-agent\\1.18.11\\byte-buddy-agent-1.18.11.jar)\nWARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning\nWARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information\nWARNING: Dynamic loading of agents will be disallowed by default in a future release\n"
+ },
+ {
+  "label": "bug-before",
+  "cmd": "set -u\ncd priorauth-api\nmvn -q -DskipTests package\njava -jar target/priorauth-api-1.2.0.jar --server.port=8091 > ../../app-before.log 2>&1 &\npid=$!\nfor i in $(seq 90); do curl -s -o /dev/null localhost:8091/requests/pending && break; sleep 1; done\ncurl -s 'localhost:8091/requests/pending?asOf=2027-01-05'; echo\nkill $pid\n",
+  "sh": true,
+  "cwd": "C:\\work\\archon-multirepo\\priorauth-workspace",
+  "start": "2026-11-04T13:13:19",
+  "seconds": 10.6,
+  "exit": 0,
+  "stdout": "[{\"id\":\"PA-10231\",\"tenantId\":\"TX-01\",\"service\":\"MRI lumbar spine\",\"status\":\"PENDED\",\"receivedAt\":\"2026-10-01\",\"ageBusinessDays\":63,\"overLimit\":true,\"ageLabel\":\"63 bd OVER 5\"},{\"id\":\"PA-10244\",\"tenantId\":\"TX-01\",\"service\":\"Physical therapy x12\",\"status\":\"IN_REVIEW\",\"receivedAt\":\"2026-10-06\",\"ageBusinessDays\":60,\"overLimit\":true,\"ageLabel\":\"60 bd OVER 5\"},{\"id\":\"PA-10263\",\"tenantId\":\"TX-01\",\"service\":\"CT abdomen\",\"status\":\"PENDED\",\"receivedAt\":\"2026-10-09\",\"ageBusinessDays\":57,\"overLimit\":true,\"ageLabel\":\"57 bd OVER 5\"}]\n",
+  "stderr": ""
+ }
+]

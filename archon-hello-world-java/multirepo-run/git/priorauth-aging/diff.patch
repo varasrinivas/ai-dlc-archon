@@ -1,0 +1,116 @@
+diff --git a/pom.xml b/pom.xml
+index fce4b8f..a1d2f68 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -14,7 +14,7 @@
+ 
+   <groupId>com.acmehealth</groupId>
+   <artifactId>priorauth-aging</artifactId>
+-  <version>1.0.0</version>
++  <version>1.0.1</version>
+   <name>priorauth-aging</name>
+   <description>Request aging for prior auth: business days, tenant holiday calendars, the age badge. A library; priorauth-api depends on it.</description>
+ 
+diff --git a/src/main/java/com/acmehealth/priorauth/aging/HolidayCalendar.java b/src/main/java/com/acmehealth/priorauth/aging/HolidayCalendar.java
+index a0d035b..d84c24d 100644
+--- a/src/main/java/com/acmehealth/priorauth/aging/HolidayCalendar.java
++++ b/src/main/java/com/acmehealth/priorauth/aging/HolidayCalendar.java
+@@ -1,6 +1,7 @@
+ package com.acmehealth.priorauth.aging;
+ 
+-import org.springframework.core.io.ClassPathResource;
++import org.springframework.core.io.Resource;
++import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+ import org.springframework.stereotype.Service;
+ import tools.jackson.databind.JsonNode;
+ import tools.jackson.databind.json.JsonMapper;
+@@ -14,13 +15,16 @@ import java.util.Set;
+ import java.util.concurrent.ConcurrentHashMap;
+ 
+ /**
+- * The tenant's holidays (FR1.2): one JSON file per tenant under resources/data, the same list the nightly report uses.
++ * The tenant's holidays (FR1.2): one JSON file per tenant per year under resources/data
++ * ({@code holidays-<tenant>-<year>.json}), the same list the nightly report uses. A tenant's calendar is the union of
++ * all its years, so an age that crosses a year boundary skips both years' holidays.
+  * A tenant without a file has no holidays, which is the safe default (the age is then slightly higher, never lower).
+  */
+ @Service
+ public class HolidayCalendar {
+ 
+     private final JsonMapper mapper;
++    private final PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+     private final Map<String, Set<LocalDate>> cache = new ConcurrentHashMap<>();
+ 
+     public HolidayCalendar(JsonMapper mapper) {
+@@ -32,14 +36,16 @@ public class HolidayCalendar {
+     }
+ 
+     private Set<LocalDate> load(String tenantId) {
+-        ClassPathResource file = new ClassPathResource("data/holidays-" + tenantId + "-2026.json");
+-        if (!file.exists()) {
+-            return Set.of();
+-        }
+-        try (InputStream in = file.getInputStream()) {
+-            JsonNode root = mapper.readTree(in);
++        try {
++            // ???? (exactly a four-character year), not *: tenant "TX" must not pick up "TX-01"'s files.
++            Resource[] files = resolver.getResources("classpath*:data/holidays-" + tenantId + "-????.json");
+             Set<LocalDate> holidays = new HashSet<>();
+-            root.get("holidays").forEach(node -> holidays.add(LocalDate.parse(node.asString())));
++            for (Resource file : files) {
++                try (InputStream in = file.getInputStream()) {
++                    JsonNode root = mapper.readTree(in);
++                    root.get("holidays").forEach(node -> holidays.add(LocalDate.parse(node.asString())));
++                }
++            }
+             return Set.copyOf(holidays);
+         } catch (IOException e) {
+             throw new IllegalStateException("cannot read holidays for tenant " + tenantId, e);
+diff --git a/src/main/resources/data/holidays-TX-01-2027.json b/src/main/resources/data/holidays-TX-01-2027.json
+new file mode 100644
+index 0000000..5e60ca9
+--- /dev/null
++++ b/src/main/resources/data/holidays-TX-01-2027.json
+@@ -0,0 +1,4 @@
++{
++  "tenantId": "TX-01",
++  "holidays": ["2027-01-01", "2027-01-18", "2027-02-15", "2027-05-31", "2027-07-05", "2027-09-06", "2027-10-11", "2027-11-11", "2027-11-25", "2027-11-26", "2027-12-24"]
++}
+diff --git a/src/test/java/com/acmehealth/priorauth/aging/HolidayCalendarTest.java b/src/test/java/com/acmehealth/priorauth/aging/HolidayCalendarTest.java
+new file mode 100644
+index 0000000..dccd958
+--- /dev/null
++++ b/src/test/java/com/acmehealth/priorauth/aging/HolidayCalendarTest.java
+@@ -0,0 +1,32 @@
++package com.acmehealth.priorauth.aging;
++
++import org.junit.jupiter.api.Test;
++import tools.jackson.databind.json.JsonMapper;
++
++import java.time.LocalDate;
++
++import static org.assertj.core.api.Assertions.assertThat;
++
++/** Bug report 17 Oct 2026 (Ravi Menon): New Year's Day 2027 was counted as a working day. */
++class HolidayCalendarTest {
++
++    private final HolidayCalendar calendar = new HolidayCalendar(JsonMapper.builder().build());
++
++    @Test // every year's file for the tenant is loaded, not just 2026's
++    void loadsEveryYearForTheTenant() {
++        assertThat(calendar.forTenant("TX-01"))
++                .contains(LocalDate.of(2026, 1, 1), LocalDate.of(2026, 10, 12), LocalDate.of(2027, 1, 1))
++                .hasSize(22);
++    }
++
++    @Test // the existing safe default: no file, no holidays
++    void tenantWithoutFilesHasNoHolidays() {
++        assertThat(calendar.forTenant("ZZ-99")).isEmpty();
++    }
++
++    @Test // PA-10231, received 1 Oct 2026, as of 5 Jan 2027: 62, not 63
++    void ageAcrossTheYearSkipsNewYearsDay() {
++        assertThat(BusinessDays.between(LocalDate.of(2026, 10, 1), LocalDate.of(2027, 1, 5), calendar.forTenant("TX-01")))
++                .isEqualTo(62);
++    }
++}

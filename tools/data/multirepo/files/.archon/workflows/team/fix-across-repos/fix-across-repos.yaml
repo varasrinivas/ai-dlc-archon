@@ -1,0 +1,125 @@
+name: fix-across-repos
+description: >-
+  Fix one reported bug across the workspace's repos (priorauth-aging, priorauth-api), as a folder
+  project: scan both repos, plan the change per repo, fix until ./scripts/verify.sh passes, review,
+  and push a branch in each repo it changed after a final approval. Archon makes no worktree or branch
+  here: the agent branches and commits in each repo. Use from the workspace root.
+  NOT for: a change to one repo only (run request-to-pr inside that repo).
+
+nodes:
+  # ── Plan: read both repos before anything is decided ──────────────────
+  - id: scan
+    command: scan
+    mutates_checkout: false
+
+  - id: plan
+    depends_on: [scan]
+    mutates_checkout: false
+    prompt: |
+      The bug: $USER_MESSAGE
+      The scan of both repos is in $ARTIFACTS_DIR/scan.md.
+
+      Write $ARTIFACTS_DIR/plan.md: for each repo the fix touches, the files to change, the tests
+      to add, its version now and after (follow CLAUDE.md), and the branch name. Then the order
+      the repos change and are released in, and how ./scripts/verify.sh proves the fix.
+      Change nothing yet.
+    output_format:
+      type: object
+      properties:
+        summary: { type: string }
+        repos: { type: array, items: { type: string } }
+        branch: { type: string }
+        versions: { type: string }
+        tests: { type: string }
+      required: [summary, repos, branch, versions, tests]
+      additionalProperties: false
+
+  - id: approve-plan
+    depends_on: [plan]
+    wait:
+      form: approval
+      attention: |
+        Approve the plan before any code is written.
+
+        $plan.output.summary
+        Repos: $plan.output.repos
+        Branch: $plan.output.branch
+        Versions: $plan.output.versions
+        Tests: $plan.output.tests
+
+  - id: stop-plan
+    depends_on: [approve-plan]
+    when: "$approve-plan.output.decision == 'reject'"
+    cancel: The plan was rejected.
+
+  # ── Build: fix in each repo until the workspace check passes ──────────
+  - id: implement
+    depends_on: [approve-plan]
+    when: "$approve-plan.output.decision == 'approve'"
+    loop:
+      command: implement
+      until_bash: ./scripts/verify.sh
+      max_iterations: 3
+      fresh_context: true
+
+  - id: checks
+    depends_on: [implement]
+    bash: |
+      ./scripts/verify.sh && echo "verify: passed"
+      for r in priorauth-aging priorauth-api; do
+        echo "== $r: on $(git -C "$r" branch --show-current)"
+        git -C "$r" log --oneline main..HEAD
+        git -C "$r" diff --stat main...HEAD
+        git -C "$r" status --short
+      done
+
+  # ── Review: a second reader, then a person ────────────────────────────
+  - id: review
+    depends_on: [checks]
+    mutates_checkout: false
+    prompt: |
+      Review the fix against docs-in/bug-report.md and $ARTIFACTS_DIR/plan.md. In each repo, read
+      its branch's change (git -C <repo> diff main...HEAD). Do not edit anything.
+      Check the bug is fixed with a test, the versions follow CLAUDE.md (priorauth-api depends on the
+      priorauth-aging version that has the fix), and nothing the plan did not name was changed.
+      Write $ARTIFACTS_DIR/review.md.
+    output_format:
+      type: object
+      properties:
+        verdict: { type: string, enum: [READY, NOT-READY] }
+        findings: { type: string }
+      required: [verdict, findings]
+      additionalProperties: false
+
+  - id: approve-change
+    depends_on: [review]
+    wait:
+      form: approval
+      attention: |
+        Review verdict: $review.output.verdict
+        $review.output.findings
+
+        Checks:
+        $checks.output
+
+        Approve to push a branch in each changed repo, or reject to stop.
+
+  - id: stop-change
+    depends_on: [approve-change]
+    when: "$approve-change.output.decision == 'reject'"
+    cancel: The change was rejected at review.
+
+  # ── Ship: one branch per changed repo, library first ──────────────────
+  - id: push
+    depends_on: [approve-change]
+    when: "$approve-change.output.decision == 'approve'"
+    bash: |
+      for r in priorauth-aging priorauth-api; do
+        b=$(git -C "$r" branch --show-current)
+        if [ "$b" != main ] && [ -n "$(git -C "$r" log --oneline main..HEAD)" ]; then
+          git -C "$r" push -u origin "$b" 2>&1
+          echo "$r: open the PR $b -> main"
+        else
+          echo "$r: nothing to push"
+        fi
+      done

@@ -17,7 +17,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-DIRS = ("tools/data/", "archon-hello-world-java/java-run/")
+DIRS = ("tools/data/", "archon-hello-world-java/java-run/", "archon-hello-world-java/multirepo-run/")
 USER = getpass.getuser()
 HOST = socket.gethostname()
 S = r"(\\+|/)"  # one separator, escaped any number of times (or a forward slash)

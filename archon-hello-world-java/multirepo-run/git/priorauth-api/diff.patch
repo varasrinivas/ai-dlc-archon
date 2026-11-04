@@ -1,0 +1,46 @@
+diff --git a/pom.xml b/pom.xml
+index 3296e66..61c3013 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -14,7 +14,7 @@
+ 
+   <groupId>com.acmehealth</groupId>
+   <artifactId>priorauth-api</artifactId>
+-  <version>1.2.0</version>
++  <version>1.2.1</version>
+   <name>priorauth-api</name>
+   <description>The prior-auth API the reviewer screen reads: pending requests per tenant.</description>
+ 
+@@ -32,7 +32,7 @@
+     <dependency>
+       <groupId>com.acmehealth</groupId>
+       <artifactId>priorauth-aging</artifactId>
+-      <version>1.0.0</version>
++      <version>1.0.1</version>
+     </dependency>
+     <!-- JUnit 5, AssertJ and MockMvc for the tests. Test scope: never shipped. -->
+     <dependency>
+diff --git a/src/test/java/com/acmehealth/priorauth/api/PendingRequestsControllerTest.java b/src/test/java/com/acmehealth/priorauth/api/PendingRequestsControllerTest.java
+index 898e73b..7399996 100644
+--- a/src/test/java/com/acmehealth/priorauth/api/PendingRequestsControllerTest.java
++++ b/src/test/java/com/acmehealth/priorauth/api/PendingRequestsControllerTest.java
+@@ -40,6 +40,19 @@ class PendingRequestsControllerTest {
+                 .andExpect(jsonPath("$[1].overLimit").value(false));
+     }
+ 
++    @Test // bug report 17 Oct 2026 (Ravi Menon): 1 Jan 2027 is a TX-01 holiday, so each age is one lower than before
++    void newYearsDayIsNotABusinessDay() throws Exception {
++        mvc.perform(get("/requests/pending").param("asOf", "2027-01-05"))
++                .andExpect(status().isOk())
++                .andExpect(jsonPath("$[0].id").value("PA-10231"))
++                .andExpect(jsonPath("$[0].ageBusinessDays").value(62))
++                .andExpect(jsonPath("$[0].ageLabel").value("62 bd OVER 5"))
++                .andExpect(jsonPath("$[1].id").value("PA-10244"))
++                .andExpect(jsonPath("$[1].ageBusinessDays").value(59))
++                .andExpect(jsonPath("$[2].id").value("PA-10263"))
++                .andExpect(jsonPath("$[2].ageBusinessDays").value(56));
++    }
++
+     @Test // FR1: PA-10231 arrived on 1 Oct, so an as-of of 30 Sep is the caller's error: 400, not 500
+     void asOfBeforeReceivedIsABadRequest() throws Exception {
+         mvc.perform(get("/requests/pending").param("asOf", "2026-09-30"))

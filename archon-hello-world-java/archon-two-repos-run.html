@@ -1,0 +1,1512 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Archon, Two Repos: Every Step</title>
+<meta name="description" content="One bug fixed across two repos with an Archon folder project, step by step: the workspace, the workflow, what you type, what Archon and Claude return, both waits, a branch per repo, and the merges. Real run, real output.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@600;700;800&family=Red+Hat+Text:wght@400;500;600&family=Red+Hat+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script>document.documentElement.classList.add('js');</script>
+<style>
+:root{
+  --bg:#F3F6F9; --bg-2:#E8EDF3; --panel:#FFFFFF; --ink:#141C25; --ink-2:#48566A; --ink-3:#7A8797; --line:#D9E1EA; --line-2:#B9C5D3;
+  --you:#1D4ED8; --you-soft:#E9EFFD; --you-ink:#15317E;
+  --setup:#5B6B7F; --plan:#0E7490; --build:#C2410C; --review:#6D28D9; --ship:#15803D; --gate:#D97706; --gate-soft:#FEF3C7; --gate-ink:#4A2E04; --ok:#15803D; --new:#15803D; --bad:#B91C1C;
+  --console:#0B1220; --console-ink:#E6EDF5; --c-muted:#8A9BB0; --c-str:#9FE1B0; --c-num:#F8C77A; --c-kw:#8CC4FF; --c-anno:#F0A6D2; --c-add:#10351F; --c-del:#4A1A1A; --c-prompt:#B5F5C8; --c-status:#7DD3FC;
+  --radius:14px; --shadow:0 1px 0 rgba(20,28,37,.04),0 14px 34px -24px rgba(20,28,37,.45);
+  --font-display:"Red Hat Display","Segoe UI",system-ui,sans-serif; --font-text:"Red Hat Text","Segoe UI",system-ui,sans-serif; --font-mono:"Red Hat Mono",ui-monospace,Consolas,Menlo,monospace;
+}
+[data-theme="dark"]{
+  --bg:#0F141A; --bg-2:#161D26; --panel:#171F29; --ink:#E7EDF3; --ink-2:#B1BDCA; --ink-3:#7E8B98; --line:#273240; --line-2:#3A4858;
+  --you:#8AB4FF; --you-soft:#15223D; --you-ink:#C9DAFF;
+  --setup:#9AA8B8; --plan:#38BDF8; --build:#FB923C; --review:#A78BFA; --ship:#4ADE80; --gate:#FBBF24; --gate-soft:#3A2A0A; --gate-ink:#FDE9B3; --ok:#4ADE80; --new:#4ADE80;
+  --console:#070C14; --shadow:0 1px 0 rgba(0,0,0,.4),0 14px 34px -24px rgba(0,0,0,.9);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 var(--font-text);-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-family:var(--font-display);line-height:1.15;margin:0 0 .4em;letter-spacing:-.01em}
+h1{font-size:clamp(1.9rem,4vw,2.9rem);font-weight:800}
+h2{font-size:1.45rem;font-weight:700}
+h3{font-size:1.12rem;font-weight:700}
+p{margin:0 0 .9em}
+a{color:inherit}
+code{font-family:var(--font-mono);font-size:.86em;background:rgba(120,140,170,.16);padding:.1em .38em;border-radius:6px;overflow-wrap:anywhere}
+pre{margin:0;font-family:var(--font-mono)}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--you);outline-offset:2px}
+.sr{position:absolute;left:-9999px}
+
+/* header */
+.top{position:sticky;top:0;z-index:40;background:color-mix(in srgb,var(--panel) 92%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top__in{max-width:1240px;margin:0 auto;padding:10px 20px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center}
+.brand{font-family:var(--font-display);font-weight:800;font-size:1.02rem;line-height:1.15}
+.brand small{display:block;font:500 .74rem/1.2 var(--font-text);color:var(--ink-3)}
+.prog{display:flex;align-items:center;gap:10px;min-width:0;overflow:hidden;font-size:.86rem;color:var(--ink-2)}
+.prog b{color:var(--ink);white-space:nowrap}
+.prog .bar{flex:1 1 0;height:8px;border-radius:99px;background:var(--bg-2);overflow:hidden;min-width:0}
+.prog .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--plan),var(--build),var(--review),var(--ship));transition:width .3s}
+.prog .ph{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.btn{border:1.5px solid var(--line-2);background:var(--panel);border-radius:10px;padding:7px 12px;font-weight:600;font-size:.86rem;cursor:pointer}
+.btn:hover{border-color:var(--ink-3)}
+@media (max-width:640px){.prog .ph{display:none}.brand small{display:none}.top__in{gap:8px;padding:8px 14px;grid-template-columns:minmax(0,auto) minmax(0,1fr) auto}.brand{min-width:0;overflow-wrap:anywhere}}
+
+/* shell */
+.shell{max-width:1240px;margin:0 auto;padding:0 20px 90px;display:grid;grid-template-columns:250px minmax(0,1fr);gap:28px;align-items:start}
+.rail{position:sticky;top:66px;max-height:calc(100vh - 80px);overflow:auto;padding:14px 0 20px}
+.rail h4{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin:14px 0 6px 10px}
+.rail h4:first-child{margin-top:0}
+.rl{display:grid;grid-template-columns:26px minmax(0,1fr);gap:8px;align-items:center;padding:6px 10px;border-radius:10px;text-decoration:none;color:var(--ink-2);font-size:.86rem;line-height:1.25}
+.rl b{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--bg-2);color:var(--ink-2);font:600 .74rem var(--font-mono);border:2px solid transparent}
+.rl:hover{background:var(--bg-2)}
+.rl.is-on{background:var(--panel);color:var(--ink);box-shadow:var(--shadow)}
+.rl.is-on b{border-color:var(--c);color:var(--c)}
+.rl.is-done b{background:var(--c);color:#fff;border-color:var(--c)}
+@media (max-width:900px){
+  .shell{grid-template-columns:minmax(0,1fr);gap:0}
+  .rail{position:sticky;top:58px;z-index:30;max-height:none;overflow-x:auto;overflow-y:hidden;display:flex;gap:6px;padding:8px 0;background:var(--bg);border-bottom:1px solid var(--line);margin:0 -20px 8px;padding-left:20px;padding-right:20px;scrollbar-width:thin}
+  .rail h4{display:none}
+  .rl{flex:0 0 auto;grid-template-columns:22px auto;padding:5px 9px;border:1px solid var(--line);background:var(--panel);white-space:nowrap}
+  .rl span{max-width:150px;overflow:hidden;text-overflow:ellipsis}
+}
+
+/* hero */
+.hero{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:28px;align-items:start;padding:40px 0 24px}
+.lead{font-size:1.1rem;color:var(--ink-2);max-width:62ch}
+.facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 18px;margin:18px 0 22px}
+.facts div{font-size:.86rem;color:var(--ink-2)}
+.facts b{display:block;font-family:var(--font-display);font-size:1.5rem;color:var(--ink);line-height:1.1}
+.slack{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.slack__bar{display:flex;justify-content:space-between;padding:9px 16px;background:var(--bg-2);font:500 .78rem var(--font-mono);color:var(--ink-2)}
+.slack__body{padding:16px 18px}
+.slack__who{display:flex;gap:10px;align-items:center;margin-bottom:10px}
+.slack__who i{width:38px;height:38px;border-radius:9px;background:var(--plan);color:#fff;display:grid;place-items:center;font:700 .9rem var(--font-display);font-style:normal}
+.slack__who b{display:block;line-height:1.2}.slack__who small{color:var(--ink-3)}
+.slack__body p{font-size:1rem}
+.legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin:0 0 30px}
+.legend>div{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:.86rem;color:var(--ink-2);display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:start}.legend>div>div{min-width:0}
+.legend b{display:block;color:var(--ink);font-size:.9rem}
+.legend svg{width:26px;height:26px;flex:none}
+@media (max-width:900px){.hero{grid-template-columns:minmax(0,1fr);padding-top:22px}.facts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* cards and steps */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px 24px;margin:0 0 18px}
+.phase{display:flex;align-items:center;gap:10px;margin:40px 0 14px;padding-top:18px;border-top:2px solid var(--line);color:var(--ink);font-family:var(--font-display);font-weight:800;font-size:1.3rem}
+.phase i{width:14px;height:14px;border-radius:50%;background:var(--c);flex:none}
+.phase span{font:500 .92rem var(--font-text);color:var(--ink-3)}
+.step{background:var(--panel);border:1px solid var(--line);border-top:5px solid var(--c);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px 24px;margin:0 0 20px;scroll-margin-top:84px}
+.step__head{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:start;margin-bottom:10px}
+.step__n{display:inline-grid;place-items:center;width:42px;height:42px;border-radius:12px;background:var(--c);color:#fff;font:800 1.15rem var(--font-display)}
+.chip{display:inline-block;font:600 .72rem/1.3 var(--font-mono);letter-spacing:.02em;padding:4px 9px;border-radius:99px;border:1.5px solid var(--c);color:var(--c);margin:0 6px 8px 0;overflow-wrap:anywhere}
+.chip--ours{border-color:var(--ink-3);color:var(--ink-3);border-style:dashed}
+.step h2{font-size:1.32rem;margin:0 0 .25em}
+.step__why{color:var(--ink-2);font-size:.98rem;margin:0}
+.who{font:500 .78rem/1.3 var(--font-mono);color:var(--ink-3);text-align:right;white-space:nowrap}
+@media (max-width:640px){.step__head{grid-template-columns:auto minmax(0,1fr)}.who{grid-column:1/-1;text-align:left}.step{padding:18px 16px}.card{padding:18px 16px}}
+
+.io{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:14px;margin:14px 0 0;align-items:start}
+@media (max-width:820px){.io{grid-template-columns:minmax(0,1fr)}}
+.io--stack{grid-template-columns:minmax(0,1fr)}.io--stack .you{max-width:760px}.io--stack .claude pre{max-height:none}
+.box{border-radius:12px;overflow:hidden;border:1px solid var(--line);min-width:0}
+.box__bar{display:flex;align-items:center;gap:8px;padding:8px 12px;font:600 .76rem var(--font-mono);letter-spacing:.02em}
+.box__bar svg{width:16px;height:16px;flex:none}
+.box__bar .tag{margin-left:auto;font-weight:500;opacity:.8}
+.box pre{padding:12px 14px;font-size:.84rem;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere;overflow:auto;max-height:560px}
+.you{background:var(--you-soft);border-color:color-mix(in srgb,var(--you) 40%,transparent)}
+.you .box__bar{background:color-mix(in srgb,var(--you) 14%,transparent);color:var(--you-ink)}
+.you pre{color:var(--you-ink);font-weight:500}
+.you pre .k{color:var(--ink-3);font-weight:400}
+.you pre .c{color:var(--ink-3);font-weight:400;font-style:italic}
+.you .copy{margin:0 12px 10px;border:1.5px solid color-mix(in srgb,var(--you) 50%,transparent);background:var(--panel);border-radius:8px;padding:4px 10px;font:600 .76rem var(--font-mono);cursor:pointer}
+.you .copy:hover{background:var(--you);color:#fff}
+.you .none{padding:12px 14px;font-size:.9rem;color:var(--ink-2)}
+.claude{background:var(--console);border-color:#1F2B3D}
+.claude .box__bar{background:#121C2C;color:#C7D4E3}
+.claude pre{color:var(--console-ink)}
+.claude .s{color:var(--c-status)}.claude .q{color:var(--c-prompt)}.claude .m{color:var(--c-muted)}.claude b{color:#fff;font-weight:600}.claude .ok{color:#86EFAC}.claude .w{color:#FCD34D}
+.disk{margin-top:12px;background:var(--bg-2);border-color:var(--line)}
+.disk .box__bar{background:color-mix(in srgb,var(--setup) 18%,transparent);color:var(--ink-2)}
+.disk pre{color:var(--ink-2);font-size:.76rem;max-height:none;white-space:pre}
+.disk .n{color:var(--new);font-weight:600}.disk .m{color:var(--ink-3)}.disk b{color:var(--ink);font-weight:600}.disk .d{color:var(--ink-3);text-decoration:line-through}
+.disk .ex{color:var(--ink-3)}
+@media (max-width:640px){.disk .box__bar::after{content:"swipe sideways for the notes";margin-left:auto;font-weight:500;opacity:.7}}
+.open{margin-top:12px}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 8px}
+.tab{border:1.5px solid var(--line-2);background:var(--panel);border-radius:99px;padding:5px 11px;font:500 .76rem var(--font-mono);cursor:pointer;color:var(--ink-2);max-width:100%;overflow-wrap:anywhere}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.pane{display:none}.pane.is-on{display:block}
+.code{border-radius:12px;overflow:hidden;border:1px solid var(--line)}
+.code__bar{display:flex;justify-content:space-between;gap:10px;padding:7px 12px;background:var(--bg-2);border-left:5px solid var(--c);font:500 .74rem var(--font-mono);color:var(--ink-2)}
+.code__bar .path{color:var(--ink);font-weight:600;overflow-wrap:anywhere}
+.code pre{background:var(--console);color:var(--console-ink);padding:12px 14px;font-size:.8rem;line-height:1.55;overflow:auto;white-space:pre;margin:0}
+.code--wrap pre{white-space:pre-wrap;overflow-wrap:anywhere}
+.code textarea.src{display:none}
+.tok-c{color:var(--c-muted);font-style:italic}.tok-s{color:var(--c-str)}.tok-n{color:var(--c-num)}.tok-k{color:var(--c-kw)}.tok-a{color:var(--c-anno)}.tok-p{color:var(--c-muted)}.tok-t{color:var(--c-kw)}
+.ln-add{display:block;background:var(--c-add)}.ln-del{display:block;background:var(--c-del)}
+.gate{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:start;background:var(--gate-soft);border:1.5px solid var(--gate);border-radius:12px;padding:12px 14px;margin-top:12px;color:var(--gate-ink)}
+.gate i{width:18px;height:18px;background:var(--gate);transform:rotate(45deg);margin:4px 3px 0;flex:none;border-radius:3px}
+.gate b{display:block;margin-bottom:2px}.gate p{margin:0;font-size:.94rem}.gate .by{font:500 .76rem var(--font-mono);opacity:.85;margin-top:4px}
+.plain{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:start;margin-top:12px;padding:11px 14px;border-radius:12px;background:var(--bg-2);border:1px dashed var(--line-2);font-size:.94rem;color:var(--ink-2)}
+.plain svg{width:24px;height:24px;color:var(--c);flex:none;margin-top:2px}
+.plain b{color:var(--ink)}
+.note{background:var(--bg-2);border-left:4px solid var(--ink-3);border-radius:10px;padding:12px 14px;font-size:.94rem;margin-top:12px}
+.note b{color:var(--ink)}
+.three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:12px}
+.three>div{background:var(--bg-2);border-radius:12px;padding:10px 12px;font-size:.9rem}
+.three b{display:block;font-size:.76rem;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3);margin-bottom:4px}
+@media (max-width:760px){.three{grid-template-columns:minmax(0,1fr)}}
+table{border-collapse:collapse;width:100%;font-size:.9rem;margin:10px 0}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--bg-2);font-weight:600}
+td code{font-size:.82em}td:first-child{white-space:nowrap}
+@media (max-width:640px){table{display:block;overflow-x:auto}}
+.setup{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
+.srow{display:grid;grid-template-columns:34px minmax(0,1fr);gap:12px;align-items:start;background:var(--bg-2);border-radius:12px;padding:12px 14px}
+.srow>b{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--setup);color:#fff;font:700 .9rem var(--font-display)}
+.srow .io{margin-top:8px}
+.srow .box pre{max-height:220px}
+.pills{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.pill{font:500 .74rem var(--font-mono);padding:4px 9px;border-radius:99px;border:1.5px solid var(--line-2);color:var(--ink-3);text-decoration:line-through;background:var(--panel)}
+.pill.on{text-decoration:none;color:var(--c);border-color:var(--c);font-weight:600}
+.os-mac{display:none}
+[data-os="mac"] .os-win{display:none}
+[data-os="mac"] .os-mac{display:revert}
+.top__btns{display:flex;gap:8px}
+@media (max-width:640px){.top__btns{gap:4px}.top__btns .btn{padding:5px 8px;font-size:.74rem}}
+.goal-rule{margin:10px 0 0;padding-left:1.3em}.goal-rule li{margin:4px 0}
+.cal{display:grid;grid-template-columns:repeat(13,minmax(0,1fr));gap:4px;margin:12px 0 4px;font:500 .74rem var(--font-mono);text-align:center}
+.cal div{border:1px solid var(--line);border-radius:8px;padding:6px 2px;background:var(--panel);min-width:0}
+.cal div b{display:block;font:700 .95rem var(--font-display);color:var(--ink)}
+.cal div i{display:block;font-style:normal;color:var(--ink-3)}
+.cal .wk,.cal .hol{background:var(--bg-2);color:var(--ink-3)}.cal .wk b,.cal .hol b{color:var(--ink-3)}
+.cal .hol{border-style:dashed}
+.cal .arr{border-color:var(--plan)}.cal .over{border-color:var(--bad);border-width:2px}.cal .over i{color:var(--bad);font-weight:600}
+@media (max-width:760px){.cal{grid-template-columns:repeat(7,minmax(0,1fr))}}
+.box pre .plus{color:var(--c-str);font-weight:600}
+.cmd{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;background:var(--bg-2);border-radius:10px;padding:10px 12px;margin:8px 0}
+.cmd code[data-copy]{display:block;background:none;padding:0;font-size:.84rem;overflow-wrap:anywhere}
+.cmd small{display:block;color:var(--ink-3);margin-top:3px}
+.cmd .copy{border:1.5px solid var(--line-2);background:var(--panel);border-radius:8px;padding:5px 10px;font:600 .76rem var(--font-mono);cursor:pointer}
+.cmd .copy:hover{background:var(--ink);color:var(--bg)}
+dl.gloss{display:grid;grid-template-columns:minmax(0,1fr);gap:0;margin:0}
+dl.gloss div{display:grid;grid-template-columns:190px minmax(0,1fr);gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:.94rem}
+dl.gloss dt{font-weight:600;color:var(--ink)}dl.gloss dd{margin:0;color:var(--ink-2)}
+@media (max-width:640px){dl.gloss div{grid-template-columns:minmax(0,1fr);gap:2px}}
+.foot{max-width:1240px;margin:0 auto;padding:20px 20px 60px;font-size:.84rem;color:var(--ink-3);border-top:1px solid var(--line)}
+
+figure.dia{margin:14px 0}figure.dia figcaption{font-size:.82rem;color:var(--ink-3);text-align:center;margin-top:4px}
+.gwrap{overflow-x:auto;max-width:100%}.gwrap figure.dia{min-width:760px}.gwrap table{display:table}
+.kv{table-layout:fixed}.kv td:first-child,.kv th:first-child{width:34%}.kv td:first-child code{white-space:normal;overflow-wrap:anywhere}
+.ref-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:12px}
+@media (max-width:760px){.ref-grid{grid-template-columns:minmax(0,1fr)}}
+.ref-grid>div{background:var(--bg-2);border-radius:12px;padding:12px 14px;font-size:.92rem}
+.ref-grid h3{margin:0 0 4px;font:700 1rem var(--font-display)}
+.ref-grid h3 small{font:500 .78rem var(--font-mono);color:var(--ink-3);margin-left:6px}
+.ref-grid p{margin:0 0 6px}.ref-grid ul{margin:0;padding-left:1.1em}.ref-grid li{margin:2px 0}
+.filter{width:100%;padding:9px 12px;border:1.5px solid var(--line-2);border-radius:10px;background:var(--panel);color:var(--ink);font:500 .92rem var(--font-mono);margin:10px 0}
+.flist{max-height:560px;overflow:auto;border:1px solid var(--line);border-radius:10px}.flist table{margin:0}
+.flist td:first-child{font-family:var(--font-mono);font-size:.8rem;white-space:nowrap}.flist td:last-child{font-size:.86rem;color:var(--ink-2)}
+.tag-yes{color:var(--ok);font-weight:600}.tag-no{color:var(--ink-3)}
+.lbl{display:inline-block;font:600 .72rem var(--font-mono);padding:1px 7px;border-radius:999px;vertical-align:2px;margin-left:4px}
+.lbl-real{background:color-mix(in srgb,var(--ok) 16%,transparent);color:var(--ok)}
+.lbl-doc{background:color-mix(in srgb,var(--gate) 18%,transparent);color:var(--gate-ink)}
+[data-theme="dark"] .lbl-doc{color:var(--gate)}
+@media (max-width:680px){.who,.box__bar .tag{white-space:normal;overflow-wrap:anywhere;min-width:0}.box__bar{flex-wrap:wrap}}
+.node{display:inline-block;font:600 .8rem var(--font-mono);padding:1px 8px;border-radius:6px;border:1.5px solid var(--c,var(--line-2));color:var(--ink)}
+</style>
+</head>
+<body>
+<a class="sr" href="#main">Skip to content</a>
+<header class="top"><div class="top__in">
+  <div class="brand">Archon, two repos<small>one bug · a folder project · real run</small></div>
+  <div class="prog" aria-live="polite"><b id="progText">Step 0 of 13</b><div class="bar"><i id="progBar"></i></div><span class="ph" id="progPhase">Start at the top</span></div>
+  <div class="top__btns"><button class="btn" id="osToggle" type="button" title="Show the commands for your computer">Windows</button><button class="btn" id="themeToggle" type="button" aria-pressed="false">Dark mode</button></div>
+</div></header>
+
+<div class="shell">
+<nav class="rail" aria-label="Steps">
+  <h4>Set up</h4>
+  <a class="rl" href="#s01" data-step="1" style="--c:var(--setup)"><b>1</b><span>Two repos and a folder</span></a>
+  <a class="rl" href="#s02" data-step="2" style="--c:var(--setup)"><b>2</b><span>Bug report and workflow</span></a>
+  <a class="rl" href="#s03" data-step="3" style="--c:var(--setup)"><b>3</b><span>Before: the bug shows</span></a>
+  <a class="rl" href="#s04" data-step="4" style="--c:var(--setup)"><b>4</b><span>Dry-run, not with --folder</span></a>
+  <h4>Plan</h4>
+  <a class="rl" href="#s05" data-step="5" style="--c:var(--plan)"><b>5</b><span>Start from the root</span></a>
+  <a class="rl" href="#s06" data-step="6" style="--c:var(--plan)"><b>6</b><span>Approve, with a correction</span></a>
+  <h4>Build</h4>
+  <a class="rl" href="#s07" data-step="7" style="--c:var(--build)"><b>7</b><span>Implement in both repos</span></a>
+  <a class="rl" href="#s08" data-step="8" style="--c:var(--build)"><b>8</b><span>Checks and review</span></a>
+  <h4>Ship</h4>
+  <a class="rl" href="#s09" data-step="9" style="--c:var(--ship)"><b>9</b><span>Check the jar by hand</span></a>
+  <a class="rl" href="#s10" data-step="10" style="--c:var(--ship)"><b>10</b><span>Approve; push both</span></a>
+  <h4>After</h4>
+  <a class="rl" href="#s11" data-step="11" style="--c:var(--setup)"><b>11</b><span>What it leaves behind</span></a>
+  <a class="rl" href="#s12" data-step="12" style="--c:var(--setup)"><b>12</b><span>Merge; tidy up</span></a>
+  <a class="rl" href="#s13" data-step="13" style="--c:var(--setup)"><b>13</b><span>AI-DLC vs Archon</span></a>
+  <h4>Reference</h4>
+  <a class="rl" href="#yourself" style="--c:var(--review)"><b>·</b><span>Run it yourself</span></a>
+  <a class="rl" href="#real" style="--c:var(--review)"><b>·</b><span>What is real here</span></a>
+</nav>
+
+<main id="main">
+<section class="hero" id="top">
+  <div>
+    <h1>One bug, two repos, one Archon run, for real.</h1>
+    <p class="lead">The age badge counts New Year's Day as a working day. The cause is in the aging library; the API has to move to the fixed version. Kiran runs the team's workflow from a <b>folder project</b>, a workspace that holds both repos: the agent fixes the library and bumps the API, each in its own branch, Meena approves twice, and a branch is pushed in each repo. Every command and reply below is real.</p>
+    <div class="facts">
+      <div><b>2</b>repos, one run, in place</div>
+      <div><b>10</b>nodes, 2 of them waits</div>
+      <div><b>1</b>pass of the implement loop</div>
+      <div><b>2</b>branches pushed, library first</div>
+      <div><b>$2.15</b>reported cost (API prices; claude.ai plan)</div>
+      <div><b>0</b>worktrees: Archon made none</div>
+    </div>
+  </div>
+  <aside class="slack" aria-label="The bug report, as it arrived in Slack">
+    <div class="slack__bar"><span># priorauth-reviewers</span><span>Sat 17 Oct</span></div>
+    <div class="slack__body">
+      <div class="slack__who"><i>RM</i><div><b>Ravi Menon</b><span>Nurse Manager, Utilization Management · 09:40</span></div></div>
+      <p>Kiran, the new age badge is great, but I think it breaks in January. I tried the screen with <code>asOf=2027-01-05</code>: PA-10231 shows an age one higher than the nightly report, and so do the other pending ones. It looks like New Year's Day is being counted as a working day.</p>
+    </div>
+  </aside>
+</section>
+<div class="phase" style="--c:var(--setup)"><i></i>Set up<span>steps 1–4 · the workspace, the bug, a dry run</span></div>
+<section class="step" id="s01" data-step="1" data-phase="Set up" style="--c:var(--setup)">
+  <div class="step__head"><span class="step__n">1</span><div><span class="chip">ours</span><h2>The workspace: two repos and a folder around them</h2><p class="step__why">The same split as the AI-DLC course's two-repo run: the aging package of priorauth-api 1.1.0 became a library, and the API depends on it.</p></div><span class="who">Kiran · 5 min</span></div>
+<div class="io"><div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">any shell</span><span class="os-mac">any shell</span></span></div><pre class="os-win">git clone https://github.com/acme-health/priorauth-workspace
+cd priorauth-workspace
+git clone https://github.com/acme-health/priorauth-aging
+git clone https://github.com/acme-health/priorauth-api
+archon validate workflows fix-across-repos</pre><pre class="os-mac">git clone https://github.com/acme-health/priorauth-workspace
+cd priorauth-workspace
+git clone https://github.com/acme-health/priorauth-aging
+git clone https://github.com/acme-health/priorauth-api
+archon validate workflows fix-across-repos</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Archon returns <span class="tag">real</span></div><pre>Validating workflows in C:/work/archon-multirepo/priorauth-workspace
+
+  fix-across-repos                         ok
+
+Results: 1 valid, 0 with errors</pre></div></div><div class="box disk"><div class="box__bar">On disk: Kiran's workspace</div><pre>priorauth-workspace/                 <b>the folder project</b>: a git repo of its own (the team's files)
+├── <span class="n">.archon/config.yaml</span>              assistant: claude
+├── <span class="n">.archon/workflows/team/fix-across-repos/</span>
+│   ├── <span class="n">fix-across-repos.yaml</span>        <span class="m">10 nodes, 2 waits</span>
+│   └── <span class="n">commands/scan.md, implement.md</span>
+├── <span class="n">CLAUDE.md</span>                        the repo map and the rules across both repos
+├── <span class="n">scripts/verify.sh</span>, verify.cmd    install priorauth-aging, then test priorauth-api
+├── <span class="n">docs-in/bug-report.md</span>            Ravi's report, with holidays-TX-01-2027.json
+├── <span class="n">.gitignore</span>                       /priorauth-aging/ and /priorauth-api/ are not part of it
+├── priorauth-aging/                 <b>repo 1</b>: the aging library 1.0.0, its own git and remote
+└── priorauth-api/                   <b>repo 2</b>: the API 1.2.0, depends on priorauth-aging 1.0.0</pre></div><div class="box claude"><div class="box__bar">git: the two repos <span class="tag">real</span></div><pre>== priorauth-aging
+f6153ee (HEAD -&gt; main, tag: v1.0.0, origin/main, origin/HEAD) priorauth-aging 1.0.0: the aging package, split from priorauth-api 1.1.0
+11:    &lt;version&gt;4.1.1&lt;/version&gt;
+17:  &lt;version&gt;1.0.0&lt;/version&gt;
+== priorauth-api
+c2dc5d4 (HEAD -&gt; main, tag: v1.2.0, origin/main, origin/HEAD) Move request aging to the priorauth-aging library (1.0.0); depend on it
+49fe266 Merge pull request #58 from acme-health/request-age/u1-age-api
+b477c4e request age and over-limit flag on the pending list (intent 261013-request-age-api, U1)
+d9aa178 priorauth-api 1.0.2: pending list for the reviewer screen
+11:    &lt;version&gt;4.1.1&lt;/version&gt;
+17:  &lt;version&gt;1.2.0&lt;/version&gt;</pre></div><div class="note">The three URLs are illustrative: in the course's run they are local bare repos standing in for GitHub (<code>tools/setup_multirepo_run.py</code> builds them from the public starter at <code>v1.1.0</code>), so every push is real. The workspace repo's <code>.gitignore</code> leaves the two code repos out: each keeps its own history, branches and pull requests.</div>
+</section>
+<section class="step" id="s02" data-step="2" data-phase="Set up" style="--c:var(--setup)">
+  <div class="step__head"><span class="step__n">2</span><div><span class="chip">the bug</span><h2>Read the bug report and the workflow</h2><p class="step__why">Ravi's report is the input; the workflow is written for a folder project, so the git in each repo is in its prompts and bash nodes.</p></div><span class="who">Kiran · 3 min</span></div>
+<div class="open"><div class="tabs" role="tablist"><button class="tab" role="tab" aria-selected="true" data-pane="bug-1">bug-report.md</button><button class="tab" role="tab" aria-selected="false" data-pane="bug-2">fix-across-repos.yaml</button><button class="tab" role="tab" aria-selected="false" data-pane="bug-3">implement.md</button><button class="tab" role="tab" aria-selected="false" data-pane="bug-4">scan.md</button><button class="tab" role="tab" aria-selected="false" data-pane="bug-5">CLAUDE.md</button><button class="tab" role="tab" aria-selected="false" data-pane="bug-6">verify.sh</button></div><div class="pane is-on" id="bug-1"><div class="code code--wrap"><div class="code__bar"><span class="path">docs-in/bug-report.md</span><span>Ravi, 17 Oct · real input (from the AI-DLC course)</span></div><textarea class="src" data-lang="md">**#priorauth-reviewers** · Ravi Menon (nurse manager) · Sat 17 Oct 2026, 09:40
+
+Kiran, the new age badge is great, but I think it breaks in January. Payer ops just sent the 2027 holiday list for TX-01 (attached as `holidays-TX-01-2027.json`), so I tried the screen with a January date: `GET /requests/pending?asOf=2027-01-05`.
+
+PA-10231 (received 1 Oct) shows an age one higher than the nightly report gives for the same day, and so do the other pending ones. It looks like New Year&#x27;s Day is being counted as a working day. The nightly report is right; the screen should match it.
+
+Can this be fixed before the year turns? Same rules as before: weekends and the tenant&#x27;s holidays don&#x27;t count.
+</textarea></div></div><div class="pane" id="bug-2"><div class="code code--wrap"><div class="code__bar"><span class="path">.archon/workflows/team/fix-across-repos/fix-across-repos.yaml</span><span>the team's workflow</span></div><textarea class="src" data-lang="yaml">name: fix-across-repos
+description: &gt;-
+  Fix one reported bug across the workspace&#x27;s repos (priorauth-aging, priorauth-api), as a folder
+  project: scan both repos, plan the change per repo, fix until ./scripts/verify.sh passes, review,
+  and push a branch in each repo it changed after a final approval. Archon makes no worktree or branch
+  here: the agent branches and commits in each repo. Use from the workspace root.
+  NOT for: a change to one repo only (run request-to-pr inside that repo).
+
+nodes:
+  # ── Plan: read both repos before anything is decided ──────────────────
+  - id: scan
+    command: scan
+    mutates_checkout: false
+
+  - id: plan
+    depends_on: [scan]
+    mutates_checkout: false
+    prompt: |
+      The bug: $USER_MESSAGE
+      The scan of both repos is in $ARTIFACTS_DIR/scan.md.
+
+      Write $ARTIFACTS_DIR/plan.md: for each repo the fix touches, the files to change, the tests
+      to add, its version now and after (follow CLAUDE.md), and the branch name. Then the order
+      the repos change and are released in, and how ./scripts/verify.sh proves the fix.
+      Change nothing yet.
+    output_format:
+      type: object
+      properties:
+        summary: { type: string }
+        repos: { type: array, items: { type: string } }
+        branch: { type: string }
+        versions: { type: string }
+        tests: { type: string }
+      required: [summary, repos, branch, versions, tests]
+      additionalProperties: false
+
+  - id: approve-plan
+    depends_on: [plan]
+    wait:
+      form: approval
+      attention: |
+        Approve the plan before any code is written.
+
+        $plan.output.summary
+        Repos: $plan.output.repos
+        Branch: $plan.output.branch
+        Versions: $plan.output.versions
+        Tests: $plan.output.tests
+
+  - id: stop-plan
+    depends_on: [approve-plan]
+    when: &quot;$approve-plan.output.decision == &#x27;reject&#x27;&quot;
+    cancel: The plan was rejected.
+
+  # ── Build: fix in each repo until the workspace check passes ──────────
+  - id: implement
+    depends_on: [approve-plan]
+    when: &quot;$approve-plan.output.decision == &#x27;approve&#x27;&quot;
+    loop:
+      command: implement
+      until_bash: ./scripts/verify.sh
+      max_iterations: 3
+      fresh_context: true
+
+  - id: checks
+    depends_on: [implement]
+    bash: |
+      ./scripts/verify.sh &amp;&amp; echo &quot;verify: passed&quot;
+      for r in priorauth-aging priorauth-api; do
+        echo &quot;== $r: on $(git -C &quot;$r&quot; branch --show-current)&quot;
+        git -C &quot;$r&quot; log --oneline main..HEAD
+        git -C &quot;$r&quot; diff --stat main...HEAD
+        git -C &quot;$r&quot; status --short
+      done
+
+  # ── Review: a second reader, then a person ────────────────────────────
+  - id: review
+    depends_on: [checks]
+    mutates_checkout: false
+    prompt: |
+      Review the fix against docs-in/bug-report.md and $ARTIFACTS_DIR/plan.md. In each repo, read
+      its branch&#x27;s change (git -C &lt;repo&gt; diff main...HEAD). Do not edit anything.
+      Check the bug is fixed with a test, the versions follow CLAUDE.md (priorauth-api depends on the
+      priorauth-aging version that has the fix), and nothing the plan did not name was changed.
+      Write $ARTIFACTS_DIR/review.md.
+    output_format:
+      type: object
+      properties:
+        verdict: { type: string, enum: [READY, NOT-READY] }
+        findings: { type: string }
+      required: [verdict, findings]
+      additionalProperties: false
+
+  - id: approve-change
+    depends_on: [review]
+    wait:
+      form: approval
+      attention: |
+        Review verdict: $review.output.verdict
+        $review.output.findings
+
+        Checks:
+        $checks.output
+
+        Approve to push a branch in each changed repo, or reject to stop.
+
+  - id: stop-change
+    depends_on: [approve-change]
+    when: &quot;$approve-change.output.decision == &#x27;reject&#x27;&quot;
+    cancel: The change was rejected at review.
+
+  # ── Ship: one branch per changed repo, library first ──────────────────
+  - id: push
+    depends_on: [approve-change]
+    when: &quot;$approve-change.output.decision == &#x27;approve&#x27;&quot;
+    bash: |
+      for r in priorauth-aging priorauth-api; do
+        b=$(git -C &quot;$r&quot; branch --show-current)
+        if [ &quot;$b&quot; != main ] &amp;&amp; [ -n &quot;$(git -C &quot;$r&quot; log --oneline main..HEAD)&quot; ]; then
+          git -C &quot;$r&quot; push -u origin &quot;$b&quot; 2&gt;&amp;1
+          echo &quot;$r: open the PR $b -&gt; main&quot;
+        else
+          echo &quot;$r: nothing to push&quot;
+        fi
+      done
+</textarea></div></div><div class="pane" id="bug-3"><div class="code code--wrap"><div class="code__bar"><span class="path">.archon/workflows/team/fix-across-repos/commands/implement.md</span><span>each implement pass's prompt</span></div><textarea class="src" data-lang="md">---
+description: Fix the bug as planned, in each repo the plan names; one pass of the implement loop.
+---
+The bug: $USER_MESSAGE
+
+Implement the approved plan in $ARTIFACTS_DIR/plan.md, following CLAUDE.md. Notes from the person
+who approved the plan: $approve-plan.output.text
+
+If an earlier pass ran, this is what it reported (fix what it left failing):
+$LOOP_PREV_OUTPUT
+
+In each repo the plan names: switch to the plan&#x27;s branch (create it from main if it does not exist
+yet), make that repo&#x27;s change, and commit it there with a message that names the bug report. Do not
+commit in the workspace folder, do not touch a repo the plan does not name, and do not push.
+
+Run ./scripts/verify.sh from the workspace root. Write $ARTIFACTS_DIR/implementation.md: per repo,
+the branch, the files changed, the tests added and the commit; the verify result; and what you
+skipped or did not check. Return the verify result and each repo&#x27;s commit hash.
+</textarea></div></div><div class="pane" id="bug-4"><div class="code code--wrap"><div class="code__bar"><span class="path">.archon/workflows/team/fix-across-repos/commands/scan.md</span><span>the scan node's prompt</span></div><textarea class="src" data-lang="md">---
+description: Read the bug report and both repos; write what a planner needs to know. Changes nothing.
+---
+The bug: $USER_MESSAGE
+
+Read the bug report it names (in docs-in/) and anything attached next to it. Then read both repos
+named in CLAUDE.md: each one&#x27;s build file and version, the classes the bug touches, their tests, and
+the data files. Check each repo&#x27;s tags and current branch.
+
+Write $ARTIFACTS_DIR/scan.md with:
+- each repo: what it is, its version, how it is built and tested, and how the two depend on each other;
+- the cause of the bug as far as the code shows it, with the file and method in each repo;
+- what is missing (data, rules), and which repo it belongs in;
+- risks: callers in either repo, and tests that a change could break.
+
+Do not change any file in either repo or in the workspace. Return a five-line summary.
+</textarea></div></div><div class="pane" id="bug-5"><div class="code code--wrap"><div class="code__bar"><span class="path">CLAUDE.md</span><span>the workspace's rules</span></div><textarea class="src" data-lang="md"># priorauth workspace
+
+The team&#x27;s workspace for the reviewer screen&#x27;s backend. Two code repos, each a git repo of its own with its own
+remote, cloned side by side in this folder (this folder&#x27;s own git repo ignores them):
+
+| Repo               | What it is                                                                 | Version | Verify with           |
+|--------------------|----------------------------------------------------------------------------|---------|-----------------------|
+| `priorauth-aging/` | the request-aging library: business days, tenant holiday calendars (`src/main/resources/data/holidays-&lt;tenant&gt;-&lt;year&gt;.json`), the age badge. `com.acmehealth:priorauth-aging` | 1.0.0 | `./scripts/verify.sh` |
+| `priorauth-api/`   | the Spring Boot 4.1 API the reviewer screen reads (`GET /requests/pending`); depends on priorauth-aging | 1.2.0 | `./scripts/verify.sh` |
+
+Both are Java 21 and Maven. This folder is an Archon **folder project**: the team&#x27;s workflows live in
+`.archon/workflows/`, requests and bug reports in `docs-in/`. Archon runs here in place: it makes no worktree,
+branch or pull request. The workflow and you do the git, in each repo.
+
+## How we work across the two repos
+
+- Tests only through `./scripts/verify.sh` (`scripts\verify.cmd` by hand on Windows): it installs priorauth-aging,
+  then tests priorauth-api against it. Never ad hoc.
+- Git per repo: in each repo the change touches, branch `fix/&lt;slug&gt;` from `main` (the same name in both), and commit
+  there. Never commit code in this workspace folder, never push (the workflow&#x27;s last node does), never touch a repo
+  the plan does not name.
+- A change to priorauth-aging ships as a new version of it (patch for a fix that keeps its API, minor for an
+  addition, major for a breaking change). priorauth-api depends on that version in the same change, and bumps its own.
+- Release order: priorauth-aging&#x27;s PR is merged first, then priorauth-api&#x27;s.
+- Before proposing a version, check each repo&#x27;s tags and its `pom.xml`.
+- Write what a person must read (scan, plan, review) into `$ARTIFACTS_DIR`, not into a repo.
+
+## How to change code
+
+1. Ask, don&#x27;t assume. If something is unclear, say so in the plan; state the assumptions you make.
+2. Smallest complete change. Prefer what already exists (this codebase, the JDK, an installed dependency) over new
+   code; no features, options or abstractions nobody asked for. Deleting beats adding.
+3. Surgical. Touch only what the approved plan names and match the surrounding style. Mention unrelated problems,
+   don&#x27;t fix them.
+4. Prove it. New branching, parsing, money or security logic gets a test; run the verify script before saying done.
+5. Never cut validation at trust boundaries, error handling that prevents data loss, security, accessibility, or
+   anything the request asked for.
+6. End each summary with what you skipped or did not check, and any risk.
+</textarea></div></div><div class="pane" id="bug-6"><div class="code code--wrap"><div class="code__bar"><span class="path">scripts/verify.sh</span><span>the one check</span></div><textarea class="src" data-lang="bash">#!/usr/bin/env bash
+# The one verification command for this workspace. Archon runs it in loop until_bash and bash nodes.
+# priorauth-api depends on priorauth-aging: install the library (the version its pom names), then test the API.
+set -euo pipefail
+cd &quot;$(dirname &quot;$0&quot;)/..&quot;
+(cd priorauth-aging &amp;&amp; mvn -q install)
+(cd priorauth-api &amp;&amp; mvn -q test)
+</textarea></div></div></div><div class="gwrap"><figure class="dia"><svg viewBox="0 0 820 614" role="img" aria-label="fix-across-repos: the 10 nodes this run goes through" style="width:100%;height:auto;font-family:var(--font-text);"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" style="fill:var(--ink-3)"/></marker></defs><rect x="145" y="20" width="200" height="44" rx="9" style="fill:var(--plan);fill-opacity:0.13;stroke:var(--plan);stroke-width:1.6"/><text x="245.0" y="39" text-anchor="middle" style="font-family:var(--font-mono);fill:var(--ink);font-size:12.5px;font-weight:700">scan</text><text x="245.0" y="55" text-anchor="middle" style="fill:var(--ink-3);font-size:10.5px;font-weight:400">AI command</text><text x="359" y="46.0" text-anchor="start" style="fill:var(--ink-2);font-size:11px;font-weight:400">step 5</text><rect x="145" y="90" width="200" height="44" rx="9" style="fill:var(--plan);fill-opacity:0.13;stroke:var(--plan);stroke-width:1.6"/><text x="245.0" y="109" text-anchor="middle" style="font-family:var(--font-mono);fill:var(--ink);font-size:12.5px;font-weight:700">plan</text><text x="245.0" y="125" text-anchor="middle" style="fill:var(--ink-3);font-size:10.5px;font-weight:400">AI prompt</text><text x="359" y="116.0" text-anchor="start" style="fill:var(--ink-2);font-size:11px;font-weight:400">step 5</text><rect x="145" y="160" width="200" height="44" rx="9" style="fill:var(--gate);fill-opacity:0.13;stroke:var(--gate);stroke-width:1.6;stroke-dasharray:5 4"/><text x="245.0" y="179" text-anchor="middle" style="font-family:var(--font-mono);fill:var(--ink);font-size:12.5px;font-weight:700">approve-plan</text><text x="245.0" y="195" text-anchor="middle" style="fill:var(--ink-3);font-size:10.5px;font-weight:400">wait</text><text x="359" y="186.0" text-anchor="start" style="fill:var(--ink-2);font-size:11px;font-weight:400">step 6</text><rect x="30" y="230" width="200" height="44" rx="9" style="fill:var(--bad);fill-opacity:0.13;stroke:var(--bad);stroke-width:1.6"/><text x="130.0" y="249" text-anchor="middle" style="font-family:var(--font-mono);fill:var(--ink);font-size:12.5px;font-weight:700">stop-plan</text><text x="130.0" y="265" text-anchor="middle" style="fill:var(--ink-3);font-size:10.5px;font-weight:400">cancel</text><rect x="260" y="230" width="200" height="44" rx="9" style="fill:var(--build);fill-opacity:0.13;stroke:var(--build);stroke-width:1.6"/><text x="360.0" y="249" text-anchor="middle" style="font-family:var(--font-mono);fill:var(--ink);font-size:12.5px;font-weight:700">implement</text><text x="360.0" y="265" text-anchor="middle" style="fill:var(--ink-3);font-size:10.5px;font-weight:400">AI loop</text><text x="474" y="256.0" text-anchor="start" style="fill:var(--ink-2);font-size:11px;font-weight:400">step 7</text><rect x="145" y="300" width="200" height="44" rx="9" style="fill:var(--ship);fill-opacity:0.13;stroke:var(--ship);stroke-width:1.6"/><text x="245.0" y="319" text-anchor="middle" style="font-family:var(--font-mono);fill:var(--ink);font-size:12.5px;font-weight:700">checks</text><text x="245.0" y="335" text-anchor="middle" style="fill:var(--ink-3);font-size:10.5px;font-weight:400">bash</text><text x="359" y="326.0" text-anchor="start" style="fill:var(--ink-2);font-size:11px;font-weight:400">step 8</text><rect x="145" y="370" width="200" height="44" rx="9" style="fill:var(--plan);fill-opacity:0.13;stroke:var(--plan);stroke-width:1.6"/><text x="245.0" y="389" text-anchor="middle" style="font-family:var(--font-mono);fill:var(--ink);font-size:12.5px;font-weight:700">review</text><text x="245.0" y="405" text-anchor="middle" style="fill:var(--ink-3);font-size:10.5px;font-weight:400">AI prompt</text><text x="359" y="396.0" text-anchor="start" style="fill:var(--ink-2);font-size:11px;font-weight:400">step 8</text><rect x="145" y="440" width="200" height="44" rx="9" style="fill:var(--gate);fill-opacity:0.13;stroke:var(--gate);stroke-width:1.6;stroke-dasharray:5 4"/><text x="245.0" y="459" text-anchor="middle" style="font-family:var(--font-mono);fill:var(--ink);font-size:12.5px;font-weight:700">approve-change</text><text x="245.0" y="475" text-anchor="middle" style="fill:var(--ink-3);font-size:10.5px;font-weight:400">wait</text><text x="359" y="466.0" text-anchor="start" style="fill:var(--ink-2);font-size:11px;font-weight:400">step 10</text><rect x="30" y="510" width="200" height="44" rx="9" style="fill:var(--bad);fill-opacity:0.13;stroke:var(--bad);stroke-width:1.6"/><text x="130.0" y="529" text-anchor="middle" style="font-family:var(--font-mono);fill:var(--ink);font-size:12.5px;font-weight:700">stop-change</text><text x="130.0" y="545" text-anchor="middle" style="fill:var(--ink-3);font-size:10.5px;font-weight:400">cancel</text><rect x="260" y="510" width="200" height="44" rx="9" style="fill:var(--ship);fill-opacity:0.13;stroke:var(--ship);stroke-width:1.6"/><text x="360.0" y="529" text-anchor="middle" style="font-family:var(--font-mono);fill:var(--ink);font-size:12.5px;font-weight:700">push</text><text x="360.0" y="545" text-anchor="middle" style="fill:var(--ink-3);font-size:10.5px;font-weight:400">bash</text><text x="474" y="536.0" text-anchor="start" style="fill:var(--ink-2);font-size:11px;font-weight:400">step 10</text><path d="M245.0 64 C245.0 78, 245.0 76, 245.0 87" style="fill:none;stroke:var(--ink-3);stroke-width:1.5" marker-end="url(#ah)"/><path d="M245.0 134 C245.0 148, 245.0 146, 245.0 157" style="fill:none;stroke:var(--ink-3);stroke-width:1.5" marker-end="url(#ah)"/><path d="M245.0 204 C245.0 218, 130.0 216, 130.0 227" style="fill:none;stroke:var(--ink-3);stroke-width:1.5" marker-end="url(#ah)"/><text x="122.0" y="222" text-anchor="end" style="fill:var(--gate);font-size:10px;font-weight:600">reject</text><path d="M245.0 204 C245.0 218, 360.0 216, 360.0 227" style="fill:none;stroke:var(--ink-3);stroke-width:1.5" marker-end="url(#ah)"/><text x="368.0" y="222" text-anchor="start" style="fill:var(--gate);font-size:10px;font-weight:600">approve</text><path d="M360.0 274 C360.0 288, 245.0 286, 245.0 297" style="fill:none;stroke:var(--ink-3);stroke-width:1.5" marker-end="url(#ah)"/><path d="M245.0 344 C245.0 358, 245.0 356, 245.0 367" style="fill:none;stroke:var(--ink-3);stroke-width:1.5" marker-end="url(#ah)"/><path d="M245.0 414 C245.0 428, 245.0 426, 245.0 437" style="fill:none;stroke:var(--ink-3);stroke-width:1.5" marker-end="url(#ah)"/><path d="M245.0 484 C245.0 498, 130.0 496, 130.0 507" style="fill:none;stroke:var(--ink-3);stroke-width:1.5" marker-end="url(#ah)"/><text x="122.0" y="502" text-anchor="end" style="fill:var(--gate);font-size:10px;font-weight:600">reject</text><path d="M245.0 484 C245.0 498, 360.0 496, 360.0 507" style="fill:none;stroke:var(--ink-3);stroke-width:1.5" marker-end="url(#ah)"/><text x="368.0" y="502" text-anchor="start" style="fill:var(--gate);font-size:10px;font-weight:600">approve</text><rect x="30" y="588" width="14" height="14" rx="3" style="fill:var(--plan);fill-opacity:0.13;stroke:var(--plan);stroke-width:1.6"/><text x="50" y="599" text-anchor="start" style="fill:var(--ink-3);font-size:11px;font-weight:400">AI prompt</text><rect x="142" y="588" width="14" height="14" rx="3" style="fill:var(--build);fill-opacity:0.13;stroke:var(--build);stroke-width:1.6"/><text x="162" y="599" text-anchor="start" style="fill:var(--ink-3);font-size:11px;font-weight:400">AI loop</text><rect x="254" y="588" width="14" height="14" rx="3" style="fill:var(--ship);fill-opacity:0.13;stroke:var(--ship);stroke-width:1.6"/><text x="274" y="599" text-anchor="start" style="fill:var(--ink-3);font-size:11px;font-weight:400">bash</text><rect x="366" y="588" width="14" height="14" rx="3" style="fill:var(--gate);fill-opacity:0.13;stroke:var(--gate);stroke-width:1.6;stroke-dasharray:5 4"/><text x="386" y="599" text-anchor="start" style="fill:var(--ink-3);font-size:11px;font-weight:400">wait</text><rect x="478" y="588" width="14" height="14" rx="3" style="fill:var(--bad);fill-opacity:0.13;stroke:var(--bad);stroke-width:1.6"/><text x="498" y="599" text-anchor="start" style="fill:var(--ink-3);font-size:11px;font-weight:400">cancel</text></svg><figcaption>fix-across-repos: the 10 nodes this run goes through</figcaption></figure></div><div class="plain"><div><b>In plain words.</b> Compared with the one-repo workflow, three things moved into the YAML: the implement prompt says <i>which repos</i> and <i>which branch in each</i>, the checks node loops over both repos, and the push node pushes a branch only where there are commits. Archon does none of it for a folder project.</div></div>
+</section>
+<section class="step" id="s03" data-step="3" data-phase="Set up" style="--c:var(--setup)">
+  <div class="step__head"><span class="step__n">3</span><div><span class="chip">before</span><h2>Before the run: it builds, and the bug shows</h2><p class="step__why">The check passes on main, and the jar gives the numbers Ravi complained about.</p></div><span class="who">Kiran · 2 min</span></div>
+<div class="io"><div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">Git Bash</span><span class="os-mac">Git Bash</span></span></div><pre class="os-win">./scripts/verify.sh
+cd priorauth-api; mvn -q -DskipTests package
+java -jar target/priorauth-api-1.2.0.jar
+curl &quot;localhost:8080/requests/pending?asOf=2027-01-05&quot;</pre><pre class="os-mac">./scripts/verify.sh
+cd priorauth-api; mvn -q -DskipTests package
+java -jar target/priorauth-api-1.2.0.jar
+curl &quot;localhost:8080/requests/pending?asOf=2027-01-05&quot;</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">verify and the API return <span class="tag">real</span></div><pre>verify: passed
+
+PA-10231  received 2026-10-01  63 bd OVER 5
+PA-10244  received 2026-10-06  60 bd OVER 5
+PA-10263  received 2026-10-09  57 bd OVER 5</pre></div></div><div class="note">1 January 2027 lies inside all three requests' periods, so with New Year's Day counted as a working day every age is one too high. The 2026 holiday file is the only one the library ships.</div>
+</section>
+<section class="step" id="s04" data-step="4" data-phase="Set up" style="--c:var(--setup)">
+  <div class="step__head"><span class="step__n">4</span><div><span class="chip">free check</span><h2>Dry-run it: not with --folder</h2><p class="step__why">A dry run walks the graph with stub outputs, no model and no cost. For a folder project it has to run without the flag.</p></div><span class="who">Kiran · 1 min</span></div>
+<div class="io"><div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">any shell</span><span class="os-mac">any shell</span></span></div><pre class="os-win">archon workflow run fix-across-repos --folder --dry-run --default-stubs &quot;Fix the bug in docs-in/bug-report.md&quot;</pre><pre class="os-mac">archon workflow run fix-across-repos --folder --dry-run --default-stubs &quot;Fix the bug in docs-in/bug-report.md&quot;</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Archon returns <span class="tag">real</span></div><pre>Error: --dry-run cannot be combined with --folder.</pre></div></div><div class="io"><div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">any shell</span><span class="os-mac">any shell</span></span></div><pre class="os-win">archon workflow run fix-across-repos --dry-run --default-stubs &quot;Fix the bug in docs-in/bug-report.md&quot;</pre><pre class="os-mac">archon workflow run fix-across-repos --dry-run --default-stubs &quot;Fix the bug in docs-in/bug-report.md&quot;</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Archon returns <span class="tag">real · 1.2s</span></div><pre>…
+PAUSED    approve-plan (wait) — durable wait
+…
+Simulation outcome: paused
+Authored outcome: undeclared</pre></div></div><div class="note">Without <code>--folder</code> the dry run treats the workspace (a git repo) as an ordinary repo, which is fine for checking the graph: a dry run registers nothing and creates no run. <code>archon project list</code> was the same before and after.</div>
+</section>
+<div class="phase" style="--c:var(--plan)"><i></i>Plan<span>steps 5–6 · start from the root, approve the plan</span></div>
+<section class="step" id="s05" data-step="5" data-phase="Plan" style="--c:var(--plan)">
+  <div class="step__head"><span class="step__n">5</span><div><span class="chip">start</span><h2>Start the run from the workspace root</h2><p class="step__why">The first run with --folder registers the folder project; Archon then works in place, with no worktree.</p></div><span class="who">Kiran · scan 1m 16s · $0.53 · plan 1m 05s · $0.55</span></div>
+<div class="io"><div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">any shell</span><span class="os-mac">any shell</span></span></div><pre class="os-win">archon workflow run fix-across-repos --folder --detach &quot;Fix the bug in docs-in/bug-report.md (Ravi, 17 Oct): New Year&#x27;s Day counted as a working day&quot;</pre><pre class="os-mac">archon workflow run fix-across-repos --folder --detach &quot;Fix the bug in docs-in/bug-report.md (Ravi, 17 Oct): New Year&#x27;s Day counted as a working day&quot;</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Archon returns <span class="tag">real</span></div><pre>Discovery: root=C:\work\archon-multirepo\priorauth-workspace workflows=26 bundled=25 global=0 project=1 installed=0
+Registered folder project &quot;priorauth-workspace&quot; (C:\work\archon-multirepo\priorauth-workspace)
+Started &#x27;fix-across-repos&#x27; in the background.
+Run id: 5138e1be8e01d39ed631d192df3bb2c1
+Track it with: archon workflow get 5138e1be8e01d39ed631d192df3bb2c1
+Transcript: C:\Users\you\.archon\workspaces\_folder\priorauth-workspace\logs\5138e1be8e01d39ed631d192df3bb2c1.jsonl
+Child output: C:\Users\you\.archon\logs\detached-run-cli-1793778233437-d60fda43787ee077c46bc06cfed1f647.log</pre></div></div><div class="open"><div class="tabs" role="tablist"><button class="tab" role="tab" aria-selected="true" data-pane="plan-1">scan.md</button><button class="tab" role="tab" aria-selected="false" data-pane="plan-2">plan.md</button></div><div class="pane is-on" id="plan-1"><div class="code code--wrap"><div class="code__bar"><span class="path">$ARTIFACTS_DIR/scan.md</span><span>what the scan found in both repos</span></div><textarea class="src" data-lang="md"># Scan: New Year&#x27;s Day counted as a working day (Ravi Menon, 17 Oct 2026)
+
+Source: `docs-in/bug-report.md`. Attachment next to it: `docs-in/holidays-TX-01-2027.json`.
+Ravi&#x27;s report: `GET /requests/pending?asOf=2027-01-05` shows PA-10231 (received 2026-10-01) and every other pending
+TX-01 request one business day older than the nightly report gives. He thinks 1 Jan 2027 is counted as a working
+day. The rule has not changed: weekends and the tenant&#x27;s holidays don&#x27;t count. The nightly report is correct.
+
+## The repos
+
+| | priorauth-aging | priorauth-api |
+|---|---|---|
+| What | Library: `BusinessDays`, `HolidayCalendar` (`@Service`), `AgeBadge` (record) in `com.acmehealth.priorauth.aging` | Spring Boot API: `GET /requests/pending[?asOf=]` (`PendingRequestsController`), `RequestStore` (reads `data/requests.sample.json`), `PriorAuthRequest` |
+| Coordinates | `com.acmehealth:priorauth-aging:1.0.0` (pom) | `com.acmehealth:priorauth-api:1.2.0` (pom) |
+| Tags | `v1.0.0` (only tag) | `v1.2.0` (latest tag; history covers 1.0.2 → 1.1.0 → 1.2.0) |
+| Branch / state | `main`, clean, 1 commit (`f6153ee`) | `main`, clean, HEAD `c2dc5d4` |
+| `fix/*` branches | none | none |
+| Build | Maven, Java 21, parent `spring-boot-starter-parent` 4.1.1; deps: spring-boot-starter, `tools.jackson.core:jackson-databind` (Jackson 3) | Maven, Java 21, same parent 4.1.1; spring-boot-starter-webmvc, `priorauth-aging` **1.0.0** (pinned), spring-boot-maven-plugin |
+| Tests | `BusinessDaysTest` (4), `AgeBadgeTest` (1). **No test for `HolidayCalendar`.** | `PendingRequestsControllerTest` (3, full `@SpringBootTest` + MockMvc), `RequestStoreTest` (2) |
+
+**Dependency.** priorauth-api pulls priorauth-aging 1.0.0 out of the local Maven repo. The controller injects
+`HolidayCalendar` and calls `AgeBadge.of(...)`. Component scanning picks up `HolidayCalendar`: the API&#x27;s
+`@SpringBootApplication` sits in `com.acmehealth.priorauth`, and the aging package is beneath it.
+
+**Verification.** Only `scripts/verify.sh` / `scripts\verify.cmd` at the **workspace** root. It runs
+`mvn -q install` in priorauth-aging and then `mvn -q test` in priorauth-api. Neither repo has a `scripts/` folder of
+its own. CLAUDE.md&#x27;s table (&quot;Verify with `./scripts/verify.sh`&quot; per repo) means the workspace script.
+
+## The cause, as far as the code shows it
+
+**priorauth-aging, `HolidayCalendar.load(String tenantId)`**
+(`src/main/java/com/acmehealth/priorauth/aging/HolidayCalendar.java`):
+
+```java
+ClassPathResource file = new ClassPathResource(&quot;data/holidays-&quot; + tenantId + &quot;-2026.json&quot;);
+```
+
+- **The year is hardcoded to 2026.** `forTenant(tenantId)` only ever loads the 2026 file, so no 2027 date can be a
+  holiday. That stays true even after a 2027 file is added.
+- The cache is keyed by tenant only (`Map&lt;String, Set&lt;LocalDate&gt;&gt;`). It has no notion of a year, so one tenant gets
+  one set.
+- When the file is missing, `load` returns `Set.of()` without a sound (&quot;the safe default: the age is then slightly
+  higher, never lower&quot;). That silent fallback is why the bug shows up as a wrong age and not as an error. For a
+  2026 date the file is present. For 2027 dates, today&#x27;s code doesn&#x27;t even look for a file.
+
+**priorauth-aging, `BusinessDays.between` / `isBusinessDay`**: correct. They count days after `start` up to and
+including `end`, skipping Sat, Sun and any date in the set they are given. They only ever see the 2026 set. For
+1 Oct 2026 → 5 Jan 2027 the range crosses the year, so the set needs holidays from **both** years.
+
+**priorauth-api, `PendingRequestsController.pending(LocalDate asOf)`**
+(`src/main/java/com/acmehealth/priorauth/api/PendingRequestsController.java`): it calls
+`holidays.forTenant(r.tenantId())` with no year or range and passes the result to
+`AgeBadge.of(r.receivedAt(), day, ..., thresholdDays)`. That is correct for the API&#x27;s role. The defect is in the
+library, not here.
+
+**Arithmetic check (by hand, not run):** PA-10231, 2026-10-01 → 2027-01-05.
+- Weekdays from 2 Oct to 5 Jan: 21 (Oct) + 21 (Nov) + 23 (Dec) + 3 (1, 4, 5 Jan) = 68.
+- Minus the five 2026 TX-01 holidays in range (12 Oct, 11 Nov, 26 Nov, 27 Nov, 25 Dec) = **63**. That is what the screen shows today.
+- Minus 1 Jan 2027 = **62**. That is what the nightly report should show.
+- 1 Jan 2027 is a Friday and the only 2027 holiday before 5 Jan, so every pending row is exactly one too high.
+
+This agrees with Ravi&#x27;s report.
+
+## What is missing, and where it belongs
+
+1. **Data: the TX-01 2027 holiday file.** It belongs in **priorauth-aging** as
+   `src/main/resources/data/holidays-TX-01-2027.json`, with the content of `docs-in/holidays-TX-01-2027.json`
+   (same shape as the 2026 file: `tenantId` plus 11 dates, 2027-01-01 … 2027-12-24).
+   Note: the tenant id is `TX-01`, so the name is `holidays-&lt;tenant&gt;-&lt;year&gt;.json` with a hyphen inside the tenant.
+2. **Rule: load the holidays for every year the age range covers, not just 2026.** This also belongs in
+   **priorauth-aging** (`HolidayCalendar`). Ways to do it, for the planner to choose from:
+   - (a) Keep `forTenant(String)` and have it return the union of every `holidays-&lt;tenant&gt;-*.json` on the
+     classpath. Spring&#x27;s `PathMatchingResourcePatternResolver` is already available through spring-core, and the
+     signature stays the same.
+   - (b) Load per year and union the years from `receivedAt` to `asOf`. This changes or adds to the API, and
+     priorauth-api&#x27;s controller would need to change.
+   - Option (a) keeps the public API as it is, which points to a **patch** release, aging 1.0.0 → **1.0.1**.
+     priorauth-api then needs a dependency bump to 1.0.1 and its own patch, 1.2.0 → **1.2.1** (CLAUDE.md rule).
+     Option (b) is a minor (1.1.0) if a method is added.
+3. **Not in either repo, and an open question:** whether the &quot;nightly report&quot; reads these same files. The class
+   javadoc says &quot;the same list the nightly report uses&quot;. I have not checked that.
+
+priorauth-api needs **no data change**. It holds no holiday data.
+
+## Risks
+
+**Callers**
+- priorauth-aging:
+  - `HolidayCalendar.forTenant` is called only by `PendingRequestsController.pending` (priorauth-api).
+  - `AgeBadge.of` is called by the controller and `AgeBadgeTest`.
+  - `BusinessDays.between` is called by `AgeBadge.of` and `BusinessDaysTest`.
+  - No other callers in either repo. Callers outside these two repos, if the library is published, were not checked.
+- If `forTenant`&#x27;s signature or the meaning of its return value changes, priorauth-api&#x27;s controller must change in
+  the same change. With option (a) it doesn&#x27;t need to.
+- Spring wiring: `HolidayCalendar` has a single `JsonMapper` constructor parameter. If a new constructor dependency
+  is added (such as a resource resolver), it must still be resolvable in priorauth-api&#x27;s context and in
+  `@SpringBootTest`.
+
+**Tests that a change could break**
+- `PendingRequestsControllerTest.eachRowCarriesItsAgeAndFlag` (api): `asOf=2026-10-13`, expects PA-10231 = 7 bd
+  (&quot;7 bd OVER 5&quot;) and PA-10244 = 4 bd. It depends on 2026-10-12 still being loaded. Any change that drops or
+  replaces the 2026 file breaks it.
+- `PendingRequestsControllerTest.listsPendingRequestsOldestFirst` (api): no `asOf`, so it uses `LocalDate.now()`.
+  It only asserts ids and count, so it is unaffected. `asOfBeforeReceivedIsABadRequest` relies on
+  `IllegalArgumentException` from `BusinessDays.between` being mapped to 400. Keep that exception type.
+- `BusinessDaysTest`, `AgeBadgeTest` (aging): they pass sets in directly, so a `HolidayCalendar` change doesn&#x27;t
+  touch them.
+- No test covers `HolidayCalendar`, nor any range that crosses a year. The fix will need a new test for the
+  file-loading and parsing logic (CLAUDE.md &quot;Prove it&quot;), for example a 2027 `asOf` in the controller test or a unit
+  test for `HolidayCalendar`.
+- Order of the release and the build: verify installs aging from the working tree. If the aging version bumps to
+  1.0.1 and the api pom still says 1.0.0, the API is tested against a stale 1.0.0 in `~/.m2` (or fails to resolve).
+  Bump both in the same change.
+
+**Other observations (not to fix here)**
+- The silent `Set.of()` for a missing file will cause the same bug again in January 2028 if nobody adds a 2028
+  file. It could be worth a log line or a failure. That is the planner&#x27;s or the team&#x27;s call, not part of this request.
+- Holiday sets go into a `ConcurrentHashMap` cache for the life of the process. A long-running instance won&#x27;t see
+  new files without a restart. Files ship in the jar, so this only matters across deployments.
+- The priorauth-api README mentions `../aidlc/...`, which is not in this workspace. Unrelated.
+
+## Not checked
+
+- I did not run the verify script. This scan changes nothing.
+- The 63 → 62 figures are hand arithmetic, not a test run.
+- I did not compare the 2027 list against an authoritative TX-01 source. I took payer ops&#x27; attachment as given.
+- I did not check the nightly report&#x27;s source code or data.
+- I did not check remotes or open PRs.
+</textarea></div></div><div class="pane" id="plan-2"><div class="code code--wrap"><div class="code__bar"><span class="path">$ARTIFACTS_DIR/plan.md</span><span>the plan, per repo</span></div><textarea class="src" data-lang="md"># Plan: New Year&#x27;s Day counted as a working day (Ravi Menon, 17 Oct 2026)
+
+Based on `scan.md`. The cause is in **priorauth-aging**. `HolidayCalendar.load()` only reads
+`data/holidays-&lt;tenant&gt;-2026.json`, so no 2027 holiday is ever loaded. Also, no TX-01 2027 file exists yet.
+**priorauth-api** gets no logic change. It moves to the fixed library and adds a test that reproduces Ravi&#x27;s request.
+
+Branch in both repos, from `main`: **`fix/holidays-across-years`**
+
+## The approach
+
+`HolidayCalendar.forTenant(String tenantId)` keeps its signature. It will return the **union of every year&#x27;s file
+for that tenant** on the classpath (`data/holidays-&lt;tenant&gt;-????.json`). An age range that crosses a year boundary
+then sees the holidays of both years. That is what PA-10231 needs: 1 Oct 2026 → 5 Jan 2027.
+
+Why this approach:
+- It is the smallest complete change. The public API stays the same, so priorauth-api&#x27;s controller doesn&#x27;t change.
+- It uses what is already on the classpath: Spring&#x27;s `PathMatchingResourcePatternResolver` from spring-core. No new
+  dependency.
+- Every file for a tenant is small and cached for the process&#x27;s lifetime. Loading all of them costs nothing that
+  matters.
+
+Pattern detail: use `????` (exactly four characters for the year), not `*`. With `*`, a tenant id that is a prefix
+of another would pick up the other tenant&#x27;s files. For example, `TX` would match `holidays-TX-01-2026.json`.
+
+Rejected: passing a year range into `HolidayCalendar` (`forTenant(tenant, from, to)`). It is a new API, which means
+a minor release. It also needs a controller change in priorauth-api, and it adds nothing for this bug.
+
+## priorauth-aging
+
+**Version:** 1.0.0 (pom `1.0.0`, tag `v1.0.0`) → **1.0.1**. This is a patch: a fix that keeps the API.
+
+**Files to change**
+
+| File | Change |
+|---|---|
+| `src/main/resources/data/holidays-TX-01-2027.json` | **New.** Copied byte-for-byte from `docs-in/holidays-TX-01-2027.json`: `tenantId` `TX-01` and 11 dates, 2027-01-01 … 2027-12-24. |
+| `src/main/java/com/acmehealth/priorauth/aging/HolidayCalendar.java` | Change `load(tenantId)`: resolve `classpath*:data/holidays-&lt;tenantId&gt;-????.json` with a `PathMatchingResourcePatternResolver` (a private field, so the constructor stays `HolidayCalendar(JsonMapper)`). Parse each file exactly as today and add all its dates to one set. Return `Set.copyOf(...)`. Keep the rest as it is: no files means `Set.of()`; an `IOException` means `IllegalStateException(&quot;cannot read holidays for tenant …&quot;)`. Update the class javadoc to say &quot;one JSON file per tenant per year&quot;. |
+| `pom.xml` | `&lt;version&gt;1.0.0&lt;/version&gt;` → `1.0.1`. |
+
+**Tests to add**: a new `src/test/java/com/acmehealth/priorauth/aging/HolidayCalendarTest.java`. It is a plain
+unit test using `new HolidayCalendar(JsonMapper.builder().build())`, the same way `RequestStoreTest` builds its mapper.
+
+1. `loadsEveryYearForTheTenant`: `forTenant(&quot;TX-01&quot;)` contains `2026-01-01`, `2026-10-12` **and** `2027-01-01`.
+   It has 22 dates: 11 from each file. This test would fail today.
+2. `tenantWithoutFilesHasNoHolidays`: `forTenant(&quot;ZZ-99&quot;)` is empty. It pins the existing safe default.
+3. `ageAcrossTheYearSkipsNewYearsDay`: the scenario from the report, run through the real calendar.
+   `BusinessDays.between(2026-10-01, 2027-01-05, forTenant(&quot;TX-01&quot;)) == 62`. Today it is 63.
+
+`BusinessDaysTest` and `AgeBadgeTest` stay as they are.
+
+## priorauth-api
+
+**Version:** 1.2.0 (pom `1.2.0`, tag `v1.2.0`) → **1.2.1**. A patch: a dependency bump that fixes a wrong value,
+with no API change.
+
+**Files to change**
+
+| File | Change |
+|---|---|
+| `pom.xml` | `&lt;version&gt;1.2.0&lt;/version&gt;` → `1.2.1`. The `priorauth-aging` dependency goes from `1.0.0` → `1.0.1`. |
+
+No change to `src/main`.
+
+**Tests to add**: one test method in the existing
+`src/test/java/com/acmehealth/priorauth/api/PendingRequestsControllerTest.java`:
+
+- `newYearsDayIsNotABusinessDay`: `GET /requests/pending?asOf=2027-01-05` should return:
+
+  | Row | Request | Received | Expected age | Today&#x27;s age | Label |
+  |---|---|---|---|---|---|
+  | `$[0]` | PA-10231 | 2026-10-01 | 62 bd | 63 bd | `62 bd OVER 5` |
+  | `$[1]` | PA-10244 | 2026-10-06 | 60 bd | 61 bd | |
+  | `$[2]` | PA-10263 | 2026-10-09 | 57 bd | 58 bd | |
+
+  The expected figures are my hand count: weekdays in range minus 12 Oct, 11 Nov, 26 Nov, 27 Nov, 25 Dec 2026 and
+  1 Jan 2027. They match Ravi&#x27;s &quot;one lower than the screen&quot; for every row. If the verify run disagrees, stop and
+  re-count before you change a number.
+
+The existing `eachRowCarriesItsAgeAndFlag` (asOf 2026-10-13, 7 bd and 4 bd) stays as it is. It proves the 2026 file
+is still loaded.
+
+## Order
+
+**Change**
+1. priorauth-aging: on `fix/holidays-across-years`, add the 2027 file, the `HolidayCalendar` change,
+   `HolidayCalendarTest` and pom 1.0.1. Commit there.
+2. priorauth-api: on `fix/holidays-across-years`, make the pom changes (1.2.1, aging 1.0.1) and add the new controller
+   test. Commit there.
+
+The aging change comes first because the api pom can only resolve 1.0.1 once the library has been installed.
+
+**Release** (CLAUDE.md)
+1. The priorauth-aging PR is merged first, and 1.0.1 is published and tagged `v1.0.1`.
+2. The priorauth-api PR is merged second, then tagged `v1.2.1`.
+
+Its pom names aging 1.0.1, so merging it before step 1 would break its build anywhere but this workspace. Pushing and
+opening the PRs is the workflow&#x27;s last node, not this plan&#x27;s.
+
+Nothing is committed in the workspace folder. The original `docs-in/holidays-TX-01-2027.json` stays where it is.
+
+## How `./scripts/verify.sh` proves it
+
+`scripts/verify.sh` (`scripts\verify.cmd` on Windows) does two things:
+
+1. **`cd priorauth-aging &amp;&amp; mvn -q install`**: builds 1.0.1 from the working branch, runs `BusinessDaysTest`,
+   `AgeBadgeTest` and the new `HolidayCalendarTest`, and installs `priorauth-aging-1.0.1.jar` into `~/.m2`. The
+   2027 file is inside that jar. `loadsEveryYearForTheTenant` and `ageAcrossTheYearSkipsNewYearsDay` (62) fail on
+   the old code.
+2. **`cd priorauth-api &amp;&amp; mvn -q test`**: resolves aging **1.0.1**, the jar just installed, so the API is tested
+   against the fix and not the stale 1.0.0. It runs the whole application through MockMvc:
+   - `newYearsDayIsNotABusinessDay` reproduces Ravi&#x27;s exact request and expects 62, 60 and 57.
+   - `eachRowCarriesItsAgeAndFlag` still expects 7 and 4 for 2026-10-13, so there is no regression.
+   - `asOfBeforeReceivedIsABadRequest` still expects 400.
+   - `RequestStoreTest` is unchanged.
+
+A green run means: the 2027 holidays load, the 2026 ones still load, a range across the year skips 1 Jan, and the
+API serves the corrected age. Recommended: add the two failing tests first and run verify once to see them fail
+(red), then make the fix (green).
+
+## Assumptions and open questions
+
+- **A1.** The attached 2027 list from payer ops is authoritative and is the same list the nightly report uses. I have
+  not checked it against the nightly report&#x27;s source.
+- **A2.** Patch versions (1.0.1, 1.2.1) are right, because no public signature changes.
+- **Q1, for the team.** When a tenant has no file for the year an age touches, the calendar still quietly uses no
+  holidays. That is how this bug happened, and it will happen again in January 2028 unless someone adds a 2028
+  file. The fix could log or fail when that year is missing. This plan does **not** do that: nobody asked for it,
+  and it changes behaviour. Raise it with Ravi and Kiran.
+
+## Skipped / not checked / risk
+
+- **Not checked:** remotes and open PRs, and whether any other consumer of priorauth-aging exists outside these
+  two repos.
+- **Risk:** `classpath*:` with a wildcard must also find the files inside the packaged Spring Boot jar, not only in
+  `target/classes`. Maven tests run against the installed library jar in `~/.m2`, so step 2 of verify exercises the
+  jar case. `mvn spring-boot:run` and the fat jar are not covered by verify.
+- **Risk:** a malformed or misnamed holiday file now affects every age for that tenant, not just one year&#x27;s. The
+  existing `IllegalStateException` on a read error is kept, so the failure stays loud.
+- **Not done:** I did not check that a file&#x27;s `tenantId` field matches its file name. Today&#x27;s code doesn&#x27;t check it
+  either. It is out of scope.
+</textarea></div></div></div><div class="note"><code>_folder/priorauth-workspace</code>: the run's transcript and artifacts live under the folder project in <code>~/.archon/workspaces/</code>, not under either repo. The scan read both repos from the root, found the cause in the library (<code>HolidayCalendar</code> loads only one year's file) and saw that the API needs only the new version.</div>
+</section>
+<section class="step" id="s06" data-step="6" data-phase="Plan" style="--c:var(--plan)">
+  <div class="step__head"><span class="step__n">6</span><div><span class="chip">wait 1</span><h2>Approve the plan, with a correction</h2><p class="step__why">The plan is right about the code and the versions, and wrong about two of the expected numbers.</p></div><span class="who">Meena · 23s to answer</span></div>
+<div class="io"><div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">any shell</span><span class="os-mac">any shell</span></span></div><pre class="os-win">archon workflow wait 5138e1be… --json</pre><pre class="os-mac">archon workflow wait 5138e1be… --json</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">The run is waiting <span class="tag">real · approve-plan</span></div><pre>Approve the plan before any code is written.
+
+I&#x27;ve written `plan.md`; nothing in either repo or the workspace has changed yet. The plan is to fix priorauth-aging, which has the bug, and have priorauth-api move to the fixed version. `HolidayCalendar.forTenant(String)` keeps its signature but will return the holidays from every year&#x27;s file for the tenant, found with the pattern `data/holidays-&lt;tenant&gt;-????.json`. The four-character `????` stops a short tenant id like `TX` from matching another tenant&#x27;s files such as `TX-01`. The plan also adds the TX-01 2027 holiday file from `docs-in`. priorauth-api&#x27;s code doesn&#x27;t change; only its pom is updated and one test is added. Order: priorauth-aging changes and is released first (tag v1.0.1), then priorauth-api (tag v1.2.1). Pushing and opening the PRs is left to the workflow&#x27;s last node. One open question for the team: when a year&#x27;s holiday file is missing, the code still quietly uses no holidays, so this will happen again in January 2028. The plan leaves that alone because nobody asked for it. Not checked: remotes, open PRs, other users of the library outside these two repos, whether the nightly report uses the same holiday list, and whether the holiday files are found when the API runs as a packaged jar (`./scripts/verify.sh` doesn&#x27;t test that).
+Repos: [&quot;priorauth-aging: add `src/main/resources/data/holidays-TX-01-2027.json` (copied from `docs-in`); change `HolidayCalendar.load()` to combine every year&#x27;s file for the tenant into one set; bump the pom version; add `HolidayCalendarTest`&quot;,&quot;priorauth-api: pom version 1.2.1 and dependency on priorauth-aging 1.0.1; one new test in `PendingRequestsControllerTest`; no change to `src/main`&quot;]
+Branch: fix/holidays-across-years (in both repos, from main)
+Versions: priorauth-aging 1.0.0 -&gt; 1.0.1 (patch: the fix keeps its API). priorauth-api 1.2.0 -&gt; 1.2.1 (patch: depends on priorauth-aging 1.0.1). Current tags are v1.0.0 and v1.2.0, matching the poms.
+Tests: priorauth-aging, new `HolidayCalendarTest`: TX-01 returns the holidays from both years, including 2026-01-01, 2026-10-12 and 2027-01-01 (22 dates; fails on today&#x27;s code); an unknown tenant returns no holidays; 1 Oct 2026 to 5 Jan 2027 using the real calendar is 62 business days (63 today). priorauth-api, new controller test `newYearsDayIsNotABusinessDay`: asOf=2027-01-05 gives PA-10231 62 bd (&quot;62 bd OVER 5&quot;), PA-10244 60 bd and PA-10263 57 bd. These figures are my hand count and I have not run them; if `./scripts/verify.sh` disagrees, re-count before changing a number. The existing test for 13 Oct 2026 (7 and 4 business days) stays as it is and checks that the 2026 holidays still load. `./scripts/verify.sh` installs priorauth-aging 1.0.1 and runs its tests, then tests priorauth-api against that version.</pre></div></div><div class="gate"><div><b>Approved with a correction: Meena Iyer</b><p>Approved - Meena Iyer. One correction: 1 Jan 2027 falls inside all three requests&#x27; periods, so all three drop by one on 2027-01-05: PA-10231 62, PA-10244 59, PA-10263 56 (today 63, 60, 57; Ravi says the others are off too). Leave the missing-2028-file behaviour as it is; I&#x27;ll raise it separately. Kiran checks the packaged jar by hand before we push.</p><p class="by">archon workflow approve &lt;run&gt; "…"</p></div></div><div class="plain"><div><b>In plain words.</b> New Year's Day is in every one of the three periods, so all three ages drop by one: 62, 59, 56. The plan said 62, 60, 57. In this workflow a reject cancels the run, so Meena approves and puts the correction in the approval text, which the implement prompt reads as <code>$approve-plan.output.text</code>.</div></div>
+</section>
+<div class="phase" style="--c:var(--build)"><i></i>Build<span>steps 7–8 · fix in both repos, check, review</span></div>
+<section class="step" id="s07" data-step="7" data-phase="Build" style="--c:var(--build)">
+  <div class="step__head"><span class="step__n">7</span><div><span class="chip">in place</span><h2>Implement in both repos, in the live checkouts</h2><p class="step__why">The agent branches and commits in each repo itself; the loop ends when ./scripts/verify.sh passes.</p></div><span class="who">Archon · implement 2m 10s · $0.53</span></div>
+<div class="box claude"><div class="box__bar">Archon returns, after the approval <span class="tag">real</span></div><pre>[scan] Skipped (prior_success)
+[plan] Skipped (prior_success)
+[approve-plan] Completed (23.2s)
+[stop-plan] Skipped (condition: $approve-plan.output.decision == &#x27;reject&#x27;)
+[implement] Started
+[implement] Completed (2m10s)
+[checks] Started
+[checks] Completed (17.4s)
+[review] Started
+[review] Completed (1m6s)
+[approve-change] Started
+Loop node &#x27;implement&#x27; completed after 1 iteration</pre></div><div class="open"><div class="tabs" role="tablist"><button class="tab" role="tab" aria-selected="true" data-pane="impl-1">implementation.md</button><button class="tab" role="tab" aria-selected="false" data-pane="impl-2">priorauth-aging</button><button class="tab" role="tab" aria-selected="false" data-pane="impl-3">priorauth-api</button></div><div class="pane is-on" id="impl-1"><div class="code code--wrap"><div class="code__bar"><span class="path">$ARTIFACTS_DIR/implementation.md</span><span>what the agent did, per repo</span></div><textarea class="src" data-lang="md"># Implementation: New Year&#x27;s Day counted as a working day (docs-in/bug-report.md, Ravi Menon, 17 Oct 2026)
+
+Plan: `plan.md`, approved by Meena Iyer with one correction (applied, see below).
+
+## priorauth-aging (1.0.0 → 1.0.1)
+
+- **Branch:** `fix/holidays-across-years` (from `main`)
+- **Commit:** `074d5244f7c9d1768e334b26e6c6e3e895f8c724`
+- **Files changed**
+  - `src/main/resources/data/holidays-TX-01-2027.json`: new, copied byte-for-byte from `docs-in/holidays-TX-01-2027.json` (11 dates).
+  - `src/main/java/com/acmehealth/priorauth/aging/HolidayCalendar.java`: `load()` resolves
+    `classpath*:data/holidays-&lt;tenant&gt;-????.json` with a private `PathMatchingResourcePatternResolver` and returns the
+    union of all files&#x27; dates. No files → empty set; `IOException` → `IllegalStateException` as before. Javadoc says
+    &quot;one JSON file per tenant per year&quot;. Constructor and `forTenant` signature unchanged.
+  - `pom.xml`: version `1.0.1`.
+- **Tests added:** `HolidayCalendarTest` — `loadsEveryYearForTheTenant` (22 dates incl. 2026-01-01, 2026-10-12, 2027-01-01),
+  `tenantWithoutFilesHasNoHolidays`, `ageAcrossTheYearSkipsNewYearsDay` (1 Oct 2026 → 5 Jan 2027 = 62).
+
+## priorauth-api (1.2.0 → 1.2.1)
+
+- **Branch:** `fix/holidays-across-years` (from `main`)
+- **Commit:** `8d65a37f113d2a075e8f6ae2acefe355d9ebfac6`
+- **Files changed**
+  - `pom.xml`: version `1.2.1`; `priorauth-aging` dependency `1.0.1`.
+  - No change to `src/main`.
+- **Tests added:** `PendingRequestsControllerTest.newYearsDayIsNotABusinessDay` — `GET /requests/pending?asOf=2027-01-05`:
+  PA-10231 62 (`62 bd OVER 5`), PA-10244 **59**, PA-10263 **56**.
+
+### Correction to the plan&#x27;s expected ages
+
+The plan expected 62 / 60 / 57. Meena&#x27;s correction (62 / 59 / 56; today 63 / 60 / 57) is right: 1 Jan 2027 lies in all
+three periods. I re-counted independently from the two holiday files before writing the test (weekdays after the
+received date up to and including 5 Jan, minus TX-01 holidays): 62 / 59 / 56 with the fix, 63 / 60 / 57 with only the
+2026 file. The test uses 62 / 59 / 56.
+
+## Verify
+
+`scripts\verify.cmd` from the workspace root: **PASS** (exit 0).
+- priorauth-aging: AgeBadgeTest 1, BusinessDaysTest 4, HolidayCalendarTest 3 — all pass; 1.0.1 installed to `~/.m2`.
+- priorauth-api against aging 1.0.1: PendingRequestsControllerTest 4, RequestStoreTest 2 — all pass.
+- The installed `priorauth-aging-1.0.1.jar` contains `data/holidays-TX-01-2026.json` and `data/holidays-TX-01-2027.json`.
+
+`./scripts/verify.sh` (Git Bash) did not run on this machine: Git Bash&#x27;s `mvn` launcher fails with
+`ClassNotFoundException: org.codehaus.plexus.classworlds.launcher.Launcher` before any build starts — an environment
+problem with the shell&#x27;s Maven wrapper, not the code. I used the Windows twin `verify.cmd`, which CLAUDE.md names for
+Windows and which runs the same two steps.
+
+## Skipped / not checked / risk
+
+- **Not seen red:** I did not run the new tests against the old code first. The hand count (63 without 2027) and the
+  old `load()` reading only `-2026.json` make the failure clear, but it was not observed.
+- **Not checked:** the Spring Boot fat jar / `mvn spring-boot:run` (Kiran checks the packaged jar by hand before push).
+  Verify does exercise `classpath*:` + wildcard against the installed library jar.
+- **Left as is (per Meena):** a tenant with no file for a year still silently gets no holidays for that year (Jan 2028
+  will repeat this bug without a 2028 file).
+- **Not checked:** that the 2027 list matches the nightly report&#x27;s source (plan A1); that a file&#x27;s `tenantId` matches
+  its name; remotes, open PRs, other consumers of priorauth-aging.
+- Nothing pushed, nothing committed in the workspace folder. Git warned the new test file will be stored with LF→CRLF
+  conversion per local autocrlf settings; content is unaffected.
+</textarea></div></div><div class="pane" id="impl-2"><div class="code code--wrap"><div class="code__bar"><span class="path">priorauth-aging · commit 074d524</span><span>the fix, a test, the 2027 file, 1.0.1</span></div><textarea class="src" data-lang="diff">commit 074d5244f7c9d1768e334b26e6c6e3e895f8c724
+Author: Kiran Rao &lt;kiran@acme-health.example&gt;
+Date:   Wed Nov 4 13:18:17 2026 +0530
+
+    Load every year&#x27;s holiday file for a tenant; add TX-01 2027 (1.0.1)
+    
+    Fixes docs-in/bug-report.md (Ravi Menon, 17 Oct 2026): New Year&#x27;s Day
+    counted as a working day. HolidayCalendar read only the 2026 file, so ages
+    crossing into 2027 counted 1 Jan 2027 as a business day.
+---
+ pom.xml                                                         |  2 +-
+ .../java/com/acmehealth/priorauth/aging/HolidayCalendar.java    | 24 ++++++++++++++--------
+ src/main/resources/data/holidays-TX-01-2027.json                |  4 ++++
+ .../com/acmehealth/priorauth/aging/HolidayCalendarTest.java     | 32 +++++++++++++++++++++++++++++
+ 4 files changed, 52 insertions(+), 10 deletions(-)
+
+diff --git a/pom.xml b/pom.xml
+index fce4b8f..a1d2f68 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -14,7 +14,7 @@
+ 
+   &lt;groupId&gt;com.acmehealth&lt;/groupId&gt;
+   &lt;artifactId&gt;priorauth-aging&lt;/artifactId&gt;
+-  &lt;version&gt;1.0.0&lt;/version&gt;
++  &lt;version&gt;1.0.1&lt;/version&gt;
+   &lt;name&gt;priorauth-aging&lt;/name&gt;
+   &lt;description&gt;Request aging for prior auth: business days, tenant holiday calendars, the age badge. A library; priorauth-api depends on it.&lt;/description&gt;
+ 
+diff --git a/src/main/java/com/acmehealth/priorauth/aging/HolidayCalendar.java b/src/main/java/com/acmehealth/priorauth/aging/HolidayCalendar.java
+index a0d035b..d84c24d 100644
+--- a/src/main/java/com/acmehealth/priorauth/aging/HolidayCalendar.java
++++ b/src/main/java/com/acmehealth/priorauth/aging/HolidayCalendar.java
+@@ -1,6 +1,7 @@
+ package com.acmehealth.priorauth.aging;
+ 
+-import org.springframework.core.io.ClassPathResource;
++import org.springframework.core.io.Resource;
++import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+ import org.springframework.stereotype.Service;
+ import tools.jackson.databind.JsonNode;
+ import tools.jackson.databind.json.JsonMapper;
+@@ -14,13 +15,16 @@ import java.util.Set;
+ import java.util.concurrent.ConcurrentHashMap;
+ 
+ /**
+- * The tenant&#x27;s holidays (FR1.2): one JSON file per tenant under resources/data, the same list the nightly report uses.
++ * The tenant&#x27;s holidays (FR1.2): one JSON file per tenant per year under resources/data
++ * ({@code holidays-&lt;tenant&gt;-&lt;year&gt;.json}), the same list the nightly report uses. A tenant&#x27;s calendar is the union of
++ * all its years, so an age that crosses a year boundary skips both years&#x27; holidays.
+  * A tenant without a file has no holidays, which is the safe default (the age is then slightly higher, never lower).
+  */
+ @Service
+ public class HolidayCalendar {
+ 
+     private final JsonMapper mapper;
++    private final PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+     private final Map&lt;String, Set&lt;LocalDate&gt;&gt; cache = new ConcurrentHashMap&lt;&gt;();
+ 
+     public HolidayCalendar(JsonMapper mapper) {
+@@ -32,14 +36,16 @@ public class HolidayCalendar {
+     }
+ 
+     private Set&lt;LocalDate&gt; load(String tenantId) {
+-        ClassPathResource file = new ClassPathResource(&quot;data/holidays-&quot; + tenantId + &quot;-2026.json&quot;);
+-        if (!file.exists()) {
+-            return Set.of();
+-        }
+-        try (InputStream in = file.getInputStream()) {
+-            JsonNode root = mapper.readTree(in);
++        try {
++            // ???? (exactly a four-character year), not *: tenant &quot;TX&quot; must not pick up &quot;TX-01&quot;&#x27;s files.
++            Resource[] files = resolver.getResources(&quot;classpath*:data/holidays-&quot; + tenantId + &quot;-????.json&quot;);
+             Set&lt;LocalDate&gt; holidays = new HashSet&lt;&gt;();
+-            root.get(&quot;holidays&quot;).forEach(node -&gt; holidays.add(LocalDate.parse(node.asString())));
++            for (Resource file : files) {
++                try (InputStream in = file.getInputStream()) {
++                    JsonNode root = mapper.readTree(in);
++                    root.get(&quot;holidays&quot;).forEach(node -&gt; holidays.add(LocalDate.parse(node.asString())));
++                }
++            }
+             return Set.copyOf(holidays);
+         } catch (IOException e) {
+             throw new IllegalStateException(&quot;cannot read holidays for tenant &quot; + tenantId, e);
+diff --git a/src/main/resources/data/holidays-TX-01-2027.json b/src/main/resources/data/holidays-TX-01-2027.json
+new file mode 100644
+index 0000000..5e60ca9
+--- /dev/null
++++ b/src/main/resources/data/holidays-TX-01-2027.json
+@@ -0,0 +1,4 @@
++{
++  &quot;tenantId&quot;: &quot;TX-01&quot;,
++  &quot;holidays&quot;: [&quot;2027-01-01&quot;, &quot;2027-01-18&quot;, &quot;2027-02-15&quot;, &quot;2027-05-31&quot;, &quot;2027-07-05&quot;, &quot;2027-09-06&quot;, &quot;2027-10-11&quot;, &quot;2027-11-11&quot;, &quot;2027-11-25&quot;, &quot;2027-11-26&quot;, &quot;2027-12-24&quot;]
++}
+diff --git a/src/test/java/com/acmehealth/priorauth/aging/HolidayCalendarTest.java b/src/test/java/com/acmehealth/priorauth/aging/HolidayCalendarTest.java
+new file mode 100644
+index 0000000..dccd958
+--- /dev/null
++++ b/src/test/java/com/acmehealth/priorauth/aging/HolidayCalendarTest.java
+@@ -0,0 +1,32 @@
++package com.acmehealth.priorauth.aging;
++
++import org.junit.jupiter.api.Test;
++import tools.jackson.databind.json.JsonMapper;
++
++import java.time.LocalDate;
++
++import static org.assertj.core.api.Assertions.assertThat;
++
++/** Bug report 17 Oct 2026 (Ravi Menon): New Year&#x27;s Day 2027 was counted as a working day. */
++class HolidayCalendarTest {
++
++    private final HolidayCalendar calendar = new HolidayCalendar(JsonMapper.builder().build());
++
++    @Test // every year&#x27;s file for the tenant is loaded, not just 2026&#x27;s
++    void loadsEveryYearForTheTenant() {
++        assertThat(calendar.forTenant(&quot;TX-01&quot;))
++                .contains(LocalDate.of(2026, 1, 1), LocalDate.of(2026, 10, 12), LocalDate.of(2027, 1, 1))
++                .hasSize(22);
++    }
++
++    @Test // the existing safe default: no file, no holidays
++    void tenantWithoutFilesHasNoHolidays() {
++        assertThat(calendar.forTenant(&quot;ZZ-99&quot;)).isEmpty();
++    }
++
++    @Test // PA-10231, received 1 Oct 2026, as of 5 Jan 2027: 62, not 63
++    void ageAcrossTheYearSkipsNewYearsDay() {
++        assertThat(BusinessDays.between(LocalDate.of(2026, 10, 1), LocalDate.of(2027, 1, 5), calendar.forTenant(&quot;TX-01&quot;)))
++                .isEqualTo(62);
++    }
++}
+</textarea></div></div><div class="pane" id="impl-3"><div class="code code--wrap"><div class="code__bar"><span class="path">priorauth-api · commit 8d65a37</span><span>the new version, one test, 1.2.1</span></div><textarea class="src" data-lang="diff">commit 8d65a37f113d2a075e8f6ae2acefe355d9ebfac6
+Author: Kiran Rao &lt;kiran@acme-health.example&gt;
+Date:   Wed Nov 4 13:18:17 2026 +0530
+
+    Depend on priorauth-aging 1.0.1; test New Year&#x27;s Day ages (1.2.1)
+    
+    Fixes docs-in/bug-report.md (Ravi Menon, 17 Oct 2026): New Year&#x27;s Day
+    counted as a working day. As of 2027-01-05: PA-10231 62, PA-10244 59,
+    PA-10263 56.
+---
+ pom.xml                                                                       |  4 ++--
+ src/test/java/com/acmehealth/priorauth/api/PendingRequestsControllerTest.java | 13 +++++++++++++
+ 2 files changed, 15 insertions(+), 2 deletions(-)
+
+diff --git a/pom.xml b/pom.xml
+index 3296e66..61c3013 100644
+--- a/pom.xml
++++ b/pom.xml
+@@ -14,7 +14,7 @@
+ 
+   &lt;groupId&gt;com.acmehealth&lt;/groupId&gt;
+   &lt;artifactId&gt;priorauth-api&lt;/artifactId&gt;
+-  &lt;version&gt;1.2.0&lt;/version&gt;
++  &lt;version&gt;1.2.1&lt;/version&gt;
+   &lt;name&gt;priorauth-api&lt;/name&gt;
+   &lt;description&gt;The prior-auth API the reviewer screen reads: pending requests per tenant.&lt;/description&gt;
+ 
+@@ -32,7 +32,7 @@
+     &lt;dependency&gt;
+       &lt;groupId&gt;com.acmehealth&lt;/groupId&gt;
+       &lt;artifactId&gt;priorauth-aging&lt;/artifactId&gt;
+-      &lt;version&gt;1.0.0&lt;/version&gt;
++      &lt;version&gt;1.0.1&lt;/version&gt;
+     &lt;/dependency&gt;
+     &lt;!-- JUnit 5, AssertJ and MockMvc for the tests. Test scope: never shipped. --&gt;
+     &lt;dependency&gt;
+diff --git a/src/test/java/com/acmehealth/priorauth/api/PendingRequestsControllerTest.java b/src/test/java/com/acmehealth/priorauth/api/PendingRequestsControllerTest.java
+index 898e73b..7399996 100644
+--- a/src/test/java/com/acmehealth/priorauth/api/PendingRequestsControllerTest.java
++++ b/src/test/java/com/acmehealth/priorauth/api/PendingRequestsControllerTest.java
+@@ -40,6 +40,19 @@ class PendingRequestsControllerTest {
+                 .andExpect(jsonPath(&quot;$[1].overLimit&quot;).value(false));
+     }
+ 
++    @Test // bug report 17 Oct 2026 (Ravi Menon): 1 Jan 2027 is a TX-01 holiday, so each age is one lower than before
++    void newYearsDayIsNotABusinessDay() throws Exception {
++        mvc.perform(get(&quot;/requests/pending&quot;).param(&quot;asOf&quot;, &quot;2027-01-05&quot;))
++                .andExpect(status().isOk())
++                .andExpect(jsonPath(&quot;$[0].id&quot;).value(&quot;PA-10231&quot;))
++                .andExpect(jsonPath(&quot;$[0].ageBusinessDays&quot;).value(62))
++                .andExpect(jsonPath(&quot;$[0].ageLabel&quot;).value(&quot;62 bd OVER 5&quot;))
++                .andExpect(jsonPath(&quot;$[1].id&quot;).value(&quot;PA-10244&quot;))
++                .andExpect(jsonPath(&quot;$[1].ageBusinessDays&quot;).value(59))
++                .andExpect(jsonPath(&quot;$[2].id&quot;).value(&quot;PA-10263&quot;))
++                .andExpect(jsonPath(&quot;$[2].ageBusinessDays&quot;).value(56));
++    }
++
+     @Test // FR1: PA-10231 arrived on 1 Oct, so an as-of of 30 Sep is the caller&#x27;s error: 400, not 500
+     void asOfBeforeReceivedIsABadRequest() throws Exception {
+         mvc.perform(get(&quot;/requests/pending&quot;).param(&quot;asOf&quot;, &quot;2026-09-30&quot;))
+</textarea></div></div></div><div class="gwrap"><table class="kv"><thead><tr><th>Repo</th><th>Branch</th><th>Commit</th><th>Change</th></tr></thead><tbody><tr><td>priorauth-aging</td><td><code>fix/holidays-across-years</code></td><td><code>074d524</code></td><td>1.0.0 → 1.0.1: every year's holiday file is loaded; the 2027 file added; 3 tests</td></tr><tr><td>priorauth-api</td><td><code>fix/holidays-across-years</code></td><td><code>8d65a37</code></td><td>1.2.0 → 1.2.1: depends on aging 1.0.1; one test for 2027-01-05; no code change</td></tr></tbody></table></div><div class="note">Archon's own check passed: the loop's <code>until_bash: ./scripts/verify.sh</code> ran in Archon's shell. Inside the agent's session, Git Bash's <code>mvn</code> failed to start (<code>ClassNotFoundException: …classworlds.launcher.Launcher</code>), so the agent ran <code>scripts\verify.cmd</code> for its own check, as CLAUDE.md allows on Windows, and said so. Nothing ran in a worktree: these are Kiran's own clones, switched to the new branch.</div>
+</section>
+<section class="step" id="s08" data-step="8" data-phase="Build" style="--c:var(--review)">
+  <div class="step__head"><span class="step__n">8</span><div><span class="chip">checks + review</span><h2>Checks, then a second reader</h2><p class="step__why">The checks node runs the workspace check and shows each repo's branch; the review node reads both diffs.</p></div><span class="who">Archon · checks 17s · review 1m 06s · $0.54</span></div>
+<div class="box claude"><div class="box__bar">Archon returns <span class="tag">real · the checks node</span></div><pre>… (4 lines of the Spring Boot test log)
+
+… (6 lines of the Spring Boot test log)
+
+… (1 lines of the Spring Boot test log)
+
+… (6 lines of the Spring Boot test log)
+verify: passed
+== priorauth-aging: on fix/holidays-across-years
+074d524 Load every year&#x27;s holiday file for a tenant; add TX-01 2027 (1.0.1)
+ pom.xml                                            |  2 +-
+ .../priorauth/aging/HolidayCalendar.java           | 24 ++++++++++------
+ src/main/resources/data/holidays-TX-01-2027.json   |  4 +++
+ .../priorauth/aging/HolidayCalendarTest.java       | 32 ++++++++++++++++++++++
+ 4 files changed, 52 insertions(+), 10 deletions(-)
+== priorauth-api: on fix/holidays-across-years
+8d65a37 Depend on priorauth-aging 1.0.1; test New Year&#x27;s Day ages (1.2.1)
+ pom.xml                                                     |  4 ++--
+ .../priorauth/api/PendingRequestsControllerTest.java        | 13 +++++++++++++
+ 2 files changed, 15 insertions(+), 2 deletions(-)</pre></div><div class="open"><div class="tabs" role="tablist"><button class="tab" role="tab" aria-selected="true" data-pane="rev-1">review.md</button></div><div class="pane is-on" id="rev-1"><div class="code code--wrap"><div class="code__bar"><span class="path">$ARTIFACTS_DIR/review.md</span><span>verdict READY</span></div><textarea class="src" data-lang="md"># Review: New Year&#x27;s Day counted as a working day (fix/holidays-across-years)
+
+Reviewed against `docs-in/bug-report.md` (Ravi Menon, 17 Oct 2026) and `plan.md`, by reading
+`git -C &lt;repo&gt; diff main...HEAD` in each repo. Nothing was edited.
+
+**Verdict: ready to push**, with one deviation from the plan that was justified and documented (see the API test ages
+below).
+
+## Branches and commits
+
+| Repo | Branch | Base = `main`? | Commits on branch |
+|---|---|---|---|
+| priorauth-aging | `fix/holidays-across-years` | yes (f6153ee) | `074d524` Load every year&#x27;s holiday file for a tenant; add TX-01 2027 (1.0.1) |
+| priorauth-api | `fix/holidays-across-years` | yes (c2dc5d4) | `8d65a37` Depend on priorauth-aging 1.0.1; test New Year&#x27;s Day ages (1.2.1) |
+
+The workspace folder is clean. Nothing was committed there.
+
+## 1. Is the bug fixed, with a test? Yes
+
+- **Cause addressed.** `HolidayCalendar.load()` no longer hard-codes `-2026.json`. It resolves
+  `classpath*:data/holidays-&lt;tenant&gt;-????.json` and returns the union of all the files&#x27; dates. The new
+  `holidays-TX-01-2027.json` contains 2027-01-01.
+- **Fixed against the real data.** The new resource has the same git blob hash as `docs-in/holidays-TX-01-2027.json`
+  (`5e60ca99…`), so it is a byte-for-byte copy.
+- **Tests in priorauth-aging (`HolidayCalendarTest`):**
+  - `loadsEveryYearForTheTenant`: 22 dates, including 2026-01-01, 2026-10-12 and 2027-01-01.
+  - `tenantWithoutFilesHasNoHolidays`: keeps the safe default.
+  - `ageAcrossTheYearSkipsNewYearsDay`: 1 Oct 2026 to 5 Jan 2027 is 62.
+  
+  The first and third would fail on the old code.
+- **Test in priorauth-api (`newYearsDayIsNotABusinessDay`):** reproduces Ravi&#x27;s exact request,
+  `GET /requests/pending?asOf=2027-01-05`.
+- **The API test&#x27;s expected ages differ from the plan, and the test is right.** The plan said 62 / 60 / 57. The test
+  says 62 / 59 / 56. I recounted independently using `BusinessDays.between` semantics: business days strictly after the
+  received date, up to and including the as-of date, minus weekends and TX-01 holidays.
+
+  | Request | Received | With the fix | Old code (2026 file only) |
+  |---|---|---|---|
+  | PA-10231 | 2026-10-01 | **62** | 63 |
+  | PA-10244 | 2026-10-06 | **59** | 60 |
+  | PA-10263 | 2026-10-09 | **56** | 57 |
+
+  The plan&#x27;s 60 and 57 were its own miscount (its &quot;today&#x27;s age&quot; column, 61 and 58, was off by one as well). The test
+  values are exactly one lower than the old code for every row, which matches Ravi&#x27;s report. `implementation.md`
+  records this as Meena&#x27;s correction, re-counted before the test was written. The plan required exactly that: stop and
+  re-count rather than adjust a number to make the test pass.
+- **No regression in 2026.** `eachRowCarriesItsAgeAndFlag` (asOf 2026-10-13) and `asOfBeforeReceivedIsABadRequest`
+  are unchanged.
+
+## 2. Do the versions follow CLAUDE.md? Yes
+
+| Repo | Tag / pom on `main` | Branch pom | Type |
+|---|---|---|---|
+| priorauth-aging | `v1.0.0` / 1.0.0 | **1.0.1** | Patch. The fix keeps the API: `forTenant(String)` and the `HolidayCalendar(JsonMapper)` constructor are unchanged. |
+| priorauth-api | `v1.2.0` / 1.2.0 | **1.2.1** | Patch. A dependency bump, no API change. |
+
+- priorauth-api&#x27;s `priorauth-aging` dependency goes from 1.0.0 to **1.0.1**, the version that contains the fix.
+- Release order still applies: merge and tag aging `v1.0.1` first, then api `v1.2.1`. Until aging 1.0.1 is
+  published, the api branch builds only where aging 1.0.1 has been installed locally.
+
+## 3. Was anything changed that the plan didn&#x27;t name? No
+
+| Repo | Files changed | In the plan? |
+|---|---|---|
+| priorauth-aging | `pom.xml` | yes |
+| | `src/main/java/.../HolidayCalendar.java` | yes |
+| | `src/main/resources/data/holidays-TX-01-2027.json` (new) | yes |
+| | `src/test/java/.../HolidayCalendarTest.java` (new) | yes |
+| priorauth-api | `pom.xml` (own version and the aging dependency) | yes |
+| | `src/test/java/.../PendingRequestsControllerTest.java` (one method added) | yes |
+
+- priorauth-api has no `src/main` change, as planned.
+- `BusinessDaysTest` and `AgeBadgeTest` are untouched.
+- The `HolidayCalendar` diff matches the plan: a private resolver field, `????` rather than `*`, `Set.copyOf`, an empty
+  set when there are no files, `IllegalStateException` on an `IOException`, and the javadoc updated.
+- The code is the smallest complete change. There is no new dependency (`PathMatchingResourcePatternResolver` is in
+  spring-core).
+
+## Smaller observations (no change needed)
+
+- **The `????` pattern is correct.** For tenant `TX`, the remainder `01-2026` is 7 characters, so it won&#x27;t match
+  TX-01&#x27;s files.
+- **Not a trust boundary.** `tenantId` now goes into a resource pattern, but it comes from stored request data
+  (`r.tenantId()`), not from the caller.
+- **Pre-existing, not introduced here:** a file without a `holidays` key throws a `NullPointerException`, not the
+  `IllegalStateException`. It is a mention only; it is out of scope.
+- **Q1 from the plan is still open and should go to Ravi and Kiran.** A missing year still means no holidays for that
+  year, silently. January 2028 will repeat this bug unless a 2028 file is added.
+
+## What I skipped or did not check, and risk
+
+- **I did not run `./scripts/verify.sh` / `scripts\verify.cmd`.** The instruction was not to change anything, and
+  verify installs into `~/.m2` and writes `target/`. I rely on `implementation.md`, which reports a pass with
+  `verify.cmd` (exit 0) and test counts. It says `verify.sh` could not run under Git Bash because of a Maven launcher
+  problem in that environment.
+- **The new tests were never seen to fail on the old code.** `implementation.md` says so. My hand count confirms the
+  old code gives 63 / 60 / 57, so the tests do discriminate.
+- **Not checked:**
+  - the Spring Boot fat jar or `spring-boot:run` with the `classpath*:` wildcard (verify exercises only the installed
+    library jar)
+  - that the 2027 list matches the nightly report&#x27;s source (plan A1)
+  - remotes, open PRs and other consumers of priorauth-aging
+</textarea></div></div></div><div class="note">The reviewer recounted the ages on its own and agreed with Meena's numbers. What it did not check: the packaged jar, which is where the new <code>classpath*:</code> lookup could behave differently from the tests.</div>
+</section>
+<div class="phase" style="--c:var(--ship)"><i></i>Ship<span>steps 9–10 · check by hand, push a branch per repo</span></div>
+<section class="step" id="s09" data-step="9" data-phase="Ship" style="--c:var(--ship)">
+  <div class="step__head"><span class="step__n">9</span><div><span class="chip">by hand</span><h2>Check the packaged jar by hand</h2><p class="step__why">Meena asked for it at the plan: the jar must find both years' files inside the library jar.</p></div><span class="who">Kiran · 1 min</span></div>
+<div class="io"><div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">Git Bash</span><span class="os-mac">Git Bash</span></span></div><pre class="os-win">cd priorauth-api; mvn -q -DskipTests package
+java -jar target/priorauth-api-1.2.1.jar
+curl &quot;localhost:8080/requests/pending?asOf=2027-01-05&quot;
+curl &quot;localhost:8080/requests/pending?asOf=2026-10-13&quot;</pre><pre class="os-mac">cd priorauth-api; mvn -q -DskipTests package
+java -jar target/priorauth-api-1.2.1.jar
+curl &quot;localhost:8080/requests/pending?asOf=2027-01-05&quot;
+curl &quot;localhost:8080/requests/pending?asOf=2026-10-13&quot;</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">the jar returns <span class="tag">real</span></div><pre>BOOT-INF/lib/priorauth-aging-1.0.1.jar
+
+asOf=2027-01-05
+PA-10231  received 2026-10-01  62 bd OVER 5
+PA-10244  received 2026-10-06  59 bd OVER 5
+PA-10263  received 2026-10-09  56 bd OVER 5
+
+asOf=2026-10-13
+PA-10231  received 2026-10-01  7 bd OVER 5
+PA-10244  received 2026-10-06  4 bd
+PA-10263  received 2026-10-09  1 bd</pre></div></div><div class="note">62, 59, 56 on 5 Jan 2027 (63, 60, 57 before), and still 7, 4, 1 on 13 Oct 2026: the 2026 holidays still load. The same three numbers as the AI-DLC course's answer for 13 Oct.</div>
+</section>
+<section class="step" id="s10" data-step="10" data-phase="Ship" style="--c:var(--ship)">
+  <div class="step__head"><span class="step__n">10</span><div><span class="chip">wait 2</span><h2>Approve; one branch pushed per repo</h2><p class="step__why">The push node pushes a branch only where there are commits, library first.</p></div><span class="who">Meena · push 1s</span></div>
+<div class="gate"><div><b>Approved: Meena Iyer</b><p>Approved - Meena Iyer. Kiran ran the 1.2.1 jar: 2027-01-05 gives 62/59/56, 2026-10-13 still 7/4/1. Push both; aging merges first.</p><p class="by">archon workflow approve &lt;run&gt; "…"</p></div></div><div class="box claude"><div class="box__bar">Archon returns <span class="tag">real</span></div><pre>branch &#x27;fix/holidays-across-years&#x27; set up to track &#x27;origin/fix/holidays-across-years&#x27;.
+To C:\work\archon-multirepo\remotes\priorauth-aging.git
+ * [new branch]      fix/holidays-across-years -&gt; fix/holidays-across-years
+priorauth-aging: open the PR fix/holidays-across-years -&gt; main
+branch &#x27;fix/holidays-across-years&#x27; set up to track &#x27;origin/fix/holidays-across-years&#x27;.
+To C:\work\archon-multirepo\remotes\priorauth-api.git
+ * [new branch]      fix/holidays-across-years -&gt; fix/holidays-across-years
+priorauth-api: open the PR fix/holidays-across-years -&gt; main
+
+Workflow completed successfully.
+  Usage (recorded totals; completeness unknown):
+    Cost: $2.1466047
+    Input tokens: 1180203
+    Output tokens: 29527</pre></div><div class="note">Two pull requests to open, one per repo, and in order: priorauth-aging's first, because priorauth-api 1.2.1 needs aging 1.0.1 to be published. No <code>gh</code> login here, so the merge in step 12 stands in for both.</div>
+</section>
+<div class="phase" style="--c:var(--setup)"><i></i>After<span>steps 11–13 · the record, the merges, AI-DLC</span></div>
+<section class="step" id="s11" data-step="11" data-phase="After" style="--c:var(--setup)">
+  <div class="step__head"><span class="step__n">11</span><div><span class="chip">the record</span><h2>What a folder project leaves behind</h2><p class="step__why">No worktree, no branch of Archon's: a run row, a transcript, artifacts and the captured workflow source.</p></div><span class="who">Kiran · 2 min</span></div>
+<div class="io"><div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">any shell</span><span class="os-mac">any shell</span></span></div><pre class="os-win">archon workflow get 5138e1be…
+archon project list
+archon isolation list
+archon doctor</pre><pre class="os-mac">archon workflow get 5138e1be…
+archon project list
+archon isolation list
+archon doctor</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Archon returns <span class="tag">real</span></div><pre>ID:     5138e1be8e01d39ed631d192df3bb2c1
+  Name:   fix-across-repos
+  Path:   C:\work\archon-multirepo\priorauth-workspace
+  Start:  2f64cf588c995658aec246f63e4b9451633f34ea (clean)
+  Transcript: C:\Users\you\.archon\workspaces\_folder\priorauth-workspace\logs\5138e1be8e01d39ed631d192df3bb2c1.jsonl
+  Status: completed
+  Age:    11s
+  Usage (recorded totals; completeness unknown):
+    Cost: $2.1466047
+    Input tokens: 1180203
+    Output tokens: 29527
+  Terminal record:
+    Selected return: unavailable
+    Artifacts observed: 15
+      - implementation.md
+      - plan.md
+      - review.md
+      - scan.md
+    Engine-internal artifact files (not listed): 11
+  Leave-behind:
+    Worktree: C:\work\archon-multirepo\priorauth-workspace (live)
+    Artifacts (4 files under $ARTIFACTS_DIR):
+      - implementation.md
+      - plan.md
+      - review.md
+      - scan.md
+    Engine-internal artifact files (not listed): 11
+
+ID	KIND	NAME	KEY	PATH
+758611df77692f9f53c4af78e1e0a575	repo	priorauth-api	_local/priorauth-api	C:\work\archon-java\priorauth-api
+93fe5ecc3e7dca0daa41e12c5adf9df5	folder	priorauth-workspace	_folder/priorauth-workspace	C:\work\archon-multirepo\priorauth-workspace
+827a0173b7ea9dd4c0be4e41b5b4ed4a	repo	varasrinivas/aidlc-priorauth-api	varasrinivas/aidlc-priorauth-api	C:\work\scratch\probe
+
+No codebases registered.
+Use /clone or --branch to create worktrees.
+
+✓ Folder project: &quot;priorauth-workspace&quot; (runs in place) — 2 contained repo(s): priorauth-aging, priorauth-api
+All checks passed.</pre></div></div><div class="box disk"><div class="box__bar">On disk: ~/.archon/workspaces/ for this project</div><pre>_folder/priorauth-workspace/artifacts/
+_folder/priorauth-workspace/artifacts/runs/
+_folder/priorauth-workspace/artifacts/runs/5138e1be8e01d39ed631d192df3bb2c1/
+_folder/priorauth-workspace/logs/
+_folder/priorauth-workspace/logs/5138e1be8e01d39ed631d192df3bb2c1.jsonl
+_folder/priorauth-workspace/state/
+_folder/priorauth-workspace/workflow-source/
+_folder/priorauth-workspace/workflow-source/runs/
+_folder/priorauth-workspace/workflow-source/runs/5138e1be8e01d39ed631d192df3bb2c1/</pre></div><div class="note"><code>workflow get</code> calls the workspace itself the worktree, marked <i>(live)</i>. <code>isolation list</code> has nothing to show, in odd words. <code>doctor</code> names the two repos the folder holds.</div>
+</section>
+<section class="step" id="s12" data-step="12" data-phase="After" style="--c:var(--setup)">
+  <div class="step__head"><span class="step__n">12</span><div><span class="chip">merge</span><h2>Merge in release order; tidy up by hand</h2><p class="step__why">Meena merges the library first and tags it, then the API. Archon has nothing to complete: Kiran deletes his own branches.</p></div><span class="who">Meena, Kiran · 3 min</span></div>
+<div class="box claude"><div class="box__bar">git: Meena's merges <span class="tag">real</span></div><pre>== priorauth-aging
+*   317874b Merge fix/holidays-across-years: holidays across years (Ravi, 17 Oct)
+|\  
+| * 074d524 Load every year&#x27;s holiday file for a tenant; add TX-01 2027 (1.0.1)
+|/  
+* f6153ee priorauth-aging 1.0.0: the aging package, split from priorauth-api 1.1.0
+== priorauth-api
+*   e7b9a6d Merge fix/holidays-across-years: holidays across years (Ravi, 17 Oct)
+|\  
+| * 8d65a37 Depend on priorauth-aging 1.0.1; test New Year&#x27;s Day ages (1.2.1)
+|/  
+* c2dc5d4 Move request aging to the priorauth-aging library (1.0.0); depend on it
+*   49fe266 Merge pull request #58 from acme-health/request-age/u1-age-api
+|\</pre></div><div class="io"><div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">any shell</span><span class="os-mac">any shell</span></span></div><pre class="os-win">archon complete fix/holidays-across-years</pre><pre class="os-mac">archon complete fix/holidays-across-years</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Archon returns <span class="tag">real</span></div><pre>Not found: fix/holidays-across-years (no active isolation environment)
+
+Complete: 0 completed, 0 failed, 1 not found</pre></div></div><div class="io"><div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">Git Bash</span><span class="os-mac">Git Bash</span></span></div><pre class="os-win">git -C priorauth-aging switch main; git -C priorauth-aging pull
+git -C priorauth-api switch main; git -C priorauth-api pull
+./scripts/verify.sh
+git -C priorauth-aging branch -d fix/holidays-across-years
+git -C priorauth-api branch -d fix/holidays-across-years</pre><pre class="os-mac">git -C priorauth-aging switch main; git -C priorauth-aging pull
+git -C priorauth-api switch main; git -C priorauth-api pull
+./scripts/verify.sh
+git -C priorauth-aging branch -d fix/holidays-across-years
+git -C priorauth-api branch -d fix/holidays-across-years</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">git returns <span class="tag">real</span></div><pre>priorauth-aging: 317874b Merge fix/holidays-across-years: holidays across years (Ravi, 17 Oct) v1.0.1
+priorauth-api: e7b9a6d Merge fix/holidays-across-years: holidays across years (Ravi, 17 Oct) v1.2.1
+verify on main: passed
+workspace clean
+Deleted branch fix/holidays-across-years (was 074d524).
+* main
+Deleted branch fix/holidays-across-years (was 8d65a37).
+* main</pre></div></div><div class="note">In the one-repo run <code>archon complete</code> removed the worktree and the local branch. Here there is no isolation environment, so it finds nothing: the branches were the agent's and Kiran's, and so is the tidy-up.</div>
+</section>
+<section class="step" id="s13" data-step="13" data-phase="After" style="--c:var(--setup)">
+  <div class="step__head"><span class="step__n">13</span><div><span class="chip">compare</span><h2>The same bug in AI-DLC and in Archon</h2><p class="step__why">Both runs started from the same two repos at the same versions, with the same bug report.</p></div><span class="who">read · 3 min</span></div>
+<div class="gwrap"><table><thead><tr><th></th><th>AI-DLC (28 Oct 2026)</th><th>Archon folder project (this run)</th></tr></thead><tbody><tr><td>Where the process lives</td><td>the workspace's <code>aidlc/</code> and the plugin's stages</td><td>the workspace's <code>.archon/workflows/</code>, written by the team</td></tr><tr><td>Git in each repo</td><td>the agent: a branch <code>request-age/new-year-holiday</code> in both</td><td>the agent: a branch <code>fix/holidays-across-years</code> in both; the push node pushed them</td></tr><tr><td>People's approvals</td><td>Reverse Engineering (Kiran), Code Generation and Build and Test (Meena)</td><td>the plan, with a correction, and the change (Meena)</td></tr><tr><td>The library's fix</td><td><code>forTenant</code> got the period as arguments: <b>2.0.0</b> (breaking)</td><td><code>forTenant</code> kept its signature: <b>1.0.1</b> (patch)</td></tr><tr><td>The API's change</td><td>1.2.1: the controller passes the period; depends on aging 2.0.0</td><td>1.2.1: depends on aging 1.0.1; no code change</td></tr><tr><td>Record</td><td><code>aidlc/</code>, committed with the workspace</td><td>artifacts + transcript under <code>~/.archon/workspaces/_folder/</code>, not committed</td></tr><tr><td>Result on 2027-01-05</td><td>62 / 59 / 56 (its API test)</td><td>62 / 59 / 56 (its API test, and the jar by hand)</td></tr></tbody></table></div><div class="plain"><div><b>In plain words.</b> Two correct fixes of different size: the graph showed AI-DLC's planner a caller in the other repo and it changed the method; Archon's planner kept the method and changed what it loads. AI-DLC's run: <a href="../../ai-dlc-execution/aidlc-hello-world-java/aidlc-graphify.html#gx-two-repos">Two repos, one graph</a>.</div></div>
+</section>
+<section class="card" id="yourself">
+  <h2>Run it yourself</h2>
+<ol>
+<li>Set up Archon as on the <a href="../archon-workspace-setup.html">setup page</a> (steps 1–4), with JDK 21, Maven and Git Bash.</li>
+<li>Build the two repos from the starter at <code>v1.1.0</code>: move <code>src/main/java/…/aging/</code>, its tests and the holiday files to a new Maven library <code>priorauth-aging</code> 1.0.0, and make priorauth-api 1.2.0 depend on it (the course's <code>tools/setup_multirepo_run.py</code> does exactly this).</li>
+<li>Make a workspace folder with the team's files from step 2, clone both repos inside it, and run <code>archon workflow run fix-across-repos --folder …</code> from the workspace root.</li>
+<li>Answer the two waits. Check the plan's numbers: the course's plan miscounted two of them.</li></ol>
+<div class="note">Your run id, times, cost and commit hashes will differ. The course's transcript is in <code>archon-hello-world-java/multirepo-run/logs/</code>, its artifacts in <code>multirepo-run/artifacts/</code>, each repo's diff in <code>multirepo-run/git/</code>.</div>
+</section>
+<section class="card" id="real">
+  <h2>What is real here</h2>
+<p>Everything in the Archon and git boxes is real output from the course's run on Windows (4 Nov 2026, Archon 0.13.2, Claude Code on a claude.ai plan), captured by <code>tools/archon_step.py</code> and copied by <code>tools/capture_multirepo_run.py</code>. Local paths are mapped to <code>C:\Users\you</code> and <code>C:\work</code>; long Spring Boot logs are folded.</p>
+<p>Not run: opening the two pull requests (no <code>gh</code> login; the repos' remotes are local bare repos standing in for GitHub). The merges are plain <code>git merge --no-ff</code>, standing in for merging the PRs. The clone URLs in step 1 are illustrative. The people are fictional; their answers were typed by the course author. The reported cost is Archon's API-price equivalent; the run used a claude.ai plan.</p>
+</section>
+
+</main>
+</div>
+
+<footer class="foot">Archon, two repos · Archon 0.13.2 · <a href="archon-hello-world-java-run.html">the one-repo run</a> · <a href="../archon-introduction.html#s07">introduction, step 7</a> · <a href="../archon-concepts-explained.html#places">concepts</a> · <a href="../index.html">all course pages</a> · <a href="#top">Back to top</a></footer>
+<script>
+(function () {
+  'use strict';
+  var root = document.documentElement, toggle = document.getElementById('themeToggle');
+  function applyTheme(t) { if (t === 'dark') root.setAttribute('data-theme', 'dark'); else root.removeAttribute('data-theme'); toggle.textContent = t === 'dark' ? 'Light mode' : 'Dark mode'; toggle.setAttribute('aria-pressed', t === 'dark' ? 'true' : 'false'); }
+  var saved = null; try { saved = localStorage.getItem('arc-theme'); } catch (e) {}
+  applyTheme(saved || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+  toggle.addEventListener('click', function () { var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'; applyTheme(next); try { localStorage.setItem('arc-theme', next); } catch (e) {} });
+
+  var osBtn = document.getElementById('osToggle');
+  function applyOs(o) { if (o === 'mac') root.setAttribute('data-os', 'mac'); else root.removeAttribute('data-os'); osBtn.textContent = o === 'mac' ? 'macOS' : 'Windows'; osBtn.setAttribute('aria-label', 'Commands shown for ' + osBtn.textContent + '; click to switch'); }
+  var savedOs = null; try { savedOs = localStorage.getItem('arc-os'); } catch (e) {}
+  applyOs(savedOs || (/Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent) ? 'mac' : 'win'));
+  osBtn.addEventListener('click', function () { var next = root.getAttribute('data-os') === 'mac' ? 'win' : 'mac'; applyOs(next); try { localStorage.setItem('arc-os', next); } catch (e) {} });
+
+  /* icons on the boxes */
+  var ICON = {
+    you: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="6" width="19" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M8 14h8"/></svg>',
+    claude: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>',
+    disk: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>',
+    plain: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a7 7 0 0 0-4 12.7V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.3A7 7 0 0 0 12 2z"/><path d="M9 21h6"/></svg>'
+  };
+  ['you', 'claude', 'disk'].forEach(function (k) {
+    document.querySelectorAll('.box.' + k + ' > .box__bar').forEach(function (bar) { if (!bar.querySelector('svg')) bar.insertAdjacentHTML('afterbegin', ICON[k]); });
+  });
+  document.querySelectorAll('.plain').forEach(function (p) { if (!p.querySelector('svg')) p.insertAdjacentHTML('afterbegin', ICON.plain); });
+
+  /* tabs */
+  document.querySelectorAll('.tabs').forEach(function (tabs) {
+    var host = tabs.parentElement, btns = Array.prototype.slice.call(tabs.querySelectorAll('.tab'));
+    btns.forEach(function (b) { b.addEventListener('click', function () {
+      btns.forEach(function (x) { x.setAttribute('aria-selected', x === b ? 'true' : 'false'); });
+      Array.prototype.forEach.call(host.querySelectorAll(':scope > .pane'), function (p) { p.classList.toggle('is-on', p.id === b.getAttribute('data-pane')); });
+    }); });
+  });
+
+  /* copy buttons */
+  function copyText(btn, text) {
+    var done = function () { var old = btn.textContent; btn.textContent = 'copied'; setTimeout(function () { btn.textContent = old; }, 1200); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, done); else done();
+  }
+  document.querySelectorAll('.you .copy').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var pre = Array.prototype.slice.call(btn.parentElement.querySelectorAll('pre')).filter(function (x) { return x.offsetParent !== null; })[0]; if (!pre) return;
+      var clone = pre.cloneNode(true); clone.querySelectorAll('.c').forEach(function (c) { c.remove(); });
+      copyText(btn, clone.textContent.replace(/\n{2,}/g, '\n').trim());
+    });
+  });
+  document.querySelectorAll('.cmd .copy').forEach(function (btn) {
+    btn.addEventListener('click', function () { var c = btn.parentElement.querySelector('code[data-copy]'); if (c) copyText(btn, c.textContent.trim()); });
+  });
+
+  /* syntax highlighting for the embedded files */
+  function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  var KW = {
+    java: 'package import public private protected static final class record interface enum extends implements new return if else for while do try catch finally throw throws this super void int long boolean double float char byte short var null true false instanceof switch case default break continue',
+    bash: 'cd set exit echo'
+  };
+  function kw(list) { return new RegExp('(?:' + list.trim().split(/\s+/).join('|') + ')(?![\\w$])', 'y'); }
+  function rules(lang) {
+    switch (lang) {
+      case 'java': return [['c', /\/\/.*/y], ['c', /\/\*[\s\S]*?\*\//y], ['s', /"(?:[^"\\\n]|\\.)*"/y], ['a', /@[A-Za-z_][\w.]*/y], ['n', /(?<![\w.])\d+(?:\.\d+)?[LlFfDd]?(?![\w])/y], ['k', kw(KW.java)]];
+      case 'jsonl': case 'json': return [['k', /"(?:[^"\\]|\\.)*"(?=\s*:)/y], ['s', /"(?:[^"\\]|\\.)*"/y], ['n', /(?<![\w.])-?\d+(?:\.\d+)?(?![\w])|\b(?:true|false|null)\b/y]];
+      case 'md': return [['k', /^#{1,6} .*$/my], ['s', /`[^`\n]+`/y], ['a', /\*\*[^*\n]+\*\*/y], ['c', /^\|[-:| ]+\|$/my], ['p', /\|/y]];
+      case 'yaml': return [['c', /#.*/y], ['k', /^[ \t]*[\w.-]+(?=:)/my], ['s', /"(?:[^"\\\n]|\\.)*"|'(?:[^'\n])*'/y], ['n', /(?<![\w.])-?\d+(?:\.\d+)?(?![\w])|\b(?:true|false)\b/y]];
+      case 'bash': return [['c', /#.*/y], ['s', /"(?:[^"\\\n]|\\.)*"/y], ['n', /\$\{[^}]*\}|\$[\w#@?]+|\$\(.*?\)/y], ['k', kw(KW.bash)]];
+      case 'xml': return [['c', /<!--[\s\S]*?-->/y], ['c', /<\?[\s\S]*?\?>/y], ['t', /<\/?[\w:.-]+|\/?>/y], ['s', /"(?:[^"\\\n]|\\.)*"/y]];
+      default: return [];
+    }
+  }
+  function highlight(src, lang) {
+    var R = rules(lang), out = '', i = 0, n = src.length;
+    while (i < n) {
+      var hit = null, cls = '';
+      for (var k = 0; k < R.length; k++) { R[k][1].lastIndex = i; var m = R[k][1].exec(src); if (m && m.index === i && m[0].length) { hit = m[0]; cls = R[k][0]; break; } }
+      if (hit) { out += '<span class="tok-' + cls + '">' + esc(hit) + '</span>'; i += hit.length; }
+      else {
+        var j = i + 1;
+        if (src[i] !== '\n') {
+          while (j < n && !/[\w"'`#@\/\-$*{,\n|<>]/.test(src[j])) j++;
+          if (/\w/.test(src[i])) { j = i; while (j < n && /[\w$]/.test(src[j])) j++; }
+        }
+        out += esc(src.slice(i, j)); i = j;
+      }
+    }
+    return out;
+  }
+  function highlightDiff(src, sub) {
+    return src.split('\n').map(function (line, idx, arr) {
+      var nl = idx < arr.length - 1 ? '\n' : '';
+      if (/^(@@|---|\+\+\+)/.test(line)) return '<span class="tok-c">' + esc(line) + '</span>' + nl;
+      if (line[0] === '+' || line[0] === '-') return '<span class="' + (line[0] === '+' ? 'ln-add' : 'ln-del') + '">' + esc(line[0]) + highlight(line.slice(1), sub) + '</span>';
+      return highlight(line, sub) + nl;
+    }).join('');
+  }
+  document.querySelectorAll('textarea.src').forEach(function (ta) {
+    var lang = ta.getAttribute('data-lang') || '', pre = document.createElement('pre');
+    pre.setAttribute('tabindex', '0');
+    pre.innerHTML = lang === 'diff' ? highlightDiff(ta.value, ta.getAttribute('data-sub') || 'java') : highlight(ta.value, lang);
+    if (/^(json|jsonl|md|yaml|bash|text)$/.test(lang)) ta.parentNode.classList.add('code--wrap');
+    ta.parentNode.insertBefore(pre, ta.nextSibling);
+  });
+
+  /* scroll-spy: rail, progress */
+  var steps = Array.prototype.slice.call(document.querySelectorAll('.step[data-step]'));
+  var links = {}; document.querySelectorAll('.rl').forEach(function (a) { links[a.getAttribute('data-step')] = a; });
+  var progText = document.getElementById('progText'), progBar = document.getElementById('progBar'), progPhase = document.getElementById('progPhase'), TOTAL = steps.length, current = -1;
+  function setCurrent(idx) {
+    if (idx === current) return; current = idx;
+    steps.forEach(function (s, i) {
+      var a = links[s.getAttribute('data-step')]; if (!a) return;
+      a.classList.toggle('is-on', i === idx); a.classList.toggle('is-done', i < idx);
+      if (i === idx) a.setAttribute('aria-current', 'step'); else a.removeAttribute('aria-current');
+    });
+    if (idx < 0) { progText.textContent = 'Step 0 of ' + TOTAL; progBar.style.width = '0'; progPhase.textContent = 'Start at the top'; return; }
+    var s = steps[idx]; progText.textContent = 'Step ' + s.getAttribute('data-step') + ' of ' + TOTAL; progBar.style.width = ((idx + 1) / TOTAL * 100) + '%';
+    var lk = links[s.getAttribute('data-step')]; progPhase.textContent = s.getAttribute('data-phase') + ' · ' + (lk ? lk.querySelector('span').textContent : '');
+    var a = links[s.getAttribute('data-step')]; if (a && window.innerWidth <= 900) { var r = a.getBoundingClientRect(), p = a.parentElement.getBoundingClientRect(); if (r.left < p.left || r.right > p.right) a.scrollIntoView({ block: 'nearest', inline: 'center' }); }
+  }
+  function spy() {
+    var line = 130, idx = -1;
+    for (var i = 0; i < steps.length; i++) { if (steps[i].getBoundingClientRect().top <= line) idx = i; else break; }
+    setCurrent(idx);
+  }
+  var ticking = false;
+  window.addEventListener('scroll', function () { if (!ticking) { ticking = true; requestAnimationFrame(function () { spy(); ticking = false; }); } }, { passive: true });
+  window.addEventListener('resize', spy);
+  spy();
+})();
+</script>
+</body>
+</html>
