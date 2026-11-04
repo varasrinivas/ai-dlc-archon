@@ -14,7 +14,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 from cli_parse import help_sections, workflow_nodes  # noqa: E402
 from diagrams import node_cycle, workflow_dag  # noqa: E402
-from pagekit import (DOC, E, REAL, ROOT, card, disk, io, note, page, phase, plain, rail, see, step, table, tabs,  # noqa: E402
+from pagekit import (DOC, E, REAL, ROOT, card, disk, io, multirepo_facts, note, page, phase, plain, rail, see, step, table, tabs,  # noqa: E402
                      write, you)
 
 DATA = ROOT / "tools" / "data"
@@ -107,7 +107,9 @@ S.append(step(6, "Set up", "--plan", "once per machine", "Set up once",
                  see(x(CLI["doctor"]["out"].strip()), f"archon doctor · {VERSION} · real", "Archon returns"))
               + note('The installer verifies the binary\'s checksum, puts it in <code>~/.archon/bin</code> and adds that folder to your user PATH (open a new terminal). It asks which providers to add; <code>archon provider add claude</code> does the same later. Claude Code must already be installed and signed in. Full walk-through: <a href="archon-workspace-setup.html">set up Archon for a repo</a>.')))
 
-REPO_TREE = """priorauth-api/                       <b>the repo is the project: no workspace folder around it</b>
+REPO_TREE = """priorauth-api/                       <b>your clone, wherever you keep it</b>
+                                     the course's: C:\\work\\archon-java\\priorauth-api
+                                     one repo: the repo is the project (two repos: below)
 ├── <span class="n">.archon/</span>                         committed: the team's Archon files
 │   ├── <span class="n">config.yaml</span>                  assistant: claude · worktree.baseBranch: main
 │   └── workflows/
@@ -119,9 +121,21 @@ REPO_TREE = """priorauth-api/                       <b>the repo is the project: 
 │                   └── <span class="n">implement.md</span>     <span class="m">the prompt of each implement pass</span>
 ├── <span class="n">CLAUDE.md</span>                        the team's rules; Claude Code reads it in every AI node
 ├── <span class="n">.gitattributes</span>                   keeps verify.sh LF in every worktree
-├── <span class="n">scripts/verify.sh</span>, verify.cmd     the one check (until_bash and the checks node)
+├── <span class="n">scripts/verify.sh</span>, verify.cmd    the one check (until_bash and the checks node)
 ├── <span class="n">docs-in/request.md</span>               Ravi's request, named in the run message
-└── pom.xml, src/ …                  the code"""
+├── <span class="n">pom.xml</span>                          Spring Boot 4.1, Java 21, Maven
+└── <span class="n">src/</span>                             <b>the API code</b>, as on main before the run
+    ├── main/java/com/acmehealth/priorauth/
+    │   ├── PriorAuthApiApplication.java
+    │   ├── api/                     <span class="m">the endpoint the reviewer screen reads</span>
+    │   │   ├── PendingRequestsController.java   GET /requests/pending
+    │   │   └── PendingRequestResponse.java      one row of the list
+    │   ├── model/PriorAuthRequest.java
+    │   └── store/RequestStore.java  <span class="m">the nightly export, packed into the jar</span>
+    ├── main/resources/              application.yml, data/requests.sample.json
+    └── test/java/com/acmehealth/priorauth/
+        ├── api/PendingRequestsControllerTest.java
+        └── store/RequestStoreTest.java"""
 HOME_TREE = """~/.archon/                           <b>yours, never committed</b> (C:\\Users\\you\\.archon on Windows)
 ├── bin/archon.exe                   the CLI
 ├── plugins/                         provider plugins (archon-provider-claude.exe)
@@ -129,11 +143,42 @@ HOME_TREE = """~/.archon/                           <b>yours, never committed</b
 ├── install.json                     which binary and version
 ├── archon.db                        SQLite: projects, runs, events, costs
 └── workspaces/_local/priorauth-api/ one folder per project
-    ├── worktrees/request-age/age-api/   the run's checkout, on branch request-age/age-api
+    ├── worktrees/request-age/age-api/   <b>where the run writes the API code</b>: a full checkout
+    │   │                                of the repo, on branch request-age/age-api
+    │   ├── src/main/java/com/acmehealth/priorauth/api/
+    │   │   ├── RequestAge.java          <span class="m">new</span>
+    │   │   ├── HolidayCalendar.java     <span class="m">new</span>
+    │   │   └── PendingRequestsController.java   <span class="m">changed</span>
+    │   └── src/test/java/…              <span class="m">new and changed tests</span>
     ├── logs/&lt;run-id&gt;.jsonl            the transcript
     └── artifacts/runs/&lt;run-id&gt;/        scan.md, questions.md, requirements.md, plan.md …"""
+# Every file the two trees name is a real file of the run's branch, and new/changed matches the diff.
+_FILES = set((ROOT / "archon-hello-world-java" / "java-run" / "git" / "files.txt").read_text(encoding="utf-8").split())
+_DIFF = (ROOT / "archon-hello-world-java" / "java-run" / "git" / "diff.patch").read_text(encoding="utf-8")
+_NEW = set(re.findall(r"diff --git a/(\S+) b/\S+\nnew file mode", _DIFF))
+_CHANGED = set(re.findall(r"diff --git a/(\S+) b/", _DIFF)) - _NEW
+_J, _T = "src/main/java/com/acmehealth/priorauth/", "src/test/java/com/acmehealth/priorauth/"
+for _f in ["pom.xml", _J + "PriorAuthApiApplication.java", _J + "api/PendingRequestsController.java", _J + "api/PendingRequestResponse.java",
+           _J + "model/PriorAuthRequest.java", _J + "store/RequestStore.java", "src/main/resources/application.yml",
+           "src/main/resources/data/requests.sample.json", _T + "api/PendingRequestsControllerTest.java", _T + "store/RequestStoreTest.java"]:
+    assert _f in _FILES and _f not in _NEW, f"repo tree: {_f} is not a starter file"
+assert {_J + "api/RequestAge.java", _J + "api/HolidayCalendar.java"} <= _NEW
+assert _J + "api/PendingRequestsController.java" in _CHANGED
+assert any(f.startswith(_T) for f in _NEW) and any(f.startswith(_T) for f in _CHANGED)
+FOLDER_TREE = """priorauth-workspace/                 <b>the root: a folder project</b> (git at the root or not)
+├── <span class="n">.archon/workflows/…</span>              the team's workflows, read from the root
+├── <span class="n">CLAUDE.md</span>                        the rules for work across both repos
+├── <span class="n">docs-in/request.md</span>               the request, named in the run message
+├── priorauth-api/                   repo 1, a git repo of its own
+└── reviewer-ui/                     repo 2, a git repo of its own
+                                     <span class="m">the agent branches, commits and pushes in each</span>"""
+multirepo_facts(CLI)
+_ISO = next(s for s in RUN if s["label"] == "isolation-list")
+assert "request-age/age-api" in _ISO["stdout"], "the run's worktree branch"
+_UNTOUCHED = next(s for s in RUN if s["label"] == "checkout-untouched")["stdout"]
+assert _UNTOUCHED.startswith("main\n") and "Add the team's Archon files" in _UNTOUCHED, "the clone stayed on main, clean, during the run"
 S.append(step(7, "The repo", "--build", "the files", "Files in a repo, and in ~/.archon",
-              "Two places: what the team commits, and what stays on your machine.", "read · 3 min",
+              "Two places: what the team commits, and what stays on your machine. A run never edits your clone: the agent writes the API code in the run's worktree under <code>~/.archon</code>, and it comes back to the repo as a branch.", "read · 3 min",
               io(disk(REPO_TREE, "In the repo (committed)"), disk(HOME_TREE, "In your home folder (not committed)"), stack=True)
               + table(["File", "Needed?", "Why"], [
                   ["<code>.archon/workflows/…/*.yaml</code>", "only for your own workflows", "The bundled 25 need nothing in the repo"],
@@ -141,7 +186,17 @@ S.append(step(7, "The repo", "--build", "the files", "Files in a repo, and in ~/
                   ["<code>CLAUDE.md</code>", "optional, recommended", "The agent's standing rules for this repo, in every AI node"],
                   ["<code>.archon/.env</code>", "optional, never commit", "Credentials for this repo (<code>archon setup --scope project</code>)"],
                   ["<code>.gitattributes</code>", "on Windows with autocrlf", "A worktree is a fresh checkout: without <code>*.sh text eol=lf</code> bash gets CRLF scripts"]], "kv")
-              + note("Workflow commands need a git repository: outside one, <code>archon workflow list</code> says <code>" + x(CLI["outside-repo"]["out"].strip().splitlines()[0]) + "</code> (or register a plain folder with <code>--folder</code>).")))
+              + note("Workflow commands need a git repository: outside one, <code>archon workflow list</code> says <code>" + x(CLI["outside-repo"]["out"].strip().splitlines()[0]) + "</code> (or register a plain folder with <code>--folder</code>).")
+              + f'<h3 style="margin:22px 0 8px">A feature across two repos? A folder project {DOC}</h3>'
+              + plain("This course's change touches one repo, so the team's files sit in that repo. When one feature spans two repos, put both under one root and give the root the <code>.archon/</code>: Archon calls that a <b>folder project</b>, and it plays the part of the AI-DLC workspace.")
+              + disk(FOLDER_TREE, "A folder project (from the Archon docs; not run in this course)")
+              + table(["", "One repo (this course)", "A folder project"], [
+                  ["Register", "the first run in the repo", "the first run with <code>--folder</code> from the root; later runs need no flag"],
+                  ["The agent works in", "the run's worktree, on its own branch", "the root, in place: it sees every repo under it"],
+                  ["Branches and the PR", "Archon makes the branch; the workflow pushes it", "the agent's job, in each repo (Archon makes no worktree or branch; <code>--branch</code> is rejected)"],
+                  ["Isolation", "a worktree per run", "none, or <code>--container</code>: a Docker overlay, with an approval before writes reach the folders"],
+                  ["Runs are stored in", "<code>~/.archon/workspaces/_local/priorauth-api/</code>", "<code>~/.archon/workspaces/_folder/&lt;slug&gt;/</code>"]], "kv")
+              + note("Archon does not give one run a worktree in each of two repos. The docs' advice: keep the root as a folder project for cross-repo work, and let each repo also be its own project (run from inside it) for a change that touches only that repo. Workflows can also live outside every repo: <code>~/.archon/workflows/</code> appear in all your projects (yours, not the team's), and <code>--workflow-source &lt;dir&gt;</code> reads the workflow from one folder and runs it against <code>--cwd</code>. All from the Archon " + VERSION + " docs and <code>workflow run --help</code>; this course ran only the one-repo case.")))
 
 FIELDS = [["<code>name</code>, <code>description</code>, <code>nodes</code>", "required. The description is what <code>workflow list</code> shows and what chat reads to pick a workflow: say when to use it and when not"],
           ["<code>provider</code>, <code>model</code>, <code>effort</code>", "defaults for every AI node (a node can override)"],

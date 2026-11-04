@@ -14,7 +14,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 from cli_parse import workflow_nodes  # noqa: E402
-from pagekit import ROOT, write  # noqa: E402
+from pagekit import ROOT, multirepo_facts, write  # noqa: E402
 
 WF_TEXT = (ROOT / "tools/data/java/files/.archon/workflows/team/request-to-pr/request-to-pr.yaml").read_text(encoding="utf-8")
 NODES = {n["id"]: n["kind"] for n in workflow_nodes(WF_TEXT)}
@@ -25,6 +25,7 @@ for n, k in {"scan": "command", "questions": "prompt", "answer": "wait", "requir
     assert NODES[n] == k, (n, NODES[n])
 assert "until_bash: ./scripts/verify.sh" in WF_TEXT and "fresh_context: true" in WF_TEXT
 CLI = json.loads((ROOT / "tools/data/cli/cli.json").read_text(encoding="utf-8"))
+multirepo_facts(CLI)  # the folder-project lines are documented, not run
 VERSION = re.search(r"Archon CLI v([\d.]+)", CLI["version"]["out"]).group(1)
 BUNDLED = sum(1 for w in json.loads(CLI["workflow-list-json"]["out"])["workflows"] if w["name"].startswith("archon-"))
 assert (VERSION, BUNDLED) == ("0.13.2", 25)
@@ -144,10 +145,10 @@ TILES = [
      "The team keeps its agent and its <code>CLAUDE.md</code>; cheap steps can use a cheaper model.",
      "A staffing agency: Archon books the work, your agencies send the people.",
      "<code>assistant: claude</code> · small = haiku · medium = sonnet · large = opus · <code>ai tier list</code>"),
-    (SETUP, "Where things live", "The repo's <code>.archon/</code> (workflows, config: shared, committed) and your <code>~/.archon/</code> (binary, plugins, <code>archon.db</code>, workspaces: yours).",
+    (SETUP, "Where things live", "The project's <code>.archon/</code> (workflows, config: committed) and your <code>~/.archon/</code> (binary, plugins, <code>archon.db</code>, runs: yours). A project: one repo, or a folder project holding several.",
      "The process travels with the code; the runs stay on the machine that ran them.",
      "The cookbook in the restaurant; each cook's notebook in their locker.",
-     "repo config wins over home · credentials in <code>.env</code> · first run registers the project"),
+     "repo config wins over home · several repos: <code>--folder</code>, in place, git per repo"),
     (SHIP, f"Surfaces and the sdlc pack", f"Start and answer runs from the CLI, the Web UI (<code>archon serve</code>, :3090), chat or triggers. {BUNDLED} bundled workflows: <code>archon-ship</code> and its queues.",
      "A decision reaches whoever can make it; the pack shows what a full process looks like.",
      "A shop with a counter, a website and a phone; a car plant next to your garage.",
@@ -157,7 +158,7 @@ assert len(TILES) == 12
 
 MAPPING = [("Intent", "a run (run id)"), ("Scope", "which workflow you run"), ("Stage", "node"),
            ("Gate 1 / 2 &lt;why&gt;", "<code>wait</code>, <code>form: approval</code>"), ("Request Changes", "reject in a <code>loop_group</code>"),
-           ("Verification command", "<code>until_bash</code> + bash node"), ("<code>aidlc/</code> record", "artifacts + transcript, not committed"),
+           ("Verification command", "<code>until_bash</code> + bash node"), ("<code>aidlc/</code> record", "artifacts + transcript, not committed"), ("Workspace", "one repo, or a folder project"),
            ("<code>/aidlc</code> in Claude", "<code>archon workflow run</code>")]
 MIX = [("run ≠ workflow ≠ command", "one execution · the YAML process · one prompt file a node sends"),
        ("wait ≠ cancel ≠ reject", "a pause · a node that ends the run · an answer the YAML must route"),
@@ -194,7 +195,7 @@ page = f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name
 <section class="phases">{phases}</section>
 <section class="body">{tiles}</section>
 {side}
-<footer class="foot"><span>Sources: github.com/coleam00/Archon (v{VERSION}) · archon.diy (Why Archon; Workflow language; Asking for an answer; Loop nodes; Worktrees; Archon directories; SDLC pack; Configuration), read at the v{VERSION} tag. Definitions paraphrased; examples from the course's run of 3 Nov 2026; analogies ours.</span><span>Companions: <a href="archon-concepts-explained.html">concepts explained</a> · <a href="archon-concepts-map.svg">concept map</a> · <a href="index.html">the course</a></span></footer>
+<footer class="foot"><span>Sources: github.com/coleam00/Archon (v{VERSION}) · archon.diy (Why Archon; Workflow language; Asking for an answer; Loop nodes; Worktrees; Archon directories; Multi-repo projects; SDLC pack; Configuration), read at the v{VERSION} tag. Definitions paraphrased; examples from the course's run of 3 Nov 2026; analogies ours.</span><span>Companions: <a href="archon-concepts-explained.html">concepts explained</a> · <a href="archon-concepts-map.svg">concept map</a> · <a href="index.html">the course</a></span></footer>
 </div></body></html>
 """
 write(ROOT / "archon-concepts-onepage.html", page)

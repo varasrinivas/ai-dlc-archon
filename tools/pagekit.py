@@ -218,6 +218,31 @@ def assert_clean(page_html, name):
     assert "ANTHROPIC_API_KEY=sk" not in page_html
 
 
+# ---------- documented (not run) facts: checked against Archon's own text ----------
+def doc_says(doc, *phrases):
+    """Assert each phrase is in tools/data/docs/<doc> (copied from Archon v0.13.2's packages/docs-web, MIT)."""
+    text = (ROOT / "tools" / "data" / "docs" / doc).read_text(encoding="utf-8")
+    for p in phrases:
+        assert p in text, f"{doc} no longer says {p!r}"
+
+
+def multirepo_facts(cli):
+    """What the pages say about work across several repos (a folder project), each line tied to the docs or the help."""
+    doc_says("multi-repo-projects.md",
+             "running in place (no worktree isolation)", "The first run registers the folder project; later runs from the root",
+             "**Per-service git is the agent's job.** Archon does not create a worktree or manage branches/PRs for a folder project",
+             "`--branch` and `--from` are rejected", "~/.archon/workspaces/_folder/<slug>/",
+             "Archon does not create a composed multi-repo worktree", "register that service repo as its **own** project",
+             "Opt into overlay-isolated, approval-gated container execution with `--container`")
+    doc_says("global-workflows.md", "Workflows placed in `~/.archon/workflows/`", "they appear in every project")
+    run_help = cli["help-workflow-run"]["out"]
+    for flag in ["--folder                   Register the current directory (with or without git) as a folder project and run in place",
+                 "--container                Run a folder project in container isolation",
+                 "--workflow-source <path>   Read the workflow, its commands and scripts from this directory",
+                 "instead of --cwd (which stays the workspace the run acts on)"]:
+        assert flag in run_help, flag
+
+
 def write(path, page_html):
     assert_clean(page_html, path.name)
     path.write_text(page_html, encoding="utf-8", newline="\n")

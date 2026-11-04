@@ -484,8 +484,10 @@ All checks passed.</pre></div></div><div class="note">The installer verifies the
 </section>
 <div class="phase" style="--c:var(--build)"><i></i>The repo<span>steps 7–8 · the files and the fields</span></div>
 <section class="step" id="s07" data-step="7" data-phase="The repo" style="--c:var(--build)">
-  <div class="step__head"><span class="step__n">7</span><div><span class="chip">the files</span><h2>Files in a repo, and in ~/.archon</h2><p class="step__why">Two places: what the team commits, and what stays on your machine.</p></div><span class="who">read · 3 min</span></div>
-<div class="io io--stack"><div class="box disk"><div class="box__bar">In the repo (committed)</div><pre>priorauth-api/                       <b>the repo is the project: no workspace folder around it</b>
+  <div class="step__head"><span class="step__n">7</span><div><span class="chip">the files</span><h2>Files in a repo, and in ~/.archon</h2><p class="step__why">Two places: what the team commits, and what stays on your machine. A run never edits your clone: the agent writes the API code in the run's worktree under <code>~/.archon</code>, and it comes back to the repo as a branch.</p></div><span class="who">read · 3 min</span></div>
+<div class="io io--stack"><div class="box disk"><div class="box__bar">In the repo (committed)</div><pre>priorauth-api/                       <b>your clone, wherever you keep it</b>
+                                     the course's: C:\work\archon-java\priorauth-api
+                                     one repo: the repo is the project (two repos: below)
 ├── <span class="n">.archon/</span>                         committed: the team's Archon files
 │   ├── <span class="n">config.yaml</span>                  assistant: claude · worktree.baseBranch: main
 │   └── workflows/
@@ -497,18 +499,42 @@ All checks passed.</pre></div></div><div class="note">The installer verifies the
 │                   └── <span class="n">implement.md</span>     <span class="m">the prompt of each implement pass</span>
 ├── <span class="n">CLAUDE.md</span>                        the team's rules; Claude Code reads it in every AI node
 ├── <span class="n">.gitattributes</span>                   keeps verify.sh LF in every worktree
-├── <span class="n">scripts/verify.sh</span>, verify.cmd     the one check (until_bash and the checks node)
+├── <span class="n">scripts/verify.sh</span>, verify.cmd    the one check (until_bash and the checks node)
 ├── <span class="n">docs-in/request.md</span>               Ravi's request, named in the run message
-└── pom.xml, src/ …                  the code</pre></div><div class="box disk"><div class="box__bar">In your home folder (not committed)</div><pre>~/.archon/                           <b>yours, never committed</b> (C:\Users\you\.archon on Windows)
+├── <span class="n">pom.xml</span>                          Spring Boot 4.1, Java 21, Maven
+└── <span class="n">src/</span>                             <b>the API code</b>, as on main before the run
+    ├── main/java/com/acmehealth/priorauth/
+    │   ├── PriorAuthApiApplication.java
+    │   ├── api/                     <span class="m">the endpoint the reviewer screen reads</span>
+    │   │   ├── PendingRequestsController.java   GET /requests/pending
+    │   │   └── PendingRequestResponse.java      one row of the list
+    │   ├── model/PriorAuthRequest.java
+    │   └── store/RequestStore.java  <span class="m">the nightly export, packed into the jar</span>
+    ├── main/resources/              application.yml, data/requests.sample.json
+    └── test/java/com/acmehealth/priorauth/
+        ├── api/PendingRequestsControllerTest.java
+        └── store/RequestStoreTest.java</pre></div><div class="box disk"><div class="box__bar">In your home folder (not committed)</div><pre>~/.archon/                           <b>yours, never committed</b> (C:\Users\you\.archon on Windows)
 ├── bin/archon.exe                   the CLI
 ├── plugins/                         provider plugins (archon-provider-claude.exe)
 ├── config.yaml                      your defaults: assistant, tiers, concurrency
 ├── install.json                     which binary and version
 ├── archon.db                        SQLite: projects, runs, events, costs
 └── workspaces/_local/priorauth-api/ one folder per project
-    ├── worktrees/request-age/age-api/   the run's checkout, on branch request-age/age-api
+    ├── worktrees/request-age/age-api/   <b>where the run writes the API code</b>: a full checkout
+    │   │                                of the repo, on branch request-age/age-api
+    │   ├── src/main/java/com/acmehealth/priorauth/api/
+    │   │   ├── RequestAge.java          <span class="m">new</span>
+    │   │   ├── HolidayCalendar.java     <span class="m">new</span>
+    │   │   └── PendingRequestsController.java   <span class="m">changed</span>
+    │   └── src/test/java/…              <span class="m">new and changed tests</span>
     ├── logs/&lt;run-id&gt;.jsonl            the transcript
-    └── artifacts/runs/&lt;run-id&gt;/        scan.md, questions.md, requirements.md, plan.md …</pre></div></div><div class="gwrap"><table class="kv"><thead><tr><th>File</th><th>Needed?</th><th>Why</th></tr></thead><tbody><tr><td><code>.archon/workflows/…/*.yaml</code></td><td>only for your own workflows</td><td>The bundled 25 need nothing in the repo</td></tr><tr><td><code>.archon/config.yaml</code></td><td>optional</td><td>Repo defaults; wins over <code>~/.archon/config.yaml</code>. Worktree settings (<code>copyFiles</code>, <code>postCreate</code>) are read only from here</td></tr><tr><td><code>CLAUDE.md</code></td><td>optional, recommended</td><td>The agent's standing rules for this repo, in every AI node</td></tr><tr><td><code>.archon/.env</code></td><td>optional, never commit</td><td>Credentials for this repo (<code>archon setup --scope project</code>)</td></tr><tr><td><code>.gitattributes</code></td><td>on Windows with autocrlf</td><td>A worktree is a fresh checkout: without <code>*.sh text eol=lf</code> bash gets CRLF scripts</td></tr></tbody></table></div><div class="note">Workflow commands need a git repository: outside one, <code>archon workflow list</code> says <code>Error: Not in a git repository.</code> (or register a plain folder with <code>--folder</code>).</div>
+    └── artifacts/runs/&lt;run-id&gt;/        scan.md, questions.md, requirements.md, plan.md …</pre></div></div><div class="gwrap"><table class="kv"><thead><tr><th>File</th><th>Needed?</th><th>Why</th></tr></thead><tbody><tr><td><code>.archon/workflows/…/*.yaml</code></td><td>only for your own workflows</td><td>The bundled 25 need nothing in the repo</td></tr><tr><td><code>.archon/config.yaml</code></td><td>optional</td><td>Repo defaults; wins over <code>~/.archon/config.yaml</code>. Worktree settings (<code>copyFiles</code>, <code>postCreate</code>) are read only from here</td></tr><tr><td><code>CLAUDE.md</code></td><td>optional, recommended</td><td>The agent's standing rules for this repo, in every AI node</td></tr><tr><td><code>.archon/.env</code></td><td>optional, never commit</td><td>Credentials for this repo (<code>archon setup --scope project</code>)</td></tr><tr><td><code>.gitattributes</code></td><td>on Windows with autocrlf</td><td>A worktree is a fresh checkout: without <code>*.sh text eol=lf</code> bash gets CRLF scripts</td></tr></tbody></table></div><div class="note">Workflow commands need a git repository: outside one, <code>archon workflow list</code> says <code>Error: Not in a git repository.</code> (or register a plain folder with <code>--folder</code>).</div><h3 style="margin:22px 0 8px">A feature across two repos? A folder project <span class="lbl lbl-doc">documented</span></h3><div class="plain"><div><b>In plain words.</b> This course's change touches one repo, so the team's files sit in that repo. When one feature spans two repos, put both under one root and give the root the <code>.archon/</code>: Archon calls that a <b>folder project</b>, and it plays the part of the AI-DLC workspace.</div></div><div class="box disk"><div class="box__bar">A folder project (from the Archon docs; not run in this course)</div><pre>priorauth-workspace/                 <b>the root: a folder project</b> (git at the root or not)
+├── <span class="n">.archon/workflows/…</span>              the team's workflows, read from the root
+├── <span class="n">CLAUDE.md</span>                        the rules for work across both repos
+├── <span class="n">docs-in/request.md</span>               the request, named in the run message
+├── priorauth-api/                   repo 1, a git repo of its own
+└── reviewer-ui/                     repo 2, a git repo of its own
+                                     <span class="m">the agent branches, commits and pushes in each</span></pre></div><div class="gwrap"><table class="kv"><thead><tr><th></th><th>One repo (this course)</th><th>A folder project</th></tr></thead><tbody><tr><td>Register</td><td>the first run in the repo</td><td>the first run with <code>--folder</code> from the root; later runs need no flag</td></tr><tr><td>The agent works in</td><td>the run's worktree, on its own branch</td><td>the root, in place: it sees every repo under it</td></tr><tr><td>Branches and the PR</td><td>Archon makes the branch; the workflow pushes it</td><td>the agent's job, in each repo (Archon makes no worktree or branch; <code>--branch</code> is rejected)</td></tr><tr><td>Isolation</td><td>a worktree per run</td><td>none, or <code>--container</code>: a Docker overlay, with an approval before writes reach the folders</td></tr><tr><td>Runs are stored in</td><td><code>~/.archon/workspaces/_local/priorauth-api/</code></td><td><code>~/.archon/workspaces/_folder/&lt;slug&gt;/</code></td></tr></tbody></table></div><div class="note">Archon does not give one run a worktree in each of two repos. The docs' advice: keep the root as a folder project for cross-repo work, and let each repo also be its own project (run from inside it) for a change that touches only that repo. Workflows can also live outside every repo: <code>~/.archon/workflows/</code> appear in all your projects (yours, not the team's), and <code>--workflow-source &lt;dir&gt;</code> reads the workflow from one folder and runs it against <code>--cwd</code>. All from the Archon 0.13.2 docs and <code>workflow run --help</code>; this course ran only the one-repo case.</div>
 </section>
 <section class="step" id="s08" data-step="8" data-phase="The repo" style="--c:var(--build)">
   <div class="step__head"><span class="step__n">8</span><div><span class="chip">authoring</span><h2>The fields you will use</h2><p class="step__why">A short list from the workflow-language reference: enough to read any workflow and write a first one.</p></div><span class="who">reference</span></div>

@@ -101,7 +101,7 @@ S.append(step(5, "The repo", "--plan", "clone", "Clone the starter repo",
               io(you("cd C:\\work\ngit clone --single-branch --no-tags https://github.com/varasrinivas/aidlc-priorauth-api priorauth-api\ncd priorauth-api",
                      "cd ~/work\ngit clone --single-branch --no-tags https://github.com/varasrinivas/aidlc-priorauth-api priorauth-api\ncd priorauth-api", "PowerShell", "Terminal"),
                  see("Cloning into 'priorauth-api'...\ndone.", "real · the course cloned a local copy of the same repo", "git returns"))
-              + note("<code>--no-tags</code> leaves out the <code>v1.1.0</code> tag, the answer key: an agent that scans the repo would otherwise find it. There is no workspace folder to make: <b>in Archon the repo is the project</b>, and Archon registers it on the first run.")))
+              + note("<code>--no-tags</code> leaves out the <code>v1.1.0</code> tag, the answer key: an agent that scans the repo would otherwise find it. There is no workspace folder to make: <b>for a one-repo change the repo is the project</b>, and Archon registers it on the first run. A feature across several repos uses a <i>folder project</i> around them instead, the counterpart of the AI-DLC workspace (<a href='archon-introduction.html#s07'>introduction, step 7</a>).")))
 
 S.append(step(6, "The repo", "--plan", "ours", "Write the team's files",
               "Nine small files the team owns: the workflow and its two prompts, Archon's repo config, the agent's rules, the one check, the request.", "Kiran · 3 min",
@@ -186,7 +186,7 @@ hero = f'''<section class="hero" id="top">
       <div><b>1</b>install command, checksum verified</div>
       <div><b>1</b>provider: Claude Code, your login</div>
       <div><b>9</b>team files, committed</div>
-      <div><b>0</b>workspace folders: the repo is the project</div>
+      <div><b>0</b>workspace folders for one repo: the repo is the project</div>
       <div><b>{len(INV)}</b>files under ~/.archon after the course</div>
       <div><b>3090</b>the Web UI's port</div>
     </div>

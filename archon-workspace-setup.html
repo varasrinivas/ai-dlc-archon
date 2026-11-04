@@ -256,7 +256,7 @@ figure.dia{margin:14px 0}figure.dia figcaption{font-size:.82rem;color:var(--ink-
       <div><b>1</b>install command, checksum verified</div>
       <div><b>1</b>provider: Claude Code, your login</div>
       <div><b>9</b>team files, committed</div>
-      <div><b>0</b>workspace folders: the repo is the project</div>
+      <div><b>0</b>workspace folders for one repo: the repo is the project</div>
       <div><b>1049</b>files under ~/.archon after the course</div>
       <div><b>3090</b>the Web UI's port</div>
     </div>
@@ -368,7 +368,7 @@ git clone --single-branch --no-tags https://github.com/varasrinivas/aidlc-priora
 cd priorauth-api</pre><pre class="os-mac">cd ~/work
 git clone --single-branch --no-tags https://github.com/varasrinivas/aidlc-priorauth-api priorauth-api
 cd priorauth-api</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">git returns <span class="tag">real · the course cloned a local copy of the same repo</span></div><pre>Cloning into 'priorauth-api'...
-done.</pre></div></div><div class="note"><code>--no-tags</code> leaves out the <code>v1.1.0</code> tag, the answer key: an agent that scans the repo would otherwise find it. There is no workspace folder to make: <b>in Archon the repo is the project</b>, and Archon registers it on the first run.</div>
+done.</pre></div></div><div class="note"><code>--no-tags</code> leaves out the <code>v1.1.0</code> tag, the answer key: an agent that scans the repo would otherwise find it. There is no workspace folder to make: <b>for a one-repo change the repo is the project</b>, and Archon registers it on the first run. A feature across several repos uses a <i>folder project</i> around them instead, the counterpart of the AI-DLC workspace (<a href='archon-introduction.html#s07'>introduction, step 7</a>).</div>
 </section>
 <section class="step" id="s06" data-step="6" data-phase="The repo" style="--c:var(--plan)">
   <div class="step__head"><span class="step__n">6</span><div><span class="chip">ours</span><h2>Write the team's files</h2><p class="step__why">Nine small files the team owns: the workflow and its two prompts, Archon's repo config, the agent's rules, the one check, the request.</p></div><span class="who">Kiran · 3 min</span></div>
