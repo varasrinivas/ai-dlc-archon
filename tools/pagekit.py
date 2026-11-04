@@ -251,3 +251,22 @@ def write(path, page_html):
 
 def strip_ansi(s):
     return re.sub(r"\x1b\[[0-9;]*[A-Za-z]", "", s)
+
+
+def shell_group(steps, labels, quiet=("LF will be replaced by CRLF", "CRLF will be replaced by LF")):
+    """The recorded setup commands `labels` (from a steps dict) as one Git Bash script, with a `cd` wherever the
+    folder changes, and what they printed (stdout, plus stderr that is not git's line-ending chatter)."""
+    cmds, outs, cwd = [], [], None
+    for label in labels:
+        s = steps[label]
+        assert s["exit"] == 0, (label, s["exit"])
+        d = s["cwd"].replace("\\", "/")
+        if d != cwd:
+            cmds.append(f"cd {d}")
+            cwd = d
+        cmds.append(s["cmd"].strip())
+        err = "\n".join(ln for ln in s["stderr"].splitlines() if ln.strip() and not any(q in ln for q in quiet))
+        out = (s["stdout"].strip() + ("\n" + err if err else "")).strip()
+        if out:
+            outs.append(out)
+    return "\n".join(cmds), "\n".join(outs) or "(no output: git -q prints nothing when it succeeds)"

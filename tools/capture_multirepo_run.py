@@ -8,6 +8,8 @@ archon-hello-world-java/multirepo-run/ (no Claude, seconds):
   git/<repo>/                    per code repo: the graph, the fix's commit as a patch, the diff and stat from the
                                  version before (v1.0.0 / v1.2.0) to the merge (v1.0.1 / v1.2.1)
   storage.txt                    the folder project's own folders under ~/.archon/workspaces/_folder/
+  ../multirepo-workspace/        the team workspace at its main with priorauth-aging/ and priorauth-api/ inside it,
+                                 each at its main after the merge (git archive, no .git): real, buildable files
 
 Then run tools/scrub_captures.py --check (this folder is in its list).
 Usage: py -3.12 tools/capture_multirepo_run.py
@@ -19,11 +21,12 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from capture_java_run import clean_steps, node_table  # noqa: E402
+from capture_java_run import archive, clean_steps, node_table  # noqa: E402
 from pagekit import scrub  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 RUNDIR = ROOT / "archon-hello-world-java" / "multirepo-run"
+WSDIR = ROOT / "archon-hello-world-java" / "multirepo-workspace"
 REMOTES = Path(r"D:\tmp\archon-multirepo\remotes")
 PROJ = Path.home() / ".archon" / "workspaces" / "_folder" / "priorauth-workspace"
 REPOS = {"priorauth-aging": ("v1.0.0", "v1.0.1"), "priorauth-api": ("v1.2.0", "v1.2.1")}
@@ -75,6 +78,7 @@ def main():
         "\n".join(str(p.relative_to(PROJ.parent.parent)).replace("\\", "/") + ("/" if p.is_dir() else "")
                   for p in sorted(PROJ.rglob("*")) if len(p.relative_to(PROJ).parts) <= 3) + "\n", encoding="utf-8")
     print("captured into", RUNDIR.relative_to(ROOT))
+    archive(REMOTES / "priorauth-workspace.git", WSDIR, {r: REMOTES / f"{r}.git" for r in REPOS})
 
 
 if __name__ == "__main__":

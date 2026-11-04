@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Set Up Archon for a Repo</title>
-<meta name="description" content="Install Archon 0.13.2, connect Claude Code, and prepare a repo for it: every command and every file, with real output on Windows and the macOS equivalents.">
+<meta name="description" content="Install Archon 0.13.2, connect Claude Code, and make a team workspace around the repo: every command and every file, with real output on Windows and the macOS equivalents.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@600;700;800&family=Red+Hat+Text:wght@400;500;600&family=Red+Hat+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -221,7 +221,7 @@ figure.dia{margin:14px 0}figure.dia figcaption{font-size:.82rem;color:var(--ink-
 <body>
 <a class="sr" href="#main">Skip to content</a>
 <header class="top"><div class="top__in">
-  <div class="brand">Archon setup<small>install · the repo's files · real output</small></div>
+  <div class="brand">Archon setup<small>install · the workspace · real output</small></div>
   <div class="prog" aria-live="polite"><b id="progText">Step 0 of 10</b><div class="bar"><i id="progBar"></i></div><span class="ph" id="progPhase">Start at the top</span></div>
   <div class="top__btns"><button class="btn" id="osToggle" type="button" title="Show the commands for your computer">Windows</button><button class="btn" id="themeToggle" type="button" aria-pressed="false">Dark mode</button></div>
 </div></header>
@@ -233,11 +233,11 @@ figure.dia{margin:14px 0}figure.dia figcaption{font-size:.82rem;color:var(--ink-
   <a class="rl" href="#s02" data-step="2" style="--c:var(--setup)"><b>2</b><span>version and doctor</span></a>
   <a class="rl" href="#s03" data-step="3" style="--c:var(--setup)"><b>3</b><span>Telemetry</span></a>
   <a class="rl" href="#s04" data-step="4" style="--c:var(--setup)"><b>4</b><span>Windows: Git Bash</span></a>
-  <h4>The repo</h4>
-  <a class="rl" href="#s05" data-step="5" style="--c:var(--plan)"><b>5</b><span>Clone the starter</span></a>
+  <h4>The workspace</h4>
+  <a class="rl" href="#s05" data-step="5" style="--c:var(--plan)"><b>5</b><span>Workspace, then the repo</span></a>
   <a class="rl" href="#s06" data-step="6" style="--c:var(--plan)"><b>6</b><span>Write the team's files</span></a>
   <a class="rl" href="#s07" data-step="7" style="--c:var(--plan)"><b>7</b><span>Validate, dry-run</span></a>
-  <a class="rl" href="#s08" data-step="8" style="--c:var(--plan)"><b>8</b><span>Commit</span></a>
+  <a class="rl" href="#s08" data-step="8" style="--c:var(--plan)"><b>8</b><span>Commit the workspace</span></a>
   <h4>First run</h4>
   <a class="rl" href="#s09" data-step="9" style="--c:var(--build)"><b>9</b><span>Open the Web UI</span></a>
   <a class="rl" href="#s10" data-step="10" style="--c:var(--build)"><b>10</b><span>Where PRs come from</span></a>
@@ -250,30 +250,30 @@ figure.dia{margin:14px 0}figure.dia figcaption{font-size:.82rem;color:var(--ink-
 <main id="main">
 <section class="hero" id="top">
   <div>
-    <h1>Set up Archon for a repo, and know what every file is for.</h1>
-    <p class="lead">Install once per machine, then add nine small files to the repo: that is the whole setup. This page does both on the course's Spring Boot repo with real output from Archon 0.13.2, including the two Windows snags the course hit. Next: <a href="archon-hello-world-java/archon-hello-world-java-run.html">run one request through it</a>.</p>
+    <h1>Set up Archon: a team workspace around your repo, and what every file is for.</h1>
+    <p class="lead">Install once per machine, then make a team workspace: ten small files at its root, and the code repo cloned inside it. That is the whole setup. This page does both on the course's Spring Boot repo with real output from Archon 0.13.2, including the two Windows snags the course hit. Next: <a href="archon-hello-world-java/archon-hello-world-java-run.html">run one request through it</a>.</p>
     <div class="facts">
       <div><b>1</b>install command, checksum verified</div>
       <div><b>1</b>provider: Claude Code, your login</div>
-      <div><b>9</b>team files, committed</div>
-      <div><b>0</b>workspace folders for one repo: the repo is the project</div>
-      <div><b>1049</b>files under ~/.archon after the course</div>
+      <div><b>10</b>team files, committed in the workspace</div>
+      <div><b>1</b>workspace, the code repo cloned inside it</div>
+      <div><b>1511</b>files under ~/.archon after the course</div>
       <div><b>3090</b>the Web UI's port</div>
     </div>
   </div>
-  <aside class="slack" aria-label="Two places">
-    <div class="slack__bar"><span>Two places</span><span>Archon 0.13.2</span></div>
+  <aside class="slack" aria-label="Three places">
+    <div class="slack__bar"><span>Three places</span><span>Archon 0.13.2</span></div>
     <div class="slack__body">
-      <p style="margin:0 0 8px"><b>The repo, <code>.archon/</code></b><br><span style="color:var(--ink-3)">The team's workflows, prompts and config. Committed; every clone gets them.</span></p>
-      <p style="margin:0 0 8px"><b>Beside it</b><br><span style="color:var(--ink-3)">CLAUDE.md for the agent, scripts/verify.sh for the check, docs-in/ for requests.</span></p>
-      <p style="margin:0"><b>Your home, <code>~/.archon/</code></b><br><span style="color:var(--ink-3)">The binary, plugins, the database, and every run's worktree, transcript and artifacts. Never committed.</span></p>
+      <p style="margin:0 0 8px"><b>The workspace, <code>java-workspace/</code></b><br><span style="color:var(--ink-3)"><code>.archon/</code> with the team's workflows, CLAUDE.md, scripts/verify.sh, docs-in/. A git repo of its own; committed.</span></p>
+      <p style="margin:0 0 8px"><b>The code, <code>priorauth-api/</code></b><br><span style="color:var(--ink-3)">Cloned inside the workspace, with its own git and remote. The workspace ignores it.</span></p>
+      <p style="margin:0"><b>Your home, <code>~/.archon/</code></b><br><span style="color:var(--ink-3)">The binary, plugins, the database, and every run's transcript and artifacts. Never committed.</span></p>
     </div>
   </aside>
 </section>
 <div class="phase" style="--c:var(--setup)"><i></i>Once per machine<span>steps 1–4 · install, check, telemetry, Windows</span></div>
 <section class="step" id="s01" data-step="1" data-phase="Once per machine" style="--c:var(--setup)">
   <div class="step__head"><span class="step__n">1</span><div><span class="chip">install</span><h2>Install Archon and an agent</h2><p class="step__why">One binary, plus the agent it drives. Archon brings no model: it runs Claude Code (or Codex, Pi) with your own login.</p></div><span class="who">Kiran · 5 min</span></div>
-<div class="gwrap"><table><thead><tr><th>You need</th><th>Why</th><th>Check</th></tr></thead><tbody><tr><td>Claude Code, signed in</td><td>the agent every AI node runs</td><td><code>claude --version</code>, then <code>claude</code> once to sign in</td></tr><tr><td>git</td><td>worktrees, branches; on Windows also Git Bash, which runs every <code>bash:</code> node</td><td><code>git --version</code></td></tr><tr><td>JDK 21 + Maven 3.9</td><td>only for this course's Java repo</td><td><code>java -version</code> shows 21</td></tr></tbody></table></div><div class="io io--stack"><div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">PowerShell</span><span class="os-mac">Terminal</span></span></div><pre class="os-win">irm https://archon.diy/install.ps1 | iex</pre><pre class="os-mac">curl -fsSL https://archon.diy/install | bash</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">The installer returns <span class="tag">Windows · Archon 0.13.2 · real, run with -Providers claude</span></div><pre>+---------------------------------------+
+<div class="gwrap"><table><thead><tr><th>You need</th><th>Why</th><th>Check</th></tr></thead><tbody><tr><td>Claude Code, signed in</td><td>the agent every AI node runs</td><td><code>claude --version</code>, then <code>claude</code> once to sign in</td></tr><tr><td>git</td><td>the workspace and the code repo, branches; on Windows also Git Bash, which runs every <code>bash:</code> node</td><td><code>git --version</code></td></tr><tr><td>JDK 21 + Maven 3.9</td><td>only for this course's Java repo</td><td><code>java -version</code> shows 21</td></tr></tbody></table></div><div class="io io--stack"><div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">PowerShell</span><span class="os-mac">Terminal</span></span></div><pre class="os-win">irm https://archon.diy/install.ps1 | iex</pre><pre class="os-mac">curl -fsSL https://archon.diy/install | bash</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">The installer returns <span class="tag">Windows · Archon 0.13.2 · real, run with -Providers claude</span></div><pre>+---------------------------------------+
   |      Archon CLI Installer             |
   |      Windows (PowerShell)             |
   +---------------------------------------+
@@ -326,7 +326,7 @@ archon doctor — verifying your setup
 ✓ Assistant login: claude: usable
 ✓ Provider support: claude is supported
 ✓ Database: reachable (sqlite); schema created by 0.13.2, last applied by 0.13.2
-○ Folder project: cwd is not a registered folder project
+✓ Folder project: &quot;java-workspace&quot; (runs in place) — 1 contained repo(s): priorauth-api
 ○ AI credentials: none connected — run: archon ai login &lt;vendor&gt;  or  archon ai key set &lt;vendor&gt;
 ✓ Workspace: C:\Users\you\.archon is writable
 ✓ Bundled defaults: 25 workflow(s), 27 command(s) loaded
@@ -360,29 +360,44 @@ nodes:
 [hello] Failed: Bash node &#x27;hello&#x27; failed: bash executable not found at &#x27;C:\Program Files\Git\bin\bash.exe&#x27;. Set ARCHON_BASH_PATH if Git Bash is installed elsewhere (e.g. user-scope installer at %LOCALAPPDATA%\Programs\Git\bin\bash.exe).
 Error: Workflow failed: Workflow did not complete successfully</pre></div><div class="box you"><div class="box__bar">You type <span class="tag">PowerShell · only if Git is elsewhere</span></div><pre>[Environment]::SetEnvironmentVariable('ARCHON_BASH_PATH', 'D:\Program Files\Git\bin\bash.exe', 'User')</pre><button class="copy" type="button">copy</button></div></div><div class="note">Archon checks <code>%ProgramFiles%\Git\bin\bash.exe</code>, <code>%ProgramFiles%\Git\usr\bin\bash.exe</code>, the x86 Program Files, <code>%LOCALAPPDATA%\Programs\Git\bin\bash.exe</code> and scoop. With <code>ARCHON_BASH_PATH</code> set, the same probe printed <code>Workflow completed successfully.</code> macOS and Linux use the <code>bash</code> on PATH.</div>
 </section>
-<div class="phase" style="--c:var(--plan)"><i></i>The repo<span>steps 5–8 · clone, write the team's files, check them, commit</span></div>
-<section class="step" id="s05" data-step="5" data-phase="The repo" style="--c:var(--plan)">
-  <div class="step__head"><span class="step__n">5</span><div><span class="chip">clone</span><h2>Clone the starter repo</h2><p class="step__why">The same Spring Boot API as the AI-DLC course, at v1.0.2: the code before the change.</p></div><span class="who">Kiran · 1 min</span></div>
-<div class="io"><div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">PowerShell</span><span class="os-mac">Terminal</span></span></div><pre class="os-win">cd C:\work
-git clone --single-branch --no-tags https://github.com/varasrinivas/aidlc-priorauth-api priorauth-api
-cd priorauth-api</pre><pre class="os-mac">cd ~/work
-git clone --single-branch --no-tags https://github.com/varasrinivas/aidlc-priorauth-api priorauth-api
-cd priorauth-api</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">git returns <span class="tag">real · the course cloned a local copy of the same repo</span></div><pre>Cloning into 'priorauth-api'...
-done.</pre></div></div><div class="note"><code>--no-tags</code> leaves out the <code>v1.1.0</code> tag, the answer key: an agent that scans the repo would otherwise find it. There is no workspace folder to make: <b>for a one-repo change the repo is the project</b>, and Archon registers it on the first run. A feature across several repos uses a <i>folder project</i> around them instead, the counterpart of the AI-DLC workspace (<a href='archon-introduction.html#s07'>introduction, step 7</a>).</div>
+<div class="phase" style="--c:var(--plan)"><i></i>The workspace<span>steps 5–8 · the workspace and the clone, the team's files, check them, commit</span></div>
+<section class="step" id="s05" data-step="5" data-phase="The workspace" style="--c:var(--plan)">
+  <div class="step__head"><span class="step__n">5</span><div><span class="chip">ours</span><h2>Make the team's workspace, and clone the repo into it</h2><p class="step__why">Like the AI-DLC course: a folder of its own around the code. It is a git repo for the team's files; the code repo is cloned inside it and keeps its own git.</p></div><span class="who">Kiran · 2 min</span></div>
+<div class="io"><div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">PowerShell</span><span class="os-mac">Terminal</span></span></div><pre class="os-win">mkdir C:\work\java-workspace
+cd C:\work\java-workspace
+git init -b main
+git clone --single-branch --no-tags https://github.com/varasrinivas/aidlc-priorauth-api priorauth-api</pre><pre class="os-mac">mkdir -p ~/work/java-workspace
+cd ~/work/java-workspace
+git init -b main
+git clone --single-branch --no-tags https://github.com/varasrinivas/aidlc-priorauth-api priorauth-api</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">ls -a, then git in priorauth-api <span class="tag">real · the course's workspace, once the team's files of steps 6–8 are in</span></div><pre>.
+..
+.archon
+.git
+.gitattributes
+.gitignore
+CLAUDE.md
+docs-in
+priorauth-api
+scripts
+== priorauth-api
+d9aa178 (HEAD -&gt; main, origin/main, origin/HEAD) priorauth-api 1.0.2: pending list for the reviewer screen
+11:    &lt;version&gt;4.1.1&lt;/version&gt;
+17:  &lt;version&gt;1.0.2&lt;/version&gt;</pre></div></div><div class="box disk"><div class="box__bar">On disk now</div><pre>java-workspace/                      <b>the team's workspace</b>: git init, branch main
+├── .git/
+└── priorauth-api/                   <b>the code repo</b>: cloned, its own .git, main at v1.0.2
+    ├── pom.xml
+    └── src/ …</pre></div><div class="note"><code>--no-tags</code> leaves out the <code>v1.1.0</code> tag, the answer key: an agent that scans the repo would otherwise find it. The workspace is an Archon <b>folder project</b>: runs start at its root and work in place, and the agent does the git in <code>priorauth-api</code>. A second repo is one more <code>git clone</code> here (the course's <a href='archon-hello-world-java/archon-two-repos-run.html'>two-repo run</a>). The other layout, with <code>.archon/</code> inside the code repo and a worktree per run, is compared in the <a href='archon-introduction.html#s07'>introduction, step 7</a>.</div>
 </section>
-<section class="step" id="s06" data-step="6" data-phase="The repo" style="--c:var(--plan)">
-  <div class="step__head"><span class="step__n">6</span><div><span class="chip">ours</span><h2>Write the team's files</h2><p class="step__why">Nine small files the team owns: the workflow and its two prompts, Archon's repo config, the agent's rules, the one check, the request.</p></div><span class="who">Kiran · 3 min</span></div>
-<div class="io io--stack"><div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">PowerShell, from priorauth-api</span><span class="os-mac">Terminal, from priorauth-api</span></span></div><pre class="os-win">New-Item -ItemType Directory -Force .archon, .archon\workflows\team\request-to-pr, .archon\workflows\team\request-to-pr\commands, docs-in, scripts | Out-Null
+<section class="step" id="s06" data-step="6" data-phase="The workspace" style="--c:var(--plan)">
+  <div class="step__head"><span class="step__n">6</span><div><span class="chip">ours</span><h2>Write the team's files</h2><p class="step__why">Ten small files the team owns, at the workspace root: the workflow and its two prompts, Archon's config, the agent's rules, the one check, the .gitignore, the request.</p></div><span class="who">Kiran · 3 min</span></div>
+<div class="io io--stack"><div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">PowerShell, from java-workspace</span><span class="os-mac">Terminal, from java-workspace</span></span></div><pre class="os-win">New-Item -ItemType Directory -Force .archon, .archon\workflows\team\request-to-pr, .archon\workflows\team\request-to-pr\commands, docs-in, scripts | Out-Null
 [IO.File]::WriteAllText(&quot;$PWD\.archon\config.yaml&quot;, (@&#x27;
-# Archon settings for this repo (committed; every clone and every worktree reads them).
+# Archon settings for this workspace (committed). It is a folder project: no worktree settings apply.
 assistant: claude          # workflows use Claude Code unless a workflow or node says otherwise
-
-worktree:
-  baseBranch: main         # each run&#x27;s branch is cut from main
 &#x27;@ -replace &quot;`r&quot;, &quot;&quot;) + &quot;`n&quot;)
 [IO.File]::WriteAllText(&quot;$PWD\.archon\workflows\team\request-to-pr\commands\implement.md&quot;, (@&#x27;
 ---
-description: Implement the approved plan; one pass of the implement loop.
+description: Implement the approved plan in priorauth-api; one pass of the implement loop.
 ---
 The request: $USER_MESSAGE
 
@@ -392,10 +407,13 @@ following CLAUDE.md. Notes from the person who approved the plan: $approve-plan.
 If an earlier pass ran, this is what it reported (fix what it left failing):
 $LOOP_PREV_OUTPUT
 
-Run ./scripts/verify.sh. When it passes, commit the change on the current branch with a message
-that names the request and the requirement IDs. Write $ARTIFACTS_DIR/implementation.md: the files
-changed, the tests added, the verify result, and what you skipped or did not check.
-Return the verify result and the commit hash.
+In priorauth-api: switch to the branch request-age/&lt;slug&gt; named in CLAUDE.md&#x27;s pattern (create it
+from main if it does not exist yet), make the change, and commit it there with a message that names
+the request and the requirement IDs. Do not commit in the workspace folder and do not push.
+
+Run ./scripts/verify.sh from the workspace root. Write $ARTIFACTS_DIR/implementation.md: the branch,
+the files changed, the tests added, the commit, the verify result, and what you skipped or did not
+check. Return the verify result and the commit hash.
 &#x27;@ -replace &quot;`r&quot;, &quot;&quot;) + &quot;`n&quot;)
 [IO.File]::WriteAllText(&quot;$PWD\.archon\workflows\team\request-to-pr\commands\scan.md&quot;, (@&#x27;
 ---
@@ -403,8 +421,9 @@ description: Read the request and the code; write what a planner needs to know. 
 ---
 The request: $USER_MESSAGE
 
-Read the request file it names (in docs-in/), then the code: the build file, the entry points, the
-classes the request touches, the tests, the configuration and the data files.
+Read the request file it names (in docs-in/), then the code in priorauth-api/ (the repo named in
+CLAUDE.md): the build file, the entry points, the classes the request touches, the tests, the
+configuration and the data files. Check the repo&#x27;s current branch and its tags.
 
 Write $ARTIFACTS_DIR/scan.md with:
 - what the repo is and how it is built and tested (the verify command from CLAUDE.md);
@@ -412,14 +431,16 @@ Write $ARTIFACTS_DIR/scan.md with:
 - what is missing for the request (data, rules, configuration);
 - risks: callers or tests that a change could break.
 
-Do not change any file in the repository. Return a five-line summary.
+Do not change any file in priorauth-api or in the workspace. Return a five-line summary.
 &#x27;@ -replace &quot;`r&quot;, &quot;&quot;) + &quot;`n&quot;)
 [IO.File]::WriteAllText(&quot;$PWD\.archon\workflows\team\request-to-pr\request-to-pr.yaml&quot;, (@&#x27;
 name: request-to-pr
 description: &gt;-
-  Take one request from docs-in/ to a pushed branch: scan the repo, ask the questions a person must
-  answer, write the requirements (revised until approved), plan, implement until ./scripts/verify.sh
-  passes, review, and push after a final approval. Use for one small change to priorauth-api.
+  Take one request from docs-in/ to a pushed branch in priorauth-api: scan the code, ask the
+  questions a person must answer, write the requirements (revised until approved), plan, implement
+  until ./scripts/verify.sh passes, review, and push after a final approval. Run it from the
+  workspace root (a folder project): Archon makes no worktree or branch here, the agent branches and
+  commits in priorauth-api itself. Use for one small change to priorauth-api.
   NOT for: bugs whose cause is unknown (use archon-investigate first).
 
 nodes:
@@ -525,16 +546,18 @@ nodes:
     depends_on: [implement]
     bash: |
       ./scripts/verify.sh &amp;&amp; echo &quot;verify: passed&quot;
-      git log --oneline &quot;$BASE_BRANCH&quot;..HEAD
-      git diff --stat &quot;$BASE_BRANCH&quot;...HEAD
+      echo &quot;== priorauth-api: on $(git -C priorauth-api branch --show-current)&quot;
+      git -C priorauth-api log --oneline main..HEAD
+      git -C priorauth-api diff --stat main...HEAD
+      git -C priorauth-api status --short
 
   # ── Review: a second reader, then a person ────────────────────────────
   - id: review
     depends_on: [checks]
     mutates_checkout: false
     prompt: |
-      Review the change on this branch against $ARTIFACTS_DIR/requirements.md and
-      $ARTIFACTS_DIR/plan.md (git diff $BASE_BRANCH...HEAD). Do not edit anything.
+      Review the change on priorauth-api&#x27;s branch against $ARTIFACTS_DIR/requirements.md and
+      $ARTIFACTS_DIR/plan.md (git -C priorauth-api diff main...HEAD). Do not edit anything.
       Check each FR has code and a test, and look for anything the plan did not name.
       Write $ARTIFACTS_DIR/review.md.
     output_format:
@@ -568,32 +591,46 @@ nodes:
     depends_on: [approve-change]
     when: &quot;$approve-change.output.decision == &#x27;approve&#x27;&quot;
     bash: |
-      git push -u origin HEAD 2&gt;&amp;1
-      echo &quot;Open the PR: $(git rev-parse --abbrev-ref HEAD) -&gt; $BASE_BRANCH&quot;
+      b=$(git -C priorauth-api branch --show-current)
+      if [ &quot;$b&quot; != main ] &amp;&amp; [ -n &quot;$(git -C priorauth-api log --oneline main..HEAD)&quot; ]; then
+        git -C priorauth-api push -u origin &quot;$b&quot; 2&gt;&amp;1
+        echo &quot;priorauth-api: open the PR $b -&gt; main&quot;
+      else
+        echo &quot;priorauth-api: nothing to push&quot;
+      fi
 &#x27;@ -replace &quot;`r&quot;, &quot;&quot;) + &quot;`n&quot;)
 [IO.File]::WriteAllText(&quot;$PWD\.gitattributes&quot;, (@&#x27;
-# verify.sh runs under bash in every Archon worktree: keep it LF even where git converts to CRLF.
+# verify.sh runs under bash: keep it LF even where git converts to CRLF.
 *.sh text eol=lf
 *.cmd text eol=crlf
 &#x27;@ -replace &quot;`r&quot;, &quot;&quot;) + &quot;`n&quot;)
+[IO.File]::WriteAllText(&quot;$PWD\.gitignore&quot;, (@&#x27;
+# The code repo is a git repo of its own, cloned here: not part of the workspace repo.
+/priorauth-api/
+&#x27;@ -replace &quot;`r&quot;, &quot;&quot;) + &quot;`n&quot;)
 [IO.File]::WriteAllText(&quot;$PWD\CLAUDE.md&quot;, (@&#x27;
-# priorauth-api
+# java workspace
 
-A Spring Boot 4.1 REST API on Java 21, built with Maven. It serves the pending list the reviewer screen reads.
-Work on it is run through Archon: the team&#x27;s workflows live in `.archon/workflows/`, requests in `docs-in/`.
+The team&#x27;s workspace for the reviewer screen&#x27;s backend. One code repo, a git repo of its own with its own remote,
+cloned into this folder (this folder&#x27;s own git repo ignores it):
 
-| Owns                              | Verify with              | Branch pattern     | PR base |
-|-----------------------------------|--------------------------|--------------------|---------|
-| the API the reviewer screen reads | `./scripts/verify.sh`    | request-age/&lt;slug&gt; | main    |
+| Repo             | What it is                                                                       | Verify with           | Branch pattern     | PR base |
+|------------------|----------------------------------------------------------------------------------|-----------------------|--------------------|---------|
+| `priorauth-api/` | the Spring Boot 4.1 REST API on Java 21 (Maven) the reviewer screen reads (`GET /requests/pending`) | `./scripts/verify.sh` | request-age/&lt;slug&gt; | main    |
+
+This folder is an Archon **folder project**: the team&#x27;s workflows live in `.archon/workflows/`, requests in
+`docs-in/`. Archon runs here in place: it makes no worktree, branch or pull request. The workflow and you do the
+git, in the code repo.
 
 ## How we run Archon here
 
-- One request = one run of `request-to-pr` = one branch = one PR. Name the request file in the run message.
-- Tests only through `./scripts/verify.sh` (`scripts\verify.cmd` by hand on Windows); never ad hoc.
+- One request = one run of `request-to-pr` = one branch in priorauth-api = one PR. Name the request file in the run message.
+- Tests only through `./scripts/verify.sh` (`scripts\verify.cmd` by hand on Windows), from this folder; never ad hoc.
+- Git in the code repo: branch `request-age/&lt;slug&gt;` from `main` in priorauth-api and commit there. Never commit code
+  in this workspace folder, never push (the workflow&#x27;s last node does).
 - Never add a dependency to pom.xml without saying so in the plan.
-- Write what a person must read (scan, questions, requirements, plan, review) into `$ARTIFACTS_DIR`, not into the repo.
-- Commit the code on the run&#x27;s branch when the checks pass; pushing is the workflow&#x27;s last node, opening the PR is ours.
-- Before proposing a version or a tag, check the existing tags and the version in pom.xml.
+- Write what a person must read (scan, questions, requirements, plan, review) into `$ARTIFACTS_DIR`, not into a repo.
+- Before proposing a version or a tag, check the repo&#x27;s tags and the version in its pom.xml.
 
 ## How to change code
 
@@ -617,22 +654,19 @@ Attachments: none. Repo: priorauth-api (the API behind the reviewer screen).
 &#x27;@ -replace &quot;`r&quot;, &quot;&quot;) + &quot;`n&quot;)
 [IO.File]::WriteAllText(&quot;$PWD\scripts\verify.sh&quot;, (@&#x27;
 #!/usr/bin/env bash
-# The one verification command for this repo. Archon runs it in loop until_bash and bash nodes.
-set -uo pipefail
-cd &quot;$(dirname &quot;$0&quot;)/..&quot;
+# The one verification command for this workspace. Archon runs it in loop until_bash and bash nodes.
+set -euo pipefail
+cd &quot;$(dirname &quot;$0&quot;)/../priorauth-api&quot;
 mvn -q test
 &#x27;@ -replace &quot;`r&quot;, &quot;&quot;) + &quot;`n&quot;)
-[IO.File]::WriteAllText(&quot;$PWD\scripts\verify.cmd&quot;, &quot;@echo off`r`nrem Windows twin of verify.sh, for running the checks by hand in cmd or PowerShell.`r`ncd /d `&quot;%~dp0..`&quot; &amp;&amp; mvn -q test`r`n&quot;)</pre><pre class="os-mac">mkdir -p .archon .archon/workflows/team/request-to-pr .archon/workflows/team/request-to-pr/commands docs-in scripts
+[IO.File]::WriteAllText(&quot;$PWD\scripts\verify.cmd&quot;, &quot;@echo off`r`nrem Windows twin of verify.sh, for running the checks by hand in cmd or PowerShell.`r`ncd /d `&quot;%~dp0..\priorauth-api`&quot; &amp;&amp; mvn -q test`r`n&quot;)</pre><pre class="os-mac">mkdir -p .archon .archon/workflows/team/request-to-pr .archon/workflows/team/request-to-pr/commands docs-in scripts
 cat &gt; .archon/config.yaml &lt;&lt;&#x27;EOF&#x27;
-# Archon settings for this repo (committed; every clone and every worktree reads them).
+# Archon settings for this workspace (committed). It is a folder project: no worktree settings apply.
 assistant: claude          # workflows use Claude Code unless a workflow or node says otherwise
-
-worktree:
-  baseBranch: main         # each run&#x27;s branch is cut from main
 EOF
 cat &gt; .archon/workflows/team/request-to-pr/commands/implement.md &lt;&lt;&#x27;EOF&#x27;
 ---
-description: Implement the approved plan; one pass of the implement loop.
+description: Implement the approved plan in priorauth-api; one pass of the implement loop.
 ---
 The request: $USER_MESSAGE
 
@@ -642,10 +676,13 @@ following CLAUDE.md. Notes from the person who approved the plan: $approve-plan.
 If an earlier pass ran, this is what it reported (fix what it left failing):
 $LOOP_PREV_OUTPUT
 
-Run ./scripts/verify.sh. When it passes, commit the change on the current branch with a message
-that names the request and the requirement IDs. Write $ARTIFACTS_DIR/implementation.md: the files
-changed, the tests added, the verify result, and what you skipped or did not check.
-Return the verify result and the commit hash.
+In priorauth-api: switch to the branch request-age/&lt;slug&gt; named in CLAUDE.md&#x27;s pattern (create it
+from main if it does not exist yet), make the change, and commit it there with a message that names
+the request and the requirement IDs. Do not commit in the workspace folder and do not push.
+
+Run ./scripts/verify.sh from the workspace root. Write $ARTIFACTS_DIR/implementation.md: the branch,
+the files changed, the tests added, the commit, the verify result, and what you skipped or did not
+check. Return the verify result and the commit hash.
 EOF
 cat &gt; .archon/workflows/team/request-to-pr/commands/scan.md &lt;&lt;&#x27;EOF&#x27;
 ---
@@ -653,8 +690,9 @@ description: Read the request and the code; write what a planner needs to know. 
 ---
 The request: $USER_MESSAGE
 
-Read the request file it names (in docs-in/), then the code: the build file, the entry points, the
-classes the request touches, the tests, the configuration and the data files.
+Read the request file it names (in docs-in/), then the code in priorauth-api/ (the repo named in
+CLAUDE.md): the build file, the entry points, the classes the request touches, the tests, the
+configuration and the data files. Check the repo&#x27;s current branch and its tags.
 
 Write $ARTIFACTS_DIR/scan.md with:
 - what the repo is and how it is built and tested (the verify command from CLAUDE.md);
@@ -662,14 +700,16 @@ Write $ARTIFACTS_DIR/scan.md with:
 - what is missing for the request (data, rules, configuration);
 - risks: callers or tests that a change could break.
 
-Do not change any file in the repository. Return a five-line summary.
+Do not change any file in priorauth-api or in the workspace. Return a five-line summary.
 EOF
 cat &gt; .archon/workflows/team/request-to-pr/request-to-pr.yaml &lt;&lt;&#x27;EOF&#x27;
 name: request-to-pr
 description: &gt;-
-  Take one request from docs-in/ to a pushed branch: scan the repo, ask the questions a person must
-  answer, write the requirements (revised until approved), plan, implement until ./scripts/verify.sh
-  passes, review, and push after a final approval. Use for one small change to priorauth-api.
+  Take one request from docs-in/ to a pushed branch in priorauth-api: scan the code, ask the
+  questions a person must answer, write the requirements (revised until approved), plan, implement
+  until ./scripts/verify.sh passes, review, and push after a final approval. Run it from the
+  workspace root (a folder project): Archon makes no worktree or branch here, the agent branches and
+  commits in priorauth-api itself. Use for one small change to priorauth-api.
   NOT for: bugs whose cause is unknown (use archon-investigate first).
 
 nodes:
@@ -775,16 +815,18 @@ nodes:
     depends_on: [implement]
     bash: |
       ./scripts/verify.sh &amp;&amp; echo &quot;verify: passed&quot;
-      git log --oneline &quot;$BASE_BRANCH&quot;..HEAD
-      git diff --stat &quot;$BASE_BRANCH&quot;...HEAD
+      echo &quot;== priorauth-api: on $(git -C priorauth-api branch --show-current)&quot;
+      git -C priorauth-api log --oneline main..HEAD
+      git -C priorauth-api diff --stat main...HEAD
+      git -C priorauth-api status --short
 
   # ── Review: a second reader, then a person ────────────────────────────
   - id: review
     depends_on: [checks]
     mutates_checkout: false
     prompt: |
-      Review the change on this branch against $ARTIFACTS_DIR/requirements.md and
-      $ARTIFACTS_DIR/plan.md (git diff $BASE_BRANCH...HEAD). Do not edit anything.
+      Review the change on priorauth-api&#x27;s branch against $ARTIFACTS_DIR/requirements.md and
+      $ARTIFACTS_DIR/plan.md (git -C priorauth-api diff main...HEAD). Do not edit anything.
       Check each FR has code and a test, and look for anything the plan did not name.
       Write $ARTIFACTS_DIR/review.md.
     output_format:
@@ -818,32 +860,46 @@ nodes:
     depends_on: [approve-change]
     when: &quot;$approve-change.output.decision == &#x27;approve&#x27;&quot;
     bash: |
-      git push -u origin HEAD 2&gt;&amp;1
-      echo &quot;Open the PR: $(git rev-parse --abbrev-ref HEAD) -&gt; $BASE_BRANCH&quot;
+      b=$(git -C priorauth-api branch --show-current)
+      if [ &quot;$b&quot; != main ] &amp;&amp; [ -n &quot;$(git -C priorauth-api log --oneline main..HEAD)&quot; ]; then
+        git -C priorauth-api push -u origin &quot;$b&quot; 2&gt;&amp;1
+        echo &quot;priorauth-api: open the PR $b -&gt; main&quot;
+      else
+        echo &quot;priorauth-api: nothing to push&quot;
+      fi
 EOF
 cat &gt; .gitattributes &lt;&lt;&#x27;EOF&#x27;
-# verify.sh runs under bash in every Archon worktree: keep it LF even where git converts to CRLF.
+# verify.sh runs under bash: keep it LF even where git converts to CRLF.
 *.sh text eol=lf
 *.cmd text eol=crlf
 EOF
+cat &gt; .gitignore &lt;&lt;&#x27;EOF&#x27;
+# The code repo is a git repo of its own, cloned here: not part of the workspace repo.
+/priorauth-api/
+EOF
 cat &gt; CLAUDE.md &lt;&lt;&#x27;EOF&#x27;
-# priorauth-api
+# java workspace
 
-A Spring Boot 4.1 REST API on Java 21, built with Maven. It serves the pending list the reviewer screen reads.
-Work on it is run through Archon: the team&#x27;s workflows live in `.archon/workflows/`, requests in `docs-in/`.
+The team&#x27;s workspace for the reviewer screen&#x27;s backend. One code repo, a git repo of its own with its own remote,
+cloned into this folder (this folder&#x27;s own git repo ignores it):
 
-| Owns                              | Verify with              | Branch pattern     | PR base |
-|-----------------------------------|--------------------------|--------------------|---------|
-| the API the reviewer screen reads | `./scripts/verify.sh`    | request-age/&lt;slug&gt; | main    |
+| Repo             | What it is                                                                       | Verify with           | Branch pattern     | PR base |
+|------------------|----------------------------------------------------------------------------------|-----------------------|--------------------|---------|
+| `priorauth-api/` | the Spring Boot 4.1 REST API on Java 21 (Maven) the reviewer screen reads (`GET /requests/pending`) | `./scripts/verify.sh` | request-age/&lt;slug&gt; | main    |
+
+This folder is an Archon **folder project**: the team&#x27;s workflows live in `.archon/workflows/`, requests in
+`docs-in/`. Archon runs here in place: it makes no worktree, branch or pull request. The workflow and you do the
+git, in the code repo.
 
 ## How we run Archon here
 
-- One request = one run of `request-to-pr` = one branch = one PR. Name the request file in the run message.
-- Tests only through `./scripts/verify.sh` (`scripts\verify.cmd` by hand on Windows); never ad hoc.
+- One request = one run of `request-to-pr` = one branch in priorauth-api = one PR. Name the request file in the run message.
+- Tests only through `./scripts/verify.sh` (`scripts\verify.cmd` by hand on Windows), from this folder; never ad hoc.
+- Git in the code repo: branch `request-age/&lt;slug&gt;` from `main` in priorauth-api and commit there. Never commit code
+  in this workspace folder, never push (the workflow&#x27;s last node does).
 - Never add a dependency to pom.xml without saying so in the plan.
-- Write what a person must read (scan, questions, requirements, plan, review) into `$ARTIFACTS_DIR`, not into the repo.
-- Commit the code on the run&#x27;s branch when the checks pass; pushing is the workflow&#x27;s last node, opening the PR is ours.
-- Before proposing a version or a tag, check the existing tags and the version in pom.xml.
+- Write what a person must read (scan, questions, requirements, plan, review) into `$ARTIFACTS_DIR`, not into a repo.
+- Before proposing a version or a tag, check the repo&#x27;s tags and the version in its pom.xml.
 
 ## How to change code
 
@@ -867,18 +923,15 @@ Attachments: none. Repo: priorauth-api (the API behind the reviewer screen).
 EOF
 cat &gt; scripts/verify.sh &lt;&lt;&#x27;EOF&#x27;
 #!/usr/bin/env bash
-# The one verification command for this repo. Archon runs it in loop until_bash and bash nodes.
-set -uo pipefail
-cd &quot;$(dirname &quot;$0&quot;)/..&quot;
+# The one verification command for this workspace. Archon runs it in loop until_bash and bash nodes.
+set -euo pipefail
+cd &quot;$(dirname &quot;$0&quot;)/../priorauth-api&quot;
 mvn -q test
 EOF
-chmod +x scripts/verify.sh</pre><button class="copy" type="button">copy</button></div></div><div class="open"><div class="tabs" role="tablist"><button class="tab" role="tab" aria-selected="true" data-pane="team-1">config.yaml</button><button class="tab" role="tab" aria-selected="false" data-pane="team-2">implement.md</button><button class="tab" role="tab" aria-selected="false" data-pane="team-3">scan.md</button><button class="tab" role="tab" aria-selected="false" data-pane="team-4">request-to-pr.yaml</button><button class="tab" role="tab" aria-selected="false" data-pane="team-5">.gitattributes</button><button class="tab" role="tab" aria-selected="false" data-pane="team-6">CLAUDE.md</button><button class="tab" role="tab" aria-selected="false" data-pane="team-7">request.md</button><button class="tab" role="tab" aria-selected="false" data-pane="team-8">verify.cmd</button><button class="tab" role="tab" aria-selected="false" data-pane="team-9">verify.sh</button></div><div class="pane is-on" id="team-1"><div class="code code--wrap"><div class="code__bar"><span class="path">.archon/config.yaml</span><span></span></div><textarea class="src" data-lang="yaml"># Archon settings for this repo (committed; every clone and every worktree reads them).
+chmod +x scripts/verify.sh</pre><button class="copy" type="button">copy</button></div></div><div class="open"><div class="tabs" role="tablist"><button class="tab" role="tab" aria-selected="true" data-pane="team-1">config.yaml</button><button class="tab" role="tab" aria-selected="false" data-pane="team-2">implement.md</button><button class="tab" role="tab" aria-selected="false" data-pane="team-3">scan.md</button><button class="tab" role="tab" aria-selected="false" data-pane="team-4">request-to-pr.yaml</button><button class="tab" role="tab" aria-selected="false" data-pane="team-5">.gitattributes</button><button class="tab" role="tab" aria-selected="false" data-pane="team-6">.gitignore</button><button class="tab" role="tab" aria-selected="false" data-pane="team-7">CLAUDE.md</button><button class="tab" role="tab" aria-selected="false" data-pane="team-8">request.md</button><button class="tab" role="tab" aria-selected="false" data-pane="team-9">verify.cmd</button><button class="tab" role="tab" aria-selected="false" data-pane="team-10">verify.sh</button></div><div class="pane is-on" id="team-1"><div class="code code--wrap"><div class="code__bar"><span class="path">.archon/config.yaml</span><span></span></div><textarea class="src" data-lang="yaml"># Archon settings for this workspace (committed). It is a folder project: no worktree settings apply.
 assistant: claude          # workflows use Claude Code unless a workflow or node says otherwise
-
-worktree:
-  baseBranch: main         # each run&#x27;s branch is cut from main
 </textarea></div></div><div class="pane" id="team-2"><div class="code code--wrap"><div class="code__bar"><span class="path">.archon/workflows/team/request-to-pr/commands/implement.md</span><span></span></div><textarea class="src" data-lang="md">---
-description: Implement the approved plan; one pass of the implement loop.
+description: Implement the approved plan in priorauth-api; one pass of the implement loop.
 ---
 The request: $USER_MESSAGE
 
@@ -888,17 +941,21 @@ following CLAUDE.md. Notes from the person who approved the plan: $approve-plan.
 If an earlier pass ran, this is what it reported (fix what it left failing):
 $LOOP_PREV_OUTPUT
 
-Run ./scripts/verify.sh. When it passes, commit the change on the current branch with a message
-that names the request and the requirement IDs. Write $ARTIFACTS_DIR/implementation.md: the files
-changed, the tests added, the verify result, and what you skipped or did not check.
-Return the verify result and the commit hash.
+In priorauth-api: switch to the branch request-age/&lt;slug&gt; named in CLAUDE.md&#x27;s pattern (create it
+from main if it does not exist yet), make the change, and commit it there with a message that names
+the request and the requirement IDs. Do not commit in the workspace folder and do not push.
+
+Run ./scripts/verify.sh from the workspace root. Write $ARTIFACTS_DIR/implementation.md: the branch,
+the files changed, the tests added, the commit, the verify result, and what you skipped or did not
+check. Return the verify result and the commit hash.
 </textarea></div></div><div class="pane" id="team-3"><div class="code code--wrap"><div class="code__bar"><span class="path">.archon/workflows/team/request-to-pr/commands/scan.md</span><span></span></div><textarea class="src" data-lang="md">---
 description: Read the request and the code; write what a planner needs to know. Changes nothing.
 ---
 The request: $USER_MESSAGE
 
-Read the request file it names (in docs-in/), then the code: the build file, the entry points, the
-classes the request touches, the tests, the configuration and the data files.
+Read the request file it names (in docs-in/), then the code in priorauth-api/ (the repo named in
+CLAUDE.md): the build file, the entry points, the classes the request touches, the tests, the
+configuration and the data files. Check the repo&#x27;s current branch and its tags.
 
 Write $ARTIFACTS_DIR/scan.md with:
 - what the repo is and how it is built and tested (the verify command from CLAUDE.md);
@@ -906,12 +963,14 @@ Write $ARTIFACTS_DIR/scan.md with:
 - what is missing for the request (data, rules, configuration);
 - risks: callers or tests that a change could break.
 
-Do not change any file in the repository. Return a five-line summary.
+Do not change any file in priorauth-api or in the workspace. Return a five-line summary.
 </textarea></div></div><div class="pane" id="team-4"><div class="code code--wrap"><div class="code__bar"><span class="path">.archon/workflows/team/request-to-pr/request-to-pr.yaml</span><span></span></div><textarea class="src" data-lang="yaml">name: request-to-pr
 description: &gt;-
-  Take one request from docs-in/ to a pushed branch: scan the repo, ask the questions a person must
-  answer, write the requirements (revised until approved), plan, implement until ./scripts/verify.sh
-  passes, review, and push after a final approval. Use for one small change to priorauth-api.
+  Take one request from docs-in/ to a pushed branch in priorauth-api: scan the code, ask the
+  questions a person must answer, write the requirements (revised until approved), plan, implement
+  until ./scripts/verify.sh passes, review, and push after a final approval. Run it from the
+  workspace root (a folder project): Archon makes no worktree or branch here, the agent branches and
+  commits in priorauth-api itself. Use for one small change to priorauth-api.
   NOT for: bugs whose cause is unknown (use archon-investigate first).
 
 nodes:
@@ -1017,16 +1076,18 @@ nodes:
     depends_on: [implement]
     bash: |
       ./scripts/verify.sh &amp;&amp; echo &quot;verify: passed&quot;
-      git log --oneline &quot;$BASE_BRANCH&quot;..HEAD
-      git diff --stat &quot;$BASE_BRANCH&quot;...HEAD
+      echo &quot;== priorauth-api: on $(git -C priorauth-api branch --show-current)&quot;
+      git -C priorauth-api log --oneline main..HEAD
+      git -C priorauth-api diff --stat main...HEAD
+      git -C priorauth-api status --short
 
   # ── Review: a second reader, then a person ────────────────────────────
   - id: review
     depends_on: [checks]
     mutates_checkout: false
     prompt: |
-      Review the change on this branch against $ARTIFACTS_DIR/requirements.md and
-      $ARTIFACTS_DIR/plan.md (git diff $BASE_BRANCH...HEAD). Do not edit anything.
+      Review the change on priorauth-api&#x27;s branch against $ARTIFACTS_DIR/requirements.md and
+      $ARTIFACTS_DIR/plan.md (git -C priorauth-api diff main...HEAD). Do not edit anything.
       Check each FR has code and a test, and look for anything the plan did not name.
       Write $ARTIFACTS_DIR/review.md.
     output_format:
@@ -1060,28 +1121,40 @@ nodes:
     depends_on: [approve-change]
     when: &quot;$approve-change.output.decision == &#x27;approve&#x27;&quot;
     bash: |
-      git push -u origin HEAD 2&gt;&amp;1
-      echo &quot;Open the PR: $(git rev-parse --abbrev-ref HEAD) -&gt; $BASE_BRANCH&quot;
-</textarea></div></div><div class="pane" id="team-5"><div class="code code--wrap"><div class="code__bar"><span class="path">.gitattributes</span><span></span></div><textarea class="src" data-lang="bash"># verify.sh runs under bash in every Archon worktree: keep it LF even where git converts to CRLF.
+      b=$(git -C priorauth-api branch --show-current)
+      if [ &quot;$b&quot; != main ] &amp;&amp; [ -n &quot;$(git -C priorauth-api log --oneline main..HEAD)&quot; ]; then
+        git -C priorauth-api push -u origin &quot;$b&quot; 2&gt;&amp;1
+        echo &quot;priorauth-api: open the PR $b -&gt; main&quot;
+      else
+        echo &quot;priorauth-api: nothing to push&quot;
+      fi
+</textarea></div></div><div class="pane" id="team-5"><div class="code code--wrap"><div class="code__bar"><span class="path">.gitattributes</span><span></span></div><textarea class="src" data-lang="bash"># verify.sh runs under bash: keep it LF even where git converts to CRLF.
 *.sh text eol=lf
 *.cmd text eol=crlf
-</textarea></div></div><div class="pane" id="team-6"><div class="code code--wrap"><div class="code__bar"><span class="path">CLAUDE.md</span><span></span></div><textarea class="src" data-lang="md"># priorauth-api
+</textarea></div></div><div class="pane" id="team-6"><div class="code code--wrap"><div class="code__bar"><span class="path">.gitignore</span><span></span></div><textarea class="src" data-lang="bash"># The code repo is a git repo of its own, cloned here: not part of the workspace repo.
+/priorauth-api/
+</textarea></div></div><div class="pane" id="team-7"><div class="code code--wrap"><div class="code__bar"><span class="path">CLAUDE.md</span><span></span></div><textarea class="src" data-lang="md"># java workspace
 
-A Spring Boot 4.1 REST API on Java 21, built with Maven. It serves the pending list the reviewer screen reads.
-Work on it is run through Archon: the team&#x27;s workflows live in `.archon/workflows/`, requests in `docs-in/`.
+The team&#x27;s workspace for the reviewer screen&#x27;s backend. One code repo, a git repo of its own with its own remote,
+cloned into this folder (this folder&#x27;s own git repo ignores it):
 
-| Owns                              | Verify with              | Branch pattern     | PR base |
-|-----------------------------------|--------------------------|--------------------|---------|
-| the API the reviewer screen reads | `./scripts/verify.sh`    | request-age/&lt;slug&gt; | main    |
+| Repo             | What it is                                                                       | Verify with           | Branch pattern     | PR base |
+|------------------|----------------------------------------------------------------------------------|-----------------------|--------------------|---------|
+| `priorauth-api/` | the Spring Boot 4.1 REST API on Java 21 (Maven) the reviewer screen reads (`GET /requests/pending`) | `./scripts/verify.sh` | request-age/&lt;slug&gt; | main    |
+
+This folder is an Archon **folder project**: the team&#x27;s workflows live in `.archon/workflows/`, requests in
+`docs-in/`. Archon runs here in place: it makes no worktree, branch or pull request. The workflow and you do the
+git, in the code repo.
 
 ## How we run Archon here
 
-- One request = one run of `request-to-pr` = one branch = one PR. Name the request file in the run message.
-- Tests only through `./scripts/verify.sh` (`scripts\verify.cmd` by hand on Windows); never ad hoc.
+- One request = one run of `request-to-pr` = one branch in priorauth-api = one PR. Name the request file in the run message.
+- Tests only through `./scripts/verify.sh` (`scripts\verify.cmd` by hand on Windows), from this folder; never ad hoc.
+- Git in the code repo: branch `request-age/&lt;slug&gt;` from `main` in priorauth-api and commit there. Never commit code
+  in this workspace folder, never push (the workflow&#x27;s last node does).
 - Never add a dependency to pom.xml without saying so in the plan.
-- Write what a person must read (scan, questions, requirements, plan, review) into `$ARTIFACTS_DIR`, not into the repo.
-- Commit the code on the run&#x27;s branch when the checks pass; pushing is the workflow&#x27;s last node, opening the PR is ours.
-- Before proposing a version or a tag, check the existing tags and the version in pom.xml.
+- Write what a person must read (scan, questions, requirements, plan, review) into `$ARTIFACTS_DIR`, not into a repo.
+- Before proposing a version or a tag, check the repo&#x27;s tags and the version in its pom.xml.
 
 ## How to change code
 
@@ -1091,7 +1164,7 @@ Work on it is run through Archon: the team&#x27;s workflows live in `.archon/wor
 4. Prove it. New branching, parsing, money or security logic gets a test; run the verify script before saying done.
 5. Never cut validation at trust boundaries, error handling that prevents data loss, security, accessibility, or anything the request asked for.
 6. End each summary with what you skipped or did not check, and any risk.
-</textarea></div></div><div class="pane" id="team-7"><div class="code code--wrap"><div class="code__bar"><span class="path">docs-in/request.md</span><span></span></div><textarea class="src" data-lang="md"># Request age on the pending list (API)
+</textarea></div></div><div class="pane" id="team-8"><div class="code code--wrap"><div class="code__bar"><span class="path">docs-in/request.md</span><span></span></div><textarea class="src" data-lang="md"># Request age on the pending list (API)
 
 From: Ravi Menon (Nurse Manager, Utilization Management) · Slack #prior-auth-platform · Tue 13 Oct, 09:10
 
@@ -1100,23 +1173,23 @@ From: Ravi Menon (Nurse Manager, Utilization Management) · Slack #prior-auth-pl
 &gt; screen can show it? Same rule as the report: weekends and our holidays do not count. Nothing else changes.
 
 Attachments: none. Repo: priorauth-api (the API behind the reviewer screen).
-</textarea></div></div><div class="pane" id="team-8"><div class="code code--wrap"><div class="code__bar"><span class="path">scripts/verify.cmd</span><span></span></div><textarea class="src" data-lang="bash">@echo off
+</textarea></div></div><div class="pane" id="team-9"><div class="code code--wrap"><div class="code__bar"><span class="path">scripts/verify.cmd</span><span></span></div><textarea class="src" data-lang="bash">@echo off
 rem Windows twin of verify.sh, for running the checks by hand in cmd or PowerShell.
-cd /d &quot;%~dp0..&quot; &amp;&amp; mvn -q test
-</textarea></div></div><div class="pane" id="team-9"><div class="code code--wrap"><div class="code__bar"><span class="path">scripts/verify.sh</span><span></span></div><textarea class="src" data-lang="bash">#!/usr/bin/env bash
-# The one verification command for this repo. Archon runs it in loop until_bash and bash nodes.
-set -uo pipefail
-cd &quot;$(dirname &quot;$0&quot;)/..&quot;
+cd /d &quot;%~dp0..\priorauth-api&quot; &amp;&amp; mvn -q test
+</textarea></div></div><div class="pane" id="team-10"><div class="code code--wrap"><div class="code__bar"><span class="path">scripts/verify.sh</span><span></span></div><textarea class="src" data-lang="bash">#!/usr/bin/env bash
+# The one verification command for this workspace. Archon runs it in loop until_bash and bash nodes.
+set -euo pipefail
+cd &quot;$(dirname &quot;$0&quot;)/../priorauth-api&quot;
 mvn -q test
-</textarea></div></div></div><div class="gwrap"><table class="kv"><thead><tr><th>File</th><th>What it is for</th></tr></thead><tbody><tr><td><code>.archon/workflows/team/request-to-pr/request-to-pr.yaml</code></td><td>the team's process: 15 nodes, 4 waits for people</td></tr><tr><td><code>…/commands/scan.md</code>, <code>implement.md</code></td><td>the prompts of the <code>scan</code> node and each <code>implement</code> pass</td></tr><tr><td><code>.archon/config.yaml</code></td><td><code>assistant: claude</code>; runs branch from <code>main</code></td></tr><tr><td><code>CLAUDE.md</code></td><td>the agent's standing rules; Claude Code reads it in every AI node</td></tr><tr><td><code>scripts/verify.sh</code> (+ <code>verify.cmd</code>)</td><td>the one check: the implement loop ends when it exits 0</td></tr><tr><td><code>.gitattributes</code></td><td>keeps <code>verify.sh</code> LF: a worktree is a fresh checkout, and with <code>core.autocrlf=true</code> bash would get CRLF and fail</td></tr><tr><td><code>docs-in/request.md</code></td><td>Ravi's request, named in the run message</td></tr></tbody></table></div><div class="plain"><div><b>In plain words.</b> The workflow is the recipe, <code>CLAUDE.md</code> the kitchen rules every cook reads, and <code>verify.sh</code> the thermometer: the dish is done when it says so, not when the cook thinks so.</div></div>
+</textarea></div></div></div><div class="gwrap"><table class="kv"><thead><tr><th>File</th><th>What it is for</th></tr></thead><tbody><tr><td><code>.archon/workflows/team/request-to-pr/request-to-pr.yaml</code></td><td>the team's process: 15 nodes, 4 waits for people; its bash nodes run <code>git -C priorauth-api</code></td></tr><tr><td><code>…/commands/scan.md</code>, <code>implement.md</code></td><td>the prompts of the <code>scan</code> node and each <code>implement</code> pass; implement names the branch to make in priorauth-api</td></tr><tr><td><code>.archon/config.yaml</code></td><td><code>assistant: claude</code>; no worktree settings (a folder project has none)</td></tr><tr><td><code>CLAUDE.md</code></td><td>the repo map and the team's rules; Claude Code reads it in every AI node</td></tr><tr><td><code>scripts/verify.sh</code> (+ <code>verify.cmd</code>)</td><td>the one check, run from the workspace: <code>cd priorauth-api</code>, then <code>mvn -q test</code>; the implement loop ends when it exits 0</td></tr><tr><td><code>.gitignore</code></td><td><code>/priorauth-api/</code>: the code repo is not part of the workspace repo</td></tr><tr><td><code>.gitattributes</code></td><td>keeps <code>verify.sh</code> LF: with <code>core.autocrlf=true</code> bash would get CRLF and fail</td></tr><tr><td><code>docs-in/request.md</code></td><td>Ravi's request, named in the run message</td></tr></tbody></table></div><div class="plain"><div><b>In plain words.</b> The workflow is the recipe, <code>CLAUDE.md</code> the kitchen rules every cook reads, and <code>verify.sh</code> the thermometer: the dish is done when it says so, not when the cook thinks so. The workspace is the kitchen; the code repo is the pantry, stocked from its own supplier.</div></div>
 </section>
-<section class="step" id="s07" data-step="7" data-phase="The repo" style="--c:var(--plan)">
-  <div class="step__head"><span class="step__n">7</span><div><span class="chip">check before spending</span><h2>Validate the workflow, then dry-run it</h2><p class="step__why">Two free checks: the file parses and its references resolve; the graph walks the way you think.</p></div><span class="who">Kiran · 1 min</span></div>
-<div class="io"><div class="box you"><div class="box__bar">You type <span class="tag">any shell</span></div><pre>archon validate workflows request-to-pr</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Archon returns <span class="tag">real</span></div><pre>Validating workflows in C:/work/archon-java/priorauth-api
+<section class="step" id="s07" data-step="7" data-phase="The workspace" style="--c:var(--plan)">
+  <div class="step__head"><span class="step__n">7</span><div><span class="chip">check before spending</span><h2>Validate the workflow, then dry-run it</h2><p class="step__why">Two free checks, from the workspace root: the file parses and its references resolve; the graph walks the way you think.</p></div><span class="who">Kiran · 1 min</span></div>
+<div class="io"><div class="box you"><div class="box__bar">You type <span class="tag">any shell</span></div><pre>archon validate workflows request-to-pr</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Archon returns <span class="tag">real</span></div><pre>Validating workflows in C:/work/archon-java/java-workspace
 
   request-to-pr                            ok
 
-Results: 1 valid, 0 with errors</pre></div></div><div class="io"><div class="box you"><div class="box__bar">You type <span class="tag">any shell</span></div><pre>archon workflow run request-to-pr --dry-run --default-stubs "Implement the request in docs-in/request.md"</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Archon returns <span class="tag">real · no run, no model call</span></div><pre>Discovery: root=C:/work/archon-java/priorauth-api workflows=26 bundled=25 global=0 project=1 installed=0
+Results: 1 valid, 0 with errors</pre></div></div><div class="io"><div class="box you"><div class="box__bar">You type <span class="tag">any shell</span></div><pre>archon workflow run request-to-pr --dry-run --default-stubs "Implement docs-in/request.md"</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Archon returns <span class="tag">real · no run, no model call</span></div><pre>Discovery: root=C:/work/archon-java/java-workspace workflows=26 bundled=25 global=0 project=1 installed=0
 Dry-run: request-to-pr
 STUBBED   scan (command)
 …
@@ -1124,23 +1197,30 @@ STUBBED   questions (prompt)
 …
 PAUSED    answer (wait) — durable wait
 …
-Simulation outcome: paused</pre></div></div><div class="note">Run with no name, <code>archon validate workflows</code> also checks the 25 bundled ones; on Windows 24 of them warn <code>Runtime 'bun' is not available on PATH</code> for their <code>script:</code> nodes. In the course run the bundled <code>archon-plan</code> and <code>archon-implement</code> ran their script nodes anyway; install <a href="https://bun.sh">Bun</a> if a bundled workflow's script node fails.</div>
+Simulation outcome: paused</pre></div></div><div class="note">A dry run takes no <code>--folder</code> (Archon refuses the two together) and registers nothing; the first real run with <code>--folder</code> registers the workspace. Run with no name, <code>archon validate workflows</code> also checks the 25 bundled ones; on Windows 24 of them warn <code>Runtime 'bun' is not available on PATH</code> for their <code>script:</code> nodes. In the course run the bundled <code>archon-plan</code> and <code>archon-implement</code> ran their script nodes anyway; install <a href="https://bun.sh">Bun</a> if a bundled workflow's script node fails.</div>
 </section>
-<section class="step" id="s08" data-step="8" data-phase="The repo" style="--c:var(--plan)">
-  <div class="step__head"><span class="step__n">8</span><div><span class="chip">ours</span><h2>Commit the team's files</h2><p class="step__why">Worktrees are cut from the branch, so a run only sees what is committed.</p></div><span class="who">Kiran · 1 min</span></div>
+<section class="step" id="s08" data-step="8" data-phase="The workspace" style="--c:var(--plan)">
+  <div class="step__head"><span class="step__n">8</span><div><span class="chip">ours</span><h2>Commit the workspace, and check the code builds</h2><p class="step__why">Commit and push the team's files so every teammate gets them with one clone. The code repo stays out: it has its own remote.</p></div><span class="who">Kiran · 1 min</span></div>
 <div class="io"><div class="box you"><div class="box__bar">You type <span class="tag">any shell</span></div><pre>git add -A
-git status --short
-git commit -m "Add the team's Archon files: CLAUDE.md, verify scripts, request-to-pr workflow"
-git push origin main</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">git returns <span class="tag">real · git status --short</span></div><pre>A  .archon/config.yaml
-A  .archon/workflows/team/request-to-pr/commands/implement.md
-A  .archon/workflows/team/request-to-pr/commands/scan.md
-A  .archon/workflows/team/request-to-pr/request-to-pr.yaml
-A  .gitattributes
-A  CLAUDE.md
-A  docs-in/request.md
-A  scripts/verify.cmd
-A  scripts/verify.sh</pre></div></div><div class="note">If the run must see a file that is git-ignored (a <code>.env</code>, local fixtures), list it under <code>worktree.copyFiles</code> in <code>.archon/config.yaml</code>; anything that needs installing goes in <code>worktree.postCreate</code>. This repo needs neither.</div><div class="io"><div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">Git Bash</span><span class="os-mac">Terminal</span></span></div><pre class="os-win">./scripts/verify.sh</pre><pre class="os-mac">./scripts/verify.sh</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">bash returns <span class="tag">real · at v1.0.2, before the change</span></div><pre>…
-verify: passed</pre></div></div>
+git status --short --ignored
+git commit -m "The java workspace: CLAUDE.md, verify scripts, the request-to-pr workflow, the request"
+git remote add origin https://github.com/&lt;org&gt;/java-workspace
+git push -u origin main</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">git returns <span class="tag">real · git ls-files after the commit, and the code repo ignored</span></div><pre>.archon/config.yaml
+.archon/workflows/team/request-to-pr/commands/implement.md
+.archon/workflows/team/request-to-pr/commands/scan.md
+.archon/workflows/team/request-to-pr/request-to-pr.yaml
+.gitattributes
+.gitignore
+CLAUDE.md
+docs-in/request.md
+scripts/verify.cmd
+scripts/verify.sh
+
+$ git status --short --ignored
+!! priorauth-api/</pre></div></div><div class="io"><div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">Git Bash</span><span class="os-mac">Terminal</span></span></div><pre class="os-win">./scripts/verify.sh</pre><pre class="os-mac">./scripts/verify.sh</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">bash returns <span class="tag">real · at v1.0.2, before the change</span></div><pre>…
+verify: passed
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.834 s -- in com.acmehealth.priorauth.api.PendingRequestsControllerTest
+Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.116 s -- in com.acmehealth.priorauth.store.RequestStoreTest</pre></div></div><div class="note">A teammate's setup is then two clones: the workspace, and priorauth-api inside it (as Kiran's are in the run, step 3). Archon reads only what is on disk in the folder: there is no worktree, so <code>worktree.copyFiles</code> and <code>postCreate</code> do not apply.</div>
 </section>
 <div class="phase" style="--c:var(--build)"><i></i>First run<span>steps 9–10 · the Web UI, and where PRs come from</span></div>
 <section class="step" id="s09" data-step="9" data-phase="First run" style="--c:var(--build)">
@@ -1149,23 +1229,22 @@ verify: passed</pre></div></div>
 server_ready      activePlatforms: ["Web"]
 
 GET /api/health →
-{&quot;status&quot;: &quot;ok&quot;, &quot;adapter&quot;: &quot;web&quot;, &quot;version&quot;: &quot;0.13.2&quot;, &quot;activePlatforms&quot;: [&quot;Web&quot;], &quot;runningWorkflows&quot;: 0}</pre></div></div><figure class="dia"><img src="img/webui-runs.png" alt="Archon Web UI: the priorauth-api project with the course's three runs" style="width:100%;border-radius:10px;border:1px solid var(--line)"><figcaption>The project page after the course run: request-to-pr (cancelled at the last gate), archon-implement (the fix), archon-plan (the comparison). Real screenshot; display paths mapped.</figcaption></figure><figure class="dia"><img src="img/webui-graph.png" alt="Archon Web UI: the graph of the request-to-pr run" style="width:100%;border-radius:10px;border:1px solid var(--line)"><figcaption>The run page's Graph tab for request-to-pr. Log and Artifacts are the other tabs.</figcaption></figure><div class="note"><b>It listens on every interface (0.0.0.0), and a solo install has no login.</b> On a shared network, anyone who can reach port 3090 can see and answer your runs: keep a firewall on, or set up the docs' authentication before using it anywhere but your own laptop. The first <code>archon serve</code> downloads the server (92 MB) and the web UI (1.8 MB) into <code>~/.archon/server/</code> and <code>~/.archon/web-dist/</code>, checksums verified; <code>archon serve --download-only</code> does just that.</div>
+{&quot;status&quot;: &quot;ok&quot;, &quot;adapter&quot;: &quot;web&quot;, &quot;version&quot;: &quot;0.13.2&quot;, &quot;activePlatforms&quot;: [&quot;Web&quot;], &quot;runningWorkflows&quot;: 0}</pre></div></div><figure class="dia"><img src="img/webui-runs.png" alt="Archon Web UI: the java-workspace folder project with the course's three runs" style="width:100%;border-radius:10px;border:1px solid var(--line)"><figcaption>The java-workspace folder project after the course run: request-to-pr (cancelled at the last gate), archon-implement (the fix), archon-plan (the comparison). Real screenshot; display paths mapped, the machine's other projects hidden.</figcaption></figure><figure class="dia"><img src="img/webui-graph.png" alt="Archon Web UI: the graph of the request-to-pr run" style="width:100%;border-radius:10px;border:1px solid var(--line)"><figcaption>The run page's Graph tab for request-to-pr. Log and Artifacts are the other tabs.</figcaption></figure><div class="note"><b>It listens on every interface (0.0.0.0), and a solo install has no login.</b> On a shared network, anyone who can reach port 3090 can see and answer your runs: keep a firewall on, or set up the docs' authentication before using it anywhere but your own laptop. The first <code>archon serve</code> downloads the server (92 MB) and the web UI (1.8 MB) into <code>~/.archon/server/</code> and <code>~/.archon/web-dist/</code>, checksums verified; <code>archon serve --download-only</code> does just that.</div>
 </section>
 <section class="step" id="s10" data-step="10" data-phase="First run" style="--c:var(--build)">
   <div class="step__head"><span class="step__n">10</span><div><span class="chip">ours</span><h2>Where pull requests come from</h2><p class="step__why">Archon's own workflow can push a branch. Opening and merging the PR is a forge's job: gh, or a forge plugin.</p></div><span class="who">Kiran · reference</span></div>
-<div class="gwrap"><table><thead><tr><th>Who opens the PR</th><th>What it needs</th><th>In this course</th></tr></thead><tbody><tr><td>You, by hand</td><td>nothing</td><td>the course's way: the run pushes (or Kiran does), Kiran opens the PR <span class="lbl lbl-real">real</span></td></tr><tr><td>The bundled <code>archon-pr</code> / <code>archon-ship</code></td><td><code>gh auth login</code> (default), or <code>ARCHON_SDLC_FORGE=forge</code> + <code>archon plugin add coleam00/Archon/plugins/forge-github</code></td><td><span class="lbl lbl-doc">documented</span></td></tr><tr><td>Queues (<code>archon-intake</code> → <code>build-queue</code> → <code>merge-queue</code>)</td><td>gh, a maintainers file on the default branch, CI checks on PRs</td><td><span class="lbl lbl-doc">documented</span></td></tr></tbody></table></div><div class="box claude"><div class="box__bar">Archon returns <span class="tag">real · archon complete, with no gh login</span></div><pre>Warning: gh error: Command failed: gh pr list --head request-age/age-api --state open --json number,title
-To get started with GitHub CLI, please run:  gh auth login
-Alternatively, populate the GH_TOKEN environment variable with a GitHub API authentication token.
- — skipping open PR check</pre></div><div class="note">Without a <code>gh</code> login Archon still works; it only skips what needs GitHub, and says so (here <code>archon complete</code> skipped its open-PR check).</div>
+<div class="gwrap"><table><thead><tr><th>Who opens the PR</th><th>What it needs</th><th>In this course</th></tr></thead><tbody><tr><td>You, by hand</td><td>nothing</td><td>the course's way: the run pushes (or Kiran does), Kiran opens the PR <span class="lbl lbl-real">real</span></td></tr><tr><td>The bundled <code>archon-pr</code> / <code>archon-ship</code></td><td><code>gh auth login</code> (default), or <code>ARCHON_SDLC_FORGE=forge</code> + <code>archon plugin add coleam00/Archon/plugins/forge-github</code></td><td><span class="lbl lbl-doc">documented</span></td></tr><tr><td>Queues (<code>archon-intake</code> → <code>build-queue</code> → <code>merge-queue</code>)</td><td>gh, a maintainers file on the default branch, CI checks on PRs</td><td><span class="lbl lbl-doc">documented</span></td></tr></tbody></table></div><div class="box claude"><div class="box__bar">git returns <span class="tag">real · Kiran's push, in the course run</span></div><pre>branch &#x27;request-age/pending-age&#x27; set up to track &#x27;origin/request-age/pending-age&#x27;.
+To C:\work\archon-java\remotes\priorauth-api.git
+ * [new branch]      request-age/pending-age -&gt; request-age/pending-age</pre></div><div class="note">Without a <code>gh</code> login Archon still works; it only skips what needs GitHub. In a folder project the workflow (or you) pushes a branch in each code repo, and each repo gets its own PR.</div>
 </section>
 <div class="phase" style="--c:var(--review)"><i></i>Reference<span>~/.archon and the config files</span></div>
 <section class="card" id="home">
   <h2>~/.archon, folder by folder</h2>
-<p>Every file under <code>~/.archon</code> after the course (install, three runs, the Web UI), counted by <code>capture_cli.py</code> (1049 files, real). Nothing here is committed.</p><div class="gwrap"><table class="kv"><thead><tr><th>Path</th><th>Files</th><th>What it is</th></tr></thead><tbody><tr><td><code>archon.db</code></td><td>1</td><td>SQLite: projects, runs, events, sessions, costs</td></tr><tr><td><code>bin/</code></td><td>1</td><td>the CLI binary</td></tr><tr><td><code>cache/workflow-scripts</code></td><td>82</td><td>bundled workflows' scripts, unpacked</td></tr><tr><td><code>config.yaml</code></td><td>1</td><td>your defaults (all commented out at first)</td></tr><tr><td><code>install.json</code></td><td>1</td><td>which binary and version</td></tr><tr><td><code>logs/</code></td><td>1</td><td>output of detached runs</td></tr><tr><td><code>plugins/</code></td><td>1</td><td>provider plugins and their install receipts</td></tr><tr><td><code>plugins/installed</code></td><td>1</td><td>provider plugins and their install receipts</td></tr><tr><td><code>server/0.13.2</code></td><td>1</td><td>the Web UI server, downloaded by archon serve</td></tr><tr><td><code>tier-notice.json</code></td><td>1</td><td>remembers that the tier notice was shown</td></tr><tr><td><code>update-check.json</code></td><td>1</td><td>last update check</td></tr><tr><td><code>web-dist/0.13.2</code></td><td>7</td><td>the Web UI files</td></tr><tr><td><code>workspaces/_local</code></td><td>631</td><td>one folder per project: worktrees, logs, artifacts, state</td></tr><tr><td><code>workspaces/varasrinivas</code></td><td>319</td><td>one folder per project: worktrees, logs, artifacts, state</td></tr></tbody></table></div>
+<p>Every file under <code>~/.archon</code> after the course (install, the Web UI, every run the course made, including an earlier version of the Java run), counted by <code>capture_cli.py</code> (1511 files, real). Nothing here is committed.</p><div class="gwrap"><table class="kv"><thead><tr><th>Path</th><th>Files</th><th>What it is</th></tr></thead><tbody><tr><td><code>archon.db</code></td><td>1</td><td>SQLite: projects, runs, events, sessions, costs</td></tr><tr><td><code>bin/</code></td><td>1</td><td>the CLI binary</td></tr><tr><td><code>cache/workflow-scripts</code></td><td>82</td><td>bundled workflows' scripts, unpacked</td></tr><tr><td><code>config.yaml</code></td><td>1</td><td>your defaults (all commented out at first)</td></tr><tr><td><code>credential-key</code></td><td>1</td><td></td></tr><tr><td><code>install.json</code></td><td>1</td><td>which binary and version</td></tr><tr><td><code>logs/</code></td><td>3</td><td>output of detached runs</td></tr><tr><td><code>plugins/</code></td><td>1</td><td>provider plugins and their install receipts</td></tr><tr><td><code>plugins/installed</code></td><td>1</td><td>provider plugins and their install receipts</td></tr><tr><td><code>server-records/</code></td><td>1</td><td></td></tr><tr><td><code>server.json</code></td><td>1</td><td></td></tr><tr><td><code>server/0.13.2</code></td><td>1</td><td>the Web UI server, downloaded by archon serve</td></tr><tr><td><code>store-id</code></td><td>1</td><td></td></tr><tr><td><code>telemetry-id</code></td><td>1</td><td></td></tr><tr><td><code>tier-notice.json</code></td><td>1</td><td>remembers that the tier notice was shown</td></tr><tr><td><code>update-check.json</code></td><td>1</td><td>last update check</td></tr><tr><td><code>web-dist/0.13.2</code></td><td>7</td><td>the Web UI files</td></tr><tr><td><code>workspaces/_folder</code></td><td>618</td><td>one folder per project: logs, artifacts, state (and worktrees, for a repo project)</td></tr><tr><td><code>workspaces/_local</code></td><td>468</td><td>one folder per project: logs, artifacts, state (and worktrees, for a repo project)</td></tr><tr><td><code>workspaces/varasrinivas</code></td><td>319</td><td>one folder per project: logs, artifacts, state (and worktrees, for a repo project)</td></tr></tbody></table></div>
 </section>
 <section class="card" id="config">
   <h2>The two config.yaml files</h2>
-<p>Archon reads the repo's <code>.archon/config.yaml</code> over your <code>~/.archon/config.yaml</code>. The home one, as the installer wrote it (real):</p><div class="open"><div class="tabs" role="tablist"><button class="tab" role="tab" aria-selected="true" data-pane="cfg-1">~/.archon/config.yaml</button><button class="tab" role="tab" aria-selected="false" data-pane="cfg-2">repo .archon/config.yaml</button></div><div class="pane is-on" id="cfg-1"><div class="code code--wrap"><div class="code__bar"><span class="path">~/.archon/config.yaml</span><span>written by the install · real</span></div><textarea class="src" data-lang="yaml"># Archon Global Configuration
+<p>Archon reads the project's <code>.archon/config.yaml</code> (here, the workspace's) over your <code>~/.archon/config.yaml</code>. The home one, as the installer wrote it (real):</p><div class="open"><div class="tabs" role="tablist"><button class="tab" role="tab" aria-selected="true" data-pane="cfg-1">~/.archon/config.yaml</button><button class="tab" role="tab" aria-selected="false" data-pane="cfg-2">workspace .archon/config.yaml</button></div><div class="pane is-on" id="cfg-1"><div class="code code--wrap"><div class="code__bar"><span class="path">~/.archon/config.yaml</span><span>written by the install · real</span></div><textarea class="src" data-lang="yaml"># Archon Global Configuration
 # See: https://github.com/coleam00/Archon/blob/main/docs/configuration.md
 
 # Bot display name (shown in messages)
@@ -1202,16 +1281,13 @@ Alternatively, populate the GH_TOKEN environment variable with a GitHub API auth
 #   maxConversations: 10
 #   providers:        # optional cap on simultaneous attempts per provider; unlisted = unlimited
 #     pi: 1
-</textarea></div></div><div class="pane" id="cfg-2"><div class="code code--wrap"><div class="code__bar"><span class="path">.archon/config.yaml</span><span>the team's · committed</span></div><textarea class="src" data-lang="yaml"># Archon settings for this repo (committed; every clone and every worktree reads them).
+</textarea></div></div><div class="pane" id="cfg-2"><div class="code code--wrap"><div class="code__bar"><span class="path">.archon/config.yaml</span><span>the team's · committed in the workspace</span></div><textarea class="src" data-lang="yaml"># Archon settings for this workspace (committed). It is a folder project: no worktree settings apply.
 assistant: claude          # workflows use Claude Code unless a workflow or node says otherwise
-
-worktree:
-  baseBranch: main         # each run&#x27;s branch is cut from main
 </textarea></div></div></div>
 </section>
 <section class="card" id="real">
   <h2>What is real here</h2>
-<p>Every output on this page is real, from Archon 0.13.2 on Windows 10 (3 Nov 2026): the installer, <code>version</code>, <code>doctor</code>, <code>telemetry status</code>, the Git Bash probe, the clone, <code>validate</code>, the dry run, <code>git status</code>, <code>verify.sh</code>, <code>archon serve</code> and the Web UI screenshots. macOS commands are the documented equivalents and were not run. Items marked <span class="lbl lbl-doc">documented</span> are from the docs. The cast is fictional.</p>
+<p>Every output on this page is real, from Archon 0.13.2 on Windows 10 (3 and 4 Nov 2026): the installer, <code>version</code>, <code>doctor</code>, <code>telemetry status</code>, the Git Bash probe, the workspace and the clone, <code>validate</code>, the dry run, <code>git status</code>, <code>verify.sh</code>, <code>archon serve</code> and the Web UI screenshots. macOS commands are the documented equivalents and were not run. Items marked <span class="lbl lbl-doc">documented</span> are from the docs. The cast is fictional.</p>
 </section>
 
 </main>

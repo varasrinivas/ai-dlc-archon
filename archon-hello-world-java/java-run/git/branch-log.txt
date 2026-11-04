@@ -1,4 +1,4 @@
-d6288f5 Kiran Rao Tue 03 Nov 19:06
-    Reject an asOf after today, and pin the empty-asOf 400
-f3a465d Kiran Rao Tue 03 Nov 19:00
-    Request age on the pending list (docs-in/request.md)
+4ea9e9d Kiran Rao Wed 04 Nov 17:58
+    Pending list: asOf after today is a 400
+a3972b4 Kiran Rao Wed 04 Nov 17:53
+    Pending list: business-day age, over-limit flag and label (asOf)

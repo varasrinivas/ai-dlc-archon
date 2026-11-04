@@ -1,8 +1,10 @@
 name: request-to-pr
 description: >-
-  Take one request from docs-in/ to a pushed branch: scan the repo, ask the questions a person must
-  answer, write the requirements (revised until approved), plan, implement until ./scripts/verify.sh
-  passes, review, and push after a final approval. Use for one small change to priorauth-api.
+  Take one request from docs-in/ to a pushed branch in priorauth-api: scan the code, ask the
+  questions a person must answer, write the requirements (revised until approved), plan, implement
+  until ./scripts/verify.sh passes, review, and push after a final approval. Run it from the
+  workspace root (a folder project): Archon makes no worktree or branch here, the agent branches and
+  commits in priorauth-api itself. Use for one small change to priorauth-api.
   NOT for: bugs whose cause is unknown (use archon-investigate first).
 
 nodes:
@@ -108,16 +110,18 @@ nodes:
     depends_on: [implement]
     bash: |
       ./scripts/verify.sh && echo "verify: passed"
-      git log --oneline "$BASE_BRANCH"..HEAD
-      git diff --stat "$BASE_BRANCH"...HEAD
+      echo "== priorauth-api: on $(git -C priorauth-api branch --show-current)"
+      git -C priorauth-api log --oneline main..HEAD
+      git -C priorauth-api diff --stat main...HEAD
+      git -C priorauth-api status --short
 
   # ── Review: a second reader, then a person ────────────────────────────
   - id: review
     depends_on: [checks]
     mutates_checkout: false
     prompt: |
-      Review the change on this branch against $ARTIFACTS_DIR/requirements.md and
-      $ARTIFACTS_DIR/plan.md (git diff $BASE_BRANCH...HEAD). Do not edit anything.
+      Review the change on priorauth-api's branch against $ARTIFACTS_DIR/requirements.md and
+      $ARTIFACTS_DIR/plan.md (git -C priorauth-api diff main...HEAD). Do not edit anything.
       Check each FR has code and a test, and look for anything the plan did not name.
       Write $ARTIFACTS_DIR/review.md.
     output_format:
@@ -151,5 +155,10 @@ nodes:
     depends_on: [approve-change]
     when: "$approve-change.output.decision == 'approve'"
     bash: |
-      git push -u origin HEAD 2>&1
-      echo "Open the PR: $(git rev-parse --abbrev-ref HEAD) -> $BASE_BRANCH"
+      b=$(git -C priorauth-api branch --show-current)
+      if [ "$b" != main ] && [ -n "$(git -C priorauth-api log --oneline main..HEAD)" ]; then
+        git -C priorauth-api push -u origin "$b" 2>&1
+        echo "priorauth-api: open the PR $b -> main"
+      else
+        echo "priorauth-api: nothing to push"
+      fi

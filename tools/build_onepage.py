@@ -33,7 +33,7 @@ for tier, model in [("small", "claude/haiku"), ("medium", "claude/sonnet"), ("la
     assert re.search(rf"{tier}\s+\(default: {model}\)", CLI["tier-list"]["out"]), tier
 STEPS = {s["label"]: s for s in json.loads((ROOT / "archon-hello-world-java/java-run/steps.json").read_text(encoding="utf-8"))}
 for lab, start in [("answer-1", "archon workflow answer "), ("reject-requirements", "archon workflow reject "),
-                   ("approve-plan", "archon workflow approve "), ("plan-finish", "archon workflow respond "),
+                   ("approve-plan", "archon workflow approve "), ("archon-plan", "archon workflow run archon-plan --folder "), ("run", "archon workflow run request-to-pr --folder "),
                    ("fix-run", "archon workflow run archon-implement --adopt "), ("complete", "archon complete ")]:
     assert STEPS[lab]["cmd"].startswith(start), lab
 
@@ -87,9 +87,9 @@ SETUP, PLAN, BUILD, REVIEW, SHIP = "#5B6B7F", "#0E7490", "#C2410C", "#6D28D9", "
 GOLD = "#D97706"
 
 PHASES = [
-    (SETUP, "Set up", "once per repo", "Can Archon run here?",
+    (SETUP, "Set up", "once per team", "Can Archon run here?",
      "install · <code>provider add claude</code> · <code>doctor</code> · telemetry off · Git Bash found",
-     "the team's files in <code>.archon/</code>, validated and dry-run"),
+     "a workspace: <code>.archon/</code> at its root, the repo cloned inside"),
     (PLAN, "Plan", "scan → requirements", "What exactly?",
      "<code>scan</code>, <code>questions</code>, wait <code>answer</code>, loop <code>requirements</code>",
      "you answer the questions; approve or send back the requirements"),
@@ -99,8 +99,8 @@ PHASES = [
     (REVIEW, "Review", "checks → approve", "Is it right?",
      "bash <code>checks</code>, prompt <code>review</code> (READY / NOT-READY), wait <code>approve-change</code>",
      "you approve, or reject and the run is cancelled"),
-    (SHIP, "Ship", "push → complete", "Is it in main?",
-     "bash <code>push</code>; then <code>archon complete &lt;branch&gt;</code>",
+    (SHIP, "Ship", "push → merge", "Is it in main?",
+     "bash <code>push</code>: <code>git -C</code> each repo with commits",
      "OURS: the pull request, its review and the merge"),
 ]
 
@@ -133,10 +133,10 @@ TILES = [
      "You can always say what ran, what the agent was told and said, who answered, and what it cost.",
      "A parcel's tracking number.",
      "<code>--detach</code> · <code>workflow runs</code> · <code>get</code> · <code>logs --format text</code> · <code>resume</code> · <code>abandon</code>"),
-    (PLAN, "A worktree per run", "Each run works in its own git worktree and branch under <code>~/.archon/workspaces/</code>; your checkout stays as you left it.",
-     "Several runs can change the same files at once; a result you don't like is a branch you drop.",
-     "A builder draws on a copy of the plans, not the originals.",
-     "<code>--branch</code> · <code>--no-worktree</code> · <code>isolation list</code> · <code>complete &lt;branch&gt;</code> · not a sandbox"),
+    (PLAN, "In place, or a worktree", "A folder project (this course) runs in place, in your clones; the agent makes the branch. A repo project gives each run its own worktree and branch.",
+     "In place spans repos; a worktree lets runs change the same files at once.",
+     "Cooking at your own bench, or at a copy of it.",
+     "<code>--folder</code> · <code>--branch</code> (repo only) · <code>isolation list</code> · <code>complete</code> · not a sandbox"),
     (PLAN, "Artifacts and variables", "Files a run writes to <code>$ARTIFACTS_DIR</code>, outside the repo; placeholders <code>$USER_MESSAGE</code>, <code>$BASE_BRANCH</code>, <code>$&lt;node&gt;.output</code>.",
      "Nodes hand work over through files, so a fresh session reads just <code>plan.md</code> and stays focused.",
      "The surveyor's folder of working papers; the house gets only the work.",
@@ -145,10 +145,10 @@ TILES = [
      "The team keeps its agent and its <code>CLAUDE.md</code>; cheap steps can use a cheaper model.",
      "A staffing agency: Archon books the work, your agencies send the people.",
      "<code>assistant: claude</code> · small = haiku · medium = sonnet · large = opus · <code>ai tier list</code>"),
-    (SETUP, "Where things live", "The project's <code>.archon/</code> (workflows, config: committed) and your <code>~/.archon/</code> (binary, plugins, <code>archon.db</code>, runs: yours). A project: one repo, or a folder project holding several.",
-     "The process travels with the code; the runs stay on the machine that ran them.",
-     "The cookbook in the restaurant; each cook's notebook in their locker.",
-     "repo config wins over home · several repos: <code>--folder</code>, in place, git per repo"),
+    (SETUP, "Where things live", "The team workspace: <code>.archon/</code>, CLAUDE.md, the check (committed), code repos cloned inside. Your <code>~/.archon/</code>: binary, <code>archon.db</code>, runs.",
+     "The workspace repo shares the process; the runs stay on the machine that ran them.",
+     "The cookbook in the kitchen; each cook's notebook in their locker.",
+     "<code>--folder</code> once · another repo: one more clone · git per repo"),
     (SHIP, f"Surfaces and the sdlc pack", f"Start and answer runs from the CLI, the Web UI (<code>archon serve</code>, :3090), chat or triggers. {BUNDLED} bundled workflows: <code>archon-ship</code> and its queues.",
      "A decision reaches whoever can make it; the pack shows what a full process looks like.",
      "A shop with a counter, a website and a phone; a car plant next to your garage.",
@@ -158,12 +158,12 @@ assert len(TILES) == 12
 
 MAPPING = [("Intent", "a run (run id)"), ("Scope", "which workflow you run"), ("Stage", "node"),
            ("Gate 1 / 2 &lt;why&gt;", "<code>wait</code>, <code>form: approval</code>"), ("Request Changes", "reject in a <code>loop_group</code>"),
-           ("Verification command", "<code>until_bash</code> + bash node"), ("<code>aidlc/</code> record", "artifacts + transcript, not committed"), ("Workspace", "one repo, or a folder project"),
+           ("Verification command", "<code>until_bash</code> + bash node"), ("<code>aidlc/</code> record", "artifacts + transcript, not committed"), ("Workspace", "the same: a folder project"),
            ("<code>/aidlc</code> in Claude", "<code>archon workflow run</code>")]
 MIX = [("run ≠ workflow ≠ command", "one execution · the YAML process · one prompt file a node sends"),
        ("wait ≠ cancel ≠ reject", "a pause · a node that ends the run · an answer the YAML must route"),
        ("loop ≠ loop_group ≠ retry", "repeat one step · repeat a small graph · run a failed node again"),
-       ("worktree ≠ sandbox ≠ branch", "a second checkout · isolation it doesn't give · what the worktree is on"),
+       ("workspace ≠ worktree ≠ branch", "the team folder, committed · a per-run checkout · what the agent commits on"),
        ("artifacts ≠ the repo", "per-run papers in <code>~/.archon</code> · only the code and tests")]
 MYTHS = [("\"Reject stops the run.\"", "Only where a <code>cancel:</code> node says so."),
          ("\"It's an AI model.\"", "It is an engine that runs your agent."),
@@ -182,8 +182,8 @@ side = ('<section class="side"><div><h3>AI-DLC → Archon</h3><table>'
         + '<div><h3>At a pause you type</h3><div class="gates"><code>archon workflow attention</code> (what waits) · '
           '<code>answer &lt;run&gt; --occurrence &lt;id&gt; --text "…"</code> · <code>approve &lt;run&gt; "why"</code> · '
           '<code>reject &lt;run&gt; "what to change"</code> · <code>respond &lt;run&gt; &lt;option&gt;</code></div>'
-          '<h3 style="margin-top:1mm">From run to PR · OURS</h3><div class="gates">One run = one branch (<code>--branch</code>). '
-          'Push from the workflow or by hand, open the PR, merge; then <code>archon complete &lt;branch&gt;</code>. '
+          '<h3 style="margin-top:1mm">From run to PR · OURS</h3><div class="gates">One run = one branch per repo, made by the agent. '
+          'Push from the workflow or by hand, open the PR, merge, delete the branch. '
           'A follow-up fix: <code>archon-implement --adopt &lt;run&gt;</code>.</div></div></section>')
 
 page = f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Archon Concepts, One Page</title>
@@ -191,7 +191,7 @@ page = f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name
 <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
 <style>
 {CSS}</style></head><body><div class="sheet">
-<header class="head"><h1>Archon concepts on one page<small>Archon {VERSION} (coleam00/Archon, 29 Oct 2026) with Claude Code · one analogy throughout: a restaurant kitchen</small></h1><div class="idea"><b>The idea.</b> How your team works becomes a <b>YAML workflow</b>: a graph of nodes, some an <b>AI agent</b> with a prompt, some <b>plain code</b>, some a <b>pause where a person decides</b>. Archon runs it the same way every time, each run in <b>its own worktree and branch</b>, checks the agent's work with commands instead of taking its word, and keeps the transcript, the files each step wrote and the cost. It brings no model: it drives the agent you already use.</div><div class="legend"><i></i> wait: the run pauses until a person answers<br>phases and node ids: the course's <code>request-to-pr</code> · OURS = team convention, not the tool</div></header>
+<header class="head"><h1>Archon concepts on one page<small>Archon {VERSION} (coleam00/Archon, 29 Oct 2026) with Claude Code · one analogy throughout: a restaurant kitchen</small></h1><div class="idea"><b>The idea.</b> How your team works becomes a <b>YAML workflow</b>: a graph of nodes, some an <b>AI agent</b> with a prompt, some <b>plain code</b>, some a <b>pause where a person decides</b>. Archon runs it the same way every time, each run <b>from the team's workspace</b>, checks the agent's work with commands instead of taking its word, and keeps the transcript, the files each step wrote and the cost. It brings no model: it drives the agent you already use.</div><div class="legend"><i></i> wait: the run pauses until a person answers<br>phases and node ids: the course's <code>request-to-pr</code> · OURS = team convention, not the tool</div></header>
 <section class="phases">{phases}</section>
 <section class="body">{tiles}</section>
 {side}

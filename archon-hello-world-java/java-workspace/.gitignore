@@ -1,4 +1,2 @@
-target/
-.idea/
-*.iml
-.vscode/
+# The code repo is a git repo of its own, cloned here: not part of the workspace repo.
+/priorauth-api/

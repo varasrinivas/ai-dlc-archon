@@ -222,30 +222,33 @@ figure.dia{margin:14px 0}figure.dia figcaption{font-size:.82rem;color:var(--ink-
 <a class="sr" href="#main">Skip to content</a>
 <header class="top"><div class="top__in">
   <div class="brand">Archon, two repos<small>one bug · a folder project · real run</small></div>
-  <div class="prog" aria-live="polite"><b id="progText">Step 0 of 13</b><div class="bar"><i id="progBar"></i></div><span class="ph" id="progPhase">Start at the top</span></div>
+  <div class="prog" aria-live="polite"><b id="progText">Step 0 of 16</b><div class="bar"><i id="progBar"></i></div><span class="ph" id="progPhase">Start at the top</span></div>
   <div class="top__btns"><button class="btn" id="osToggle" type="button" title="Show the commands for your computer">Windows</button><button class="btn" id="themeToggle" type="button" aria-pressed="false">Dark mode</button></div>
 </div></header>
 
 <div class="shell">
 <nav class="rail" aria-label="Steps">
   <h4>Set up</h4>
-  <a class="rl" href="#s01" data-step="1" style="--c:var(--setup)"><b>1</b><span>Two repos and a folder</span></a>
-  <a class="rl" href="#s02" data-step="2" style="--c:var(--setup)"><b>2</b><span>Bug report and workflow</span></a>
-  <a class="rl" href="#s03" data-step="3" style="--c:var(--setup)"><b>3</b><span>Before: the bug shows</span></a>
-  <a class="rl" href="#s04" data-step="4" style="--c:var(--setup)"><b>4</b><span>Dry-run, not with --folder</span></a>
+  <a class="rl" href="#s01" data-step="1" style="--c:var(--setup)"><b>1</b><span>Split the starter in two</span></a>
+  <a class="rl" href="#s02" data-step="2" style="--c:var(--setup)"><b>2</b><span>The workspace repo</span></a>
+  <a class="rl" href="#s03" data-step="3" style="--c:var(--setup)"><b>3</b><span>Remotes for all three</span></a>
+  <a class="rl" href="#s04" data-step="4" style="--c:var(--setup)"><b>4</b><span>Kiran's clones</span></a>
+  <a class="rl" href="#s05" data-step="5" style="--c:var(--setup)"><b>5</b><span>Bug report and workflow</span></a>
+  <a class="rl" href="#s06" data-step="6" style="--c:var(--setup)"><b>6</b><span>Before: the bug shows</span></a>
+  <a class="rl" href="#s07" data-step="7" style="--c:var(--setup)"><b>7</b><span>Dry-run, not with --folder</span></a>
   <h4>Plan</h4>
-  <a class="rl" href="#s05" data-step="5" style="--c:var(--plan)"><b>5</b><span>Start from the root</span></a>
-  <a class="rl" href="#s06" data-step="6" style="--c:var(--plan)"><b>6</b><span>Approve, with a correction</span></a>
+  <a class="rl" href="#s08" data-step="8" style="--c:var(--plan)"><b>8</b><span>Start from the root</span></a>
+  <a class="rl" href="#s09" data-step="9" style="--c:var(--plan)"><b>9</b><span>Approve, with a correction</span></a>
   <h4>Build</h4>
-  <a class="rl" href="#s07" data-step="7" style="--c:var(--build)"><b>7</b><span>Implement in both repos</span></a>
-  <a class="rl" href="#s08" data-step="8" style="--c:var(--build)"><b>8</b><span>Checks and review</span></a>
+  <a class="rl" href="#s10" data-step="10" style="--c:var(--build)"><b>10</b><span>Implement in both repos</span></a>
+  <a class="rl" href="#s11" data-step="11" style="--c:var(--build)"><b>11</b><span>Checks and review</span></a>
   <h4>Ship</h4>
-  <a class="rl" href="#s09" data-step="9" style="--c:var(--ship)"><b>9</b><span>Check the jar by hand</span></a>
-  <a class="rl" href="#s10" data-step="10" style="--c:var(--ship)"><b>10</b><span>Approve; push both</span></a>
+  <a class="rl" href="#s12" data-step="12" style="--c:var(--ship)"><b>12</b><span>Check the jar by hand</span></a>
+  <a class="rl" href="#s13" data-step="13" style="--c:var(--ship)"><b>13</b><span>Approve; push both</span></a>
   <h4>After</h4>
-  <a class="rl" href="#s11" data-step="11" style="--c:var(--setup)"><b>11</b><span>What it leaves behind</span></a>
-  <a class="rl" href="#s12" data-step="12" style="--c:var(--setup)"><b>12</b><span>Merge; tidy up</span></a>
-  <a class="rl" href="#s13" data-step="13" style="--c:var(--setup)"><b>13</b><span>AI-DLC vs Archon</span></a>
+  <a class="rl" href="#s14" data-step="14" style="--c:var(--setup)"><b>14</b><span>What it leaves behind</span></a>
+  <a class="rl" href="#s15" data-step="15" style="--c:var(--setup)"><b>15</b><span>Merge; tidy up</span></a>
+  <a class="rl" href="#s16" data-step="16" style="--c:var(--setup)"><b>16</b><span>AI-DLC vs Archon</span></a>
   <h4>Reference</h4>
   <a class="rl" href="#yourself" style="--c:var(--review)"><b>·</b><span>Run it yourself</span></a>
   <a class="rl" href="#real" style="--c:var(--review)"><b>·</b><span>What is real here</span></a>
@@ -273,32 +276,157 @@ figure.dia{margin:14px 0}figure.dia figcaption{font-size:.82rem;color:var(--ink-
     </div>
   </aside>
 </section>
-<div class="phase" style="--c:var(--setup)"><i></i>Set up<span>steps 1–4 · the workspace, the bug, a dry run</span></div>
+<div class="phase" style="--c:var(--setup)"><i></i>Set up<span>steps 1–7 · the two repos, the workspace, the clones, the bug, a dry run</span></div>
 <section class="step" id="s01" data-step="1" data-phase="Set up" style="--c:var(--setup)">
-  <div class="step__head"><span class="step__n">1</span><div><span class="chip">ours</span><h2>The workspace: two repos and a folder around them</h2><p class="step__why">The same split as the AI-DLC course's two-repo run: the aging package of priorauth-api 1.1.0 became a library, and the API depends on it.</p></div><span class="who">Kiran · 5 min</span></div>
-<div class="io"><div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">any shell</span><span class="os-mac">any shell</span></span></div><pre class="os-win">git clone https://github.com/acme-health/priorauth-workspace
-cd priorauth-workspace
-git clone https://github.com/acme-health/priorauth-aging
-git clone https://github.com/acme-health/priorauth-api
-archon validate workflows fix-across-repos</pre><pre class="os-mac">git clone https://github.com/acme-health/priorauth-workspace
-cd priorauth-workspace
-git clone https://github.com/acme-health/priorauth-aging
-git clone https://github.com/acme-health/priorauth-api
-archon validate workflows fix-across-repos</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Archon returns <span class="tag">real</span></div><pre>Validating workflows in C:/work/archon-multirepo/priorauth-workspace
+  <div class="step__head"><span class="step__n">1</span><div><span class="chip">ours</span><h2>Split the starter: a library and an API</h2><p class="step__why">The same split as the AI-DLC course's two-repo run: the aging package of priorauth-api 1.1.0 becomes the library priorauth-aging 1.0.0, and the API 1.2.0 depends on it.</p></div><span class="who">Meena · 5 min</span></div>
+<div class="io"><div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">Git Bash</span><span class="os-mac">Git Bash</span></span></div><pre class="os-win">cd C:/work/archon-multirepo/build
+git clone -q https://github.com/varasrinivas/aidlc-priorauth-api priorauth-api
+cd C:/work/archon-multirepo/build/priorauth-api
+git switch -q -C main v1.1.0 &amp;&amp; git remote remove origin &amp;&amp; git tag | xargs git tag -d &gt;/dev/null &amp;&amp; git log --oneline -1
+cd C:/work/archon-multirepo/build/priorauth-aging
+git init -q -b main &amp;&amp; git add -A &amp;&amp; git -c user.name=&#x27;Meena Iyer&#x27; -c user.email=meena@acme-health.example commit -q -m &#x27;priorauth-aging 1.0.0: the aging package, split from priorauth-api 1.1.0&#x27; &amp;&amp; git tag v1.0.0 &amp;&amp; git log --oneline
+cd C:/work/archon-multirepo/build/priorauth-api
+git rm -q src/main/java/com/acmehealth/priorauth/aging/AgeBadge.java src/main/java/com/acmehealth/priorauth/aging/BusinessDays.java src/main/java/com/acmehealth/priorauth/aging/HolidayCalendar.java src/main/resources/data/holidays-TX-01-2026.json src/test/java/com/acmehealth/priorauth/aging/AgeBadgeTest.java src/test/java/com/acmehealth/priorauth/aging/BusinessDaysTest.java
+git add pom.xml &amp;&amp; git -c user.name=&#x27;Meena Iyer&#x27; -c user.email=meena@acme-health.example commit -q -m &#x27;Move request aging to the priorauth-aging library (1.0.0); depend on it&#x27; &amp;&amp; git tag v1.2.0 &amp;&amp; git log --oneline -3</pre><pre class="os-mac">cd C:/work/archon-multirepo/build
+git clone -q https://github.com/varasrinivas/aidlc-priorauth-api priorauth-api
+cd C:/work/archon-multirepo/build/priorauth-api
+git switch -q -C main v1.1.0 &amp;&amp; git remote remove origin &amp;&amp; git tag | xargs git tag -d &gt;/dev/null &amp;&amp; git log --oneline -1
+cd C:/work/archon-multirepo/build/priorauth-aging
+git init -q -b main &amp;&amp; git add -A &amp;&amp; git -c user.name=&#x27;Meena Iyer&#x27; -c user.email=meena@acme-health.example commit -q -m &#x27;priorauth-aging 1.0.0: the aging package, split from priorauth-api 1.1.0&#x27; &amp;&amp; git tag v1.0.0 &amp;&amp; git log --oneline
+cd C:/work/archon-multirepo/build/priorauth-api
+git rm -q src/main/java/com/acmehealth/priorauth/aging/AgeBadge.java src/main/java/com/acmehealth/priorauth/aging/BusinessDays.java src/main/java/com/acmehealth/priorauth/aging/HolidayCalendar.java src/main/resources/data/holidays-TX-01-2026.json src/test/java/com/acmehealth/priorauth/aging/AgeBadgeTest.java src/test/java/com/acmehealth/priorauth/aging/BusinessDaysTest.java
+git add pom.xml &amp;&amp; git -c user.name=&#x27;Meena Iyer&#x27; -c user.email=meena@acme-health.example commit -q -m &#x27;Move request aging to the priorauth-aging library (1.0.0); depend on it&#x27; &amp;&amp; git tag v1.2.0 &amp;&amp; git log --oneline -3</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">git returns <span class="tag">real</span></div><pre>49fe266 Merge pull request #58 from acme-health/request-age/u1-age-api
+f6153ee priorauth-aging 1.0.0: the aging package, split from priorauth-api 1.1.0
+c2dc5d4 Move request aging to the priorauth-aging library (1.0.0); depend on it
+49fe266 Merge pull request #58 from acme-health/request-age/u1-age-api
+b477c4e request age and over-limit flag on the pending list (intent 261013-request-age-api, U1)</pre></div></div><div class="plain"><div><b>In plain words.</b> Between the commands, six files move from the API to the new library (the script copies them before <code>git init</code> in <code>priorauth-aging</code>, and <code>git rm</code> takes them out of the API): <code>AgeBadge.java</code>, <code>BusinessDays.java</code>, <code>HolidayCalendar.java</code>, <code>holidays-TX-01-2026.json</code>, <code>AgeBadgeTest.java</code>, <code>BusinessDaysTest.java</code>. The library gets its own <code>pom.xml</code> and README; the API's <code>pom.xml</code> gains one dependency and moves to 1.2.0.</div></div><div class="open"><div class="tabs" role="tablist"><button class="tab" role="tab" aria-selected="true" data-pane="split-1">priorauth-aging/pom.xml</button><button class="tab" role="tab" aria-selected="false" data-pane="split-2">priorauth-aging/README.md</button><button class="tab" role="tab" aria-selected="false" data-pane="split-3">priorauth-api/pom.xml (added)</button></div><div class="pane is-on" id="split-1"><div class="code code--wrap"><div class="code__bar"><span class="path">priorauth-aging/pom.xml</span><span>the library, 1.0.0</span></div><textarea class="src" data-lang="xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot;
+         xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+         xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&gt;
+  &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
 
-  fix-across-repos                         ok
+  &lt;!-- The same parent as priorauth-api, so both repos use the same Spring and Jackson versions. --&gt;
+  &lt;parent&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;
+    &lt;version&gt;4.1.1&lt;/version&gt;
+    &lt;relativePath/&gt;
+  &lt;/parent&gt;
 
-Results: 1 valid, 0 with errors</pre></div></div><div class="box disk"><div class="box__bar">On disk: Kiran's workspace</div><pre>priorauth-workspace/                 <b>the folder project</b>: a git repo of its own (the team's files)
-├── <span class="n">.archon/config.yaml</span>              assistant: claude
-├── <span class="n">.archon/workflows/team/fix-across-repos/</span>
-│   ├── <span class="n">fix-across-repos.yaml</span>        <span class="m">10 nodes, 2 waits</span>
-│   └── <span class="n">commands/scan.md, implement.md</span>
-├── <span class="n">CLAUDE.md</span>                        the repo map and the rules across both repos
-├── <span class="n">scripts/verify.sh</span>, verify.cmd    install priorauth-aging, then test priorauth-api
-├── <span class="n">docs-in/bug-report.md</span>            Ravi's report, with holidays-TX-01-2027.json
-├── <span class="n">.gitignore</span>                       /priorauth-aging/ and /priorauth-api/ are not part of it
-├── priorauth-aging/                 <b>repo 1</b>: the aging library 1.0.0, its own git and remote
-└── priorauth-api/                   <b>repo 2</b>: the API 1.2.0, depends on priorauth-aging 1.0.0</pre></div><div class="box claude"><div class="box__bar">git: the two repos <span class="tag">real</span></div><pre>== priorauth-aging
+  &lt;groupId&gt;com.acmehealth&lt;/groupId&gt;
+  &lt;artifactId&gt;priorauth-aging&lt;/artifactId&gt;
+  &lt;version&gt;1.0.0&lt;/version&gt;
+  &lt;name&gt;priorauth-aging&lt;/name&gt;
+  &lt;description&gt;Request aging for prior auth: business days, tenant holiday calendars, the age badge. A library; priorauth-api depends on it.&lt;/description&gt;
+
+  &lt;properties&gt;
+    &lt;java.version&gt;21&lt;/java.version&gt;
+  &lt;/properties&gt;
+
+  &lt;dependencies&gt;
+    &lt;!-- Spring core (for @Service and classpath resources) and Jackson (to read the holiday files). --&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+      &lt;artifactId&gt;spring-boot-starter&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;tools.jackson.core&lt;/groupId&gt;
+      &lt;artifactId&gt;jackson-databind&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+    &lt;!-- JUnit 5 and AssertJ for the tests. Test scope: never shipped. --&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+      &lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt;
+      &lt;scope&gt;test&lt;/scope&gt;
+    &lt;/dependency&gt;
+  &lt;/dependencies&gt;
+&lt;/project&gt;
+</textarea></div></div><div class="pane" id="split-2"><div class="code code--wrap"><div class="code__bar"><span class="path">priorauth-aging/README.md</span><span>what the library is</span></div><textarea class="src" data-lang="md"># priorauth-aging
+
+Request aging for the prior-auth reviewer screen, as a library: `BusinessDays` (business days between two dates),
+`HolidayCalendar` (a tenant&#x27;s holidays, from `src/main/resources/data/holidays-&lt;tenant&gt;-&lt;year&gt;.json`) and `AgeBadge`
+(the age and the over-limit flag). `priorauth-api` depends on it (`com.acmehealth:priorauth-aging`).
+
+Build and install it locally before building the API: `mvn -q install`.
+Split out of priorauth-api 1.1.0 (the `aging` package and its tests, unchanged).
+</textarea></div></div><div class="pane" id="split-3"><div class="code code--wrap"><div class="code__bar"><span class="path">priorauth-api/pom.xml</span><span>the dependency the API gains</span></div><textarea class="src" data-lang="xml">    &lt;!-- Request aging (business days, tenant holidays, the age badge): our library, repo priorauth-aging. --&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;com.acmehealth&lt;/groupId&gt;
+      &lt;artifactId&gt;priorauth-aging&lt;/artifactId&gt;
+      &lt;version&gt;1.0.0&lt;/version&gt;
+    &lt;/dependency&gt;
+</textarea></div></div></div><div class="note">The public starter's tags are deleted before the split: <code>v1.1.0</code> there is the AI-DLC answer key. The new tags <code>v1.0.0</code> (library) and <code>v1.2.0</code> (API) are the versions this run starts from.</div>
+</section>
+<section class="step" id="s02" data-step="2" data-phase="Set up" style="--c:var(--setup)">
+  <div class="step__head"><span class="step__n">2</span><div><span class="chip">ours</span><h2>The team's workspace: a git repo of its own</h2><p class="step__why">The workspace holds the team's files only: .archon/, CLAUDE.md, the check, the bug report. Its .gitignore leaves the two code repos out.</p></div><span class="who">Meena · 2 min</span></div>
+<div class="io"><div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">Git Bash</span><span class="os-mac">Git Bash</span></span></div><pre class="os-win">cd C:/work/archon-multirepo/build/priorauth-workspace
+git init -q -b main &amp;&amp; git add -A &amp;&amp; git update-index --chmod=+x scripts/verify.sh &amp;&amp; git -c user.name=&#x27;Meena Iyer&#x27; -c user.email=meena@acme-health.example commit -q -m &#x27;The priorauth workspace: CLAUDE.md, verify scripts, the fix-across-repos workflow&#x27; &amp;&amp; git ls-files</pre><pre class="os-mac">cd C:/work/archon-multirepo/build/priorauth-workspace
+git init -q -b main &amp;&amp; git add -A &amp;&amp; git update-index --chmod=+x scripts/verify.sh &amp;&amp; git -c user.name=&#x27;Meena Iyer&#x27; -c user.email=meena@acme-health.example commit -q -m &#x27;The priorauth workspace: CLAUDE.md, verify scripts, the fix-across-repos workflow&#x27; &amp;&amp; git ls-files</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">git returns <span class="tag">real</span></div><pre>.archon/config.yaml
+.archon/workflows/team/fix-across-repos/commands/implement.md
+.archon/workflows/team/fix-across-repos/commands/scan.md
+.archon/workflows/team/fix-across-repos/fix-across-repos.yaml
+.gitattributes
+.gitignore
+CLAUDE.md
+docs-in/bug-report.md
+docs-in/holidays-TX-01-2027.json
+scripts/verify.cmd
+scripts/verify.sh</pre></div></div><div class="note"><code>git update-index --chmod=+x</code> marks <code>verify.sh</code> executable for every clone: on Windows git does not see the file mode. The files themselves are step 5's tabs.</div>
+</section>
+<section class="step" id="s03" data-step="3" data-phase="Set up" style="--c:var(--setup)">
+  <div class="step__head"><span class="step__n">3</span><div><span class="chip">ours</span><h2>Remotes for all three, standing in for GitHub</h2><p class="step__why">Three bare repos play GitHub, so every push in the run is a real push to a remote.</p></div><span class="who">Meena · 1 min</span></div>
+<div class="io"><div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">Git Bash</span><span class="os-mac">Git Bash</span></span></div><pre class="os-win">cd C:/work/archon-multirepo
+git init -q --bare -b main C:\work\archon-multirepo\remotes\priorauth-aging.git
+cd C:/work/archon-multirepo/build/priorauth-aging
+git remote add origin &#x27;C:/work/archon-multirepo/remotes/priorauth-aging.git&#x27; &amp;&amp; git push -q -u origin main --tags 2&gt;&amp;1
+cd C:/work/archon-multirepo
+git init -q --bare -b main C:\work\archon-multirepo\remotes\priorauth-api.git
+cd C:/work/archon-multirepo/build/priorauth-api
+git remote add origin &#x27;C:/work/archon-multirepo/remotes/priorauth-api.git&#x27; &amp;&amp; git push -q -u origin main --tags 2&gt;&amp;1
+cd C:/work/archon-multirepo
+git init -q --bare -b main C:\work\archon-multirepo\remotes\priorauth-workspace.git
+cd C:/work/archon-multirepo/build/priorauth-workspace
+git remote add origin &#x27;C:/work/archon-multirepo/remotes/priorauth-workspace.git&#x27; &amp;&amp; git push -q -u origin main --tags 2&gt;&amp;1</pre><pre class="os-mac">cd C:/work/archon-multirepo
+git init -q --bare -b main C:\work\archon-multirepo\remotes\priorauth-aging.git
+cd C:/work/archon-multirepo/build/priorauth-aging
+git remote add origin &#x27;C:/work/archon-multirepo/remotes/priorauth-aging.git&#x27; &amp;&amp; git push -q -u origin main --tags 2&gt;&amp;1
+cd C:/work/archon-multirepo
+git init -q --bare -b main C:\work\archon-multirepo\remotes\priorauth-api.git
+cd C:/work/archon-multirepo/build/priorauth-api
+git remote add origin &#x27;C:/work/archon-multirepo/remotes/priorauth-api.git&#x27; &amp;&amp; git push -q -u origin main --tags 2&gt;&amp;1
+cd C:/work/archon-multirepo
+git init -q --bare -b main C:\work\archon-multirepo\remotes\priorauth-workspace.git
+cd C:/work/archon-multirepo/build/priorauth-workspace
+git remote add origin &#x27;C:/work/archon-multirepo/remotes/priorauth-workspace.git&#x27; &amp;&amp; git push -q -u origin main --tags 2&gt;&amp;1</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">git returns <span class="tag">real</span></div><pre>(no output: git -q prints nothing when it succeeds)</pre></div></div><div class="note">On a real team these are three GitHub repos, and the clone URLs in step 4 are theirs. Each code repo keeps its own history, branches and pull requests; the workspace repo changes only when the team's process does.</div>
+</section>
+<section class="step" id="s04" data-step="4" data-phase="Set up" style="--c:var(--setup)">
+  <div class="step__head"><span class="step__n">4</span><div><span class="chip">ours</span><h2>Kiran's machine: the workspace, then each repo inside it</h2><p class="step__why">Clone the workspace first, then the two code repos into it, and check the workflow.</p></div><span class="who">Kiran · 3 min</span></div>
+<div class="io"><div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">Git Bash</span><span class="os-mac">Git Bash</span></span></div><pre class="os-win">cd C:/work/archon-multirepo
+git clone -q C:\work\archon-multirepo\remotes\priorauth-workspace.git priorauth-workspace
+cd C:/work/archon-multirepo/priorauth-workspace
+git clone -q C:\work\archon-multirepo\remotes\priorauth-aging.git priorauth-aging
+git clone -q C:\work\archon-multirepo\remotes\priorauth-api.git priorauth-api
+for d in . priorauth-aging priorauth-api; do git -C $d config user.name &#x27;Kiran Rao&#x27;; git -C $d config user.email kiran@acme-health.example; done; git status --short --ignored
+ls -a; for d in priorauth-aging priorauth-api; do echo &quot;== $d&quot;; git -C $d log --oneline --decorate; grep -m2 -n &#x27;&lt;version&gt;&#x27; $d/pom.xml; done</pre><pre class="os-mac">cd C:/work/archon-multirepo
+git clone -q C:\work\archon-multirepo\remotes\priorauth-workspace.git priorauth-workspace
+cd C:/work/archon-multirepo/priorauth-workspace
+git clone -q C:\work\archon-multirepo\remotes\priorauth-aging.git priorauth-aging
+git clone -q C:\work\archon-multirepo\remotes\priorauth-api.git priorauth-api
+for d in . priorauth-aging priorauth-api; do git -C $d config user.name &#x27;Kiran Rao&#x27;; git -C $d config user.email kiran@acme-health.example; done; git status --short --ignored
+ls -a; for d in priorauth-aging priorauth-api; do echo &quot;== $d&quot;; git -C $d log --oneline --decorate; grep -m2 -n &#x27;&lt;version&gt;&#x27; $d/pom.xml; done</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">git returns <span class="tag">real</span></div><pre>!! priorauth-aging/
+!! priorauth-api/
+.
+..
+.archon
+.git
+.gitattributes
+.gitignore
+CLAUDE.md
+docs-in
+priorauth-aging
+priorauth-api
+scripts
+== priorauth-aging
 f6153ee (HEAD -&gt; main, tag: v1.0.0, origin/main, origin/HEAD) priorauth-aging 1.0.0: the aging package, split from priorauth-api 1.1.0
 11:    &lt;version&gt;4.1.1&lt;/version&gt;
 17:  &lt;version&gt;1.0.0&lt;/version&gt;
@@ -308,10 +436,24 @@ c2dc5d4 (HEAD -&gt; main, tag: v1.2.0, origin/main, origin/HEAD) Move request ag
 b477c4e request age and over-limit flag on the pending list (intent 261013-request-age-api, U1)
 d9aa178 priorauth-api 1.0.2: pending list for the reviewer screen
 11:    &lt;version&gt;4.1.1&lt;/version&gt;
-17:  &lt;version&gt;1.2.0&lt;/version&gt;</pre></div><div class="note">The three URLs are illustrative: in the course's run they are local bare repos standing in for GitHub (<code>tools/setup_multirepo_run.py</code> builds them from the public starter at <code>v1.1.0</code>), so every push is real. The workspace repo's <code>.gitignore</code> leaves the two code repos out: each keeps its own history, branches and pull requests.</div>
+17:  &lt;version&gt;1.2.0&lt;/version&gt;</pre></div></div><div class="box disk"><div class="box__bar">On disk: Kiran's workspace</div><pre>priorauth-workspace/                 <b>the folder project</b>: a git repo of its own (the team's files)
+├── <span class="n">.archon/config.yaml</span>              assistant: claude
+├── <span class="n">.archon/workflows/team/fix-across-repos/</span>
+│   ├── <span class="n">fix-across-repos.yaml</span>        <span class="m">10 nodes, 2 waits</span>
+│   └── <span class="n">commands/scan.md, implement.md</span>
+├── <span class="n">CLAUDE.md</span>                        the repo map and the rules across both repos
+├── <span class="n">scripts/verify.sh</span>, verify.cmd    install priorauth-aging, then test priorauth-api
+├── <span class="n">docs-in/bug-report.md</span>            Ravi's report, with holidays-TX-01-2027.json
+├── <span class="n">.gitignore</span>                       /priorauth-aging/ and /priorauth-api/ are not part of it
+├── priorauth-aging/                 <b>repo 1</b>: the aging library 1.0.0, its own git and remote
+└── priorauth-api/                   <b>repo 2</b>: the API 1.2.0, depends on priorauth-aging 1.0.0</pre></div><div class="io"><div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">any shell</span><span class="os-mac">any shell</span></span></div><pre class="os-win">archon validate workflows fix-across-repos</pre><pre class="os-mac">archon validate workflows fix-across-repos</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Archon returns <span class="tag">real</span></div><pre>Validating workflows in C:/work/archon-multirepo/priorauth-workspace
+
+  fix-across-repos                         ok
+
+Results: 1 valid, 0 with errors</pre></div></div><div class="note"><code>git status --ignored</code> in the workspace shows the two repos as <code>!!</code>, ignored: the workspace's git never sees their files. The workspace as it is after the run, with both repos at their merged <code>main</code>, is in the course repo: <code>archon-hello-world-java/multirepo-workspace/</code>.</div>
 </section>
-<section class="step" id="s02" data-step="2" data-phase="Set up" style="--c:var(--setup)">
-  <div class="step__head"><span class="step__n">2</span><div><span class="chip">the bug</span><h2>Read the bug report and the workflow</h2><p class="step__why">Ravi's report is the input; the workflow is written for a folder project, so the git in each repo is in its prompts and bash nodes.</p></div><span class="who">Kiran · 3 min</span></div>
+<section class="step" id="s05" data-step="5" data-phase="Set up" style="--c:var(--setup)">
+  <div class="step__head"><span class="step__n">5</span><div><span class="chip">the bug</span><h2>Read the bug report and the workflow</h2><p class="step__why">Ravi's report is the input; the workflow is written for a folder project, so the git in each repo is in its prompts and bash nodes.</p></div><span class="who">Kiran · 3 min</span></div>
 <div class="open"><div class="tabs" role="tablist"><button class="tab" role="tab" aria-selected="true" data-pane="bug-1">bug-report.md</button><button class="tab" role="tab" aria-selected="false" data-pane="bug-2">fix-across-repos.yaml</button><button class="tab" role="tab" aria-selected="false" data-pane="bug-3">implement.md</button><button class="tab" role="tab" aria-selected="false" data-pane="bug-4">scan.md</button><button class="tab" role="tab" aria-selected="false" data-pane="bug-5">CLAUDE.md</button><button class="tab" role="tab" aria-selected="false" data-pane="bug-6">verify.sh</button></div><div class="pane is-on" id="bug-1"><div class="code code--wrap"><div class="code__bar"><span class="path">docs-in/bug-report.md</span><span>Ravi, 17 Oct · real input (from the AI-DLC course)</span></div><textarea class="src" data-lang="md">**#priorauth-reviewers** · Ravi Menon (nurse manager) · Sat 17 Oct 2026, 09:40
 
 Kiran, the new age badge is great, but I think it breaks in January. Payer ops just sent the 2027 holiday list for TX-01 (attached as `holidays-TX-01-2027.json`), so I tried the screen with a January date: `GET /requests/pending?asOf=2027-01-05`.
@@ -523,10 +665,10 @@ set -euo pipefail
 cd &quot;$(dirname &quot;$0&quot;)/..&quot;
 (cd priorauth-aging &amp;&amp; mvn -q install)
 (cd priorauth-api &amp;&amp; mvn -q test)
-</textarea></div></div></div><div class="gwrap"><figure class="dia"><svg viewBox="0 0 820 614" role="img" aria-label="fix-across-repos: the 10 nodes this run goes through" style="width:100%;height:auto;font-family:var(--font-text);"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" style="fill:var(--ink-3)"/></marker></defs><rect x="145" y="20" width="200" height="44" rx="9" style="fill:var(--plan);fill-opacity:0.13;stroke:var(--plan);stroke-width:1.6"/><text x="245.0" y="39" text-anchor="middle" style="font-family:var(--font-mono);fill:var(--ink);font-size:12.5px;font-weight:700">scan</text><text x="245.0" y="55" text-anchor="middle" style="fill:var(--ink-3);font-size:10.5px;font-weight:400">AI command</text><text x="359" y="46.0" text-anchor="start" style="fill:var(--ink-2);font-size:11px;font-weight:400">step 5</text><rect x="145" y="90" width="200" height="44" rx="9" style="fill:var(--plan);fill-opacity:0.13;stroke:var(--plan);stroke-width:1.6"/><text x="245.0" y="109" text-anchor="middle" style="font-family:var(--font-mono);fill:var(--ink);font-size:12.5px;font-weight:700">plan</text><text x="245.0" y="125" text-anchor="middle" style="fill:var(--ink-3);font-size:10.5px;font-weight:400">AI prompt</text><text x="359" y="116.0" text-anchor="start" style="fill:var(--ink-2);font-size:11px;font-weight:400">step 5</text><rect x="145" y="160" width="200" height="44" rx="9" style="fill:var(--gate);fill-opacity:0.13;stroke:var(--gate);stroke-width:1.6;stroke-dasharray:5 4"/><text x="245.0" y="179" text-anchor="middle" style="font-family:var(--font-mono);fill:var(--ink);font-size:12.5px;font-weight:700">approve-plan</text><text x="245.0" y="195" text-anchor="middle" style="fill:var(--ink-3);font-size:10.5px;font-weight:400">wait</text><text x="359" y="186.0" text-anchor="start" style="fill:var(--ink-2);font-size:11px;font-weight:400">step 6</text><rect x="30" y="230" width="200" height="44" rx="9" style="fill:var(--bad);fill-opacity:0.13;stroke:var(--bad);stroke-width:1.6"/><text x="130.0" y="249" text-anchor="middle" style="font-family:var(--font-mono);fill:var(--ink);font-size:12.5px;font-weight:700">stop-plan</text><text x="130.0" y="265" text-anchor="middle" style="fill:var(--ink-3);font-size:10.5px;font-weight:400">cancel</text><rect x="260" y="230" width="200" height="44" rx="9" style="fill:var(--build);fill-opacity:0.13;stroke:var(--build);stroke-width:1.6"/><text x="360.0" y="249" text-anchor="middle" style="font-family:var(--font-mono);fill:var(--ink);font-size:12.5px;font-weight:700">implement</text><text x="360.0" y="265" text-anchor="middle" style="fill:var(--ink-3);font-size:10.5px;font-weight:400">AI loop</text><text x="474" y="256.0" text-anchor="start" style="fill:var(--ink-2);font-size:11px;font-weight:400">step 7</text><rect x="145" y="300" width="200" height="44" rx="9" style="fill:var(--ship);fill-opacity:0.13;stroke:var(--ship);stroke-width:1.6"/><text x="245.0" y="319" text-anchor="middle" style="font-family:var(--font-mono);fill:var(--ink);font-size:12.5px;font-weight:700">checks</text><text x="245.0" y="335" text-anchor="middle" style="fill:var(--ink-3);font-size:10.5px;font-weight:400">bash</text><text x="359" y="326.0" text-anchor="start" style="fill:var(--ink-2);font-size:11px;font-weight:400">step 8</text><rect x="145" y="370" width="200" height="44" rx="9" style="fill:var(--plan);fill-opacity:0.13;stroke:var(--plan);stroke-width:1.6"/><text x="245.0" y="389" text-anchor="middle" style="font-family:var(--font-mono);fill:var(--ink);font-size:12.5px;font-weight:700">review</text><text x="245.0" y="405" text-anchor="middle" style="fill:var(--ink-3);font-size:10.5px;font-weight:400">AI prompt</text><text x="359" y="396.0" text-anchor="start" style="fill:var(--ink-2);font-size:11px;font-weight:400">step 8</text><rect x="145" y="440" width="200" height="44" rx="9" style="fill:var(--gate);fill-opacity:0.13;stroke:var(--gate);stroke-width:1.6;stroke-dasharray:5 4"/><text x="245.0" y="459" text-anchor="middle" style="font-family:var(--font-mono);fill:var(--ink);font-size:12.5px;font-weight:700">approve-change</text><text x="245.0" y="475" text-anchor="middle" style="fill:var(--ink-3);font-size:10.5px;font-weight:400">wait</text><text x="359" y="466.0" text-anchor="start" style="fill:var(--ink-2);font-size:11px;font-weight:400">step 10</text><rect x="30" y="510" width="200" height="44" rx="9" style="fill:var(--bad);fill-opacity:0.13;stroke:var(--bad);stroke-width:1.6"/><text x="130.0" y="529" text-anchor="middle" style="font-family:var(--font-mono);fill:var(--ink);font-size:12.5px;font-weight:700">stop-change</text><text x="130.0" y="545" text-anchor="middle" style="fill:var(--ink-3);font-size:10.5px;font-weight:400">cancel</text><rect x="260" y="510" width="200" height="44" rx="9" style="fill:var(--ship);fill-opacity:0.13;stroke:var(--ship);stroke-width:1.6"/><text x="360.0" y="529" text-anchor="middle" style="font-family:var(--font-mono);fill:var(--ink);font-size:12.5px;font-weight:700">push</text><text x="360.0" y="545" text-anchor="middle" style="fill:var(--ink-3);font-size:10.5px;font-weight:400">bash</text><text x="474" y="536.0" text-anchor="start" style="fill:var(--ink-2);font-size:11px;font-weight:400">step 10</text><path d="M245.0 64 C245.0 78, 245.0 76, 245.0 87" style="fill:none;stroke:var(--ink-3);stroke-width:1.5" marker-end="url(#ah)"/><path d="M245.0 134 C245.0 148, 245.0 146, 245.0 157" style="fill:none;stroke:var(--ink-3);stroke-width:1.5" marker-end="url(#ah)"/><path d="M245.0 204 C245.0 218, 130.0 216, 130.0 227" style="fill:none;stroke:var(--ink-3);stroke-width:1.5" marker-end="url(#ah)"/><text x="122.0" y="222" text-anchor="end" style="fill:var(--gate);font-size:10px;font-weight:600">reject</text><path d="M245.0 204 C245.0 218, 360.0 216, 360.0 227" style="fill:none;stroke:var(--ink-3);stroke-width:1.5" marker-end="url(#ah)"/><text x="368.0" y="222" text-anchor="start" style="fill:var(--gate);font-size:10px;font-weight:600">approve</text><path d="M360.0 274 C360.0 288, 245.0 286, 245.0 297" style="fill:none;stroke:var(--ink-3);stroke-width:1.5" marker-end="url(#ah)"/><path d="M245.0 344 C245.0 358, 245.0 356, 245.0 367" style="fill:none;stroke:var(--ink-3);stroke-width:1.5" marker-end="url(#ah)"/><path d="M245.0 414 C245.0 428, 245.0 426, 245.0 437" style="fill:none;stroke:var(--ink-3);stroke-width:1.5" marker-end="url(#ah)"/><path d="M245.0 484 C245.0 498, 130.0 496, 130.0 507" style="fill:none;stroke:var(--ink-3);stroke-width:1.5" marker-end="url(#ah)"/><text x="122.0" y="502" text-anchor="end" style="fill:var(--gate);font-size:10px;font-weight:600">reject</text><path d="M245.0 484 C245.0 498, 360.0 496, 360.0 507" style="fill:none;stroke:var(--ink-3);stroke-width:1.5" marker-end="url(#ah)"/><text x="368.0" y="502" text-anchor="start" style="fill:var(--gate);font-size:10px;font-weight:600">approve</text><rect x="30" y="588" width="14" height="14" rx="3" style="fill:var(--plan);fill-opacity:0.13;stroke:var(--plan);stroke-width:1.6"/><text x="50" y="599" text-anchor="start" style="fill:var(--ink-3);font-size:11px;font-weight:400">AI prompt</text><rect x="142" y="588" width="14" height="14" rx="3" style="fill:var(--build);fill-opacity:0.13;stroke:var(--build);stroke-width:1.6"/><text x="162" y="599" text-anchor="start" style="fill:var(--ink-3);font-size:11px;font-weight:400">AI loop</text><rect x="254" y="588" width="14" height="14" rx="3" style="fill:var(--ship);fill-opacity:0.13;stroke:var(--ship);stroke-width:1.6"/><text x="274" y="599" text-anchor="start" style="fill:var(--ink-3);font-size:11px;font-weight:400">bash</text><rect x="366" y="588" width="14" height="14" rx="3" style="fill:var(--gate);fill-opacity:0.13;stroke:var(--gate);stroke-width:1.6;stroke-dasharray:5 4"/><text x="386" y="599" text-anchor="start" style="fill:var(--ink-3);font-size:11px;font-weight:400">wait</text><rect x="478" y="588" width="14" height="14" rx="3" style="fill:var(--bad);fill-opacity:0.13;stroke:var(--bad);stroke-width:1.6"/><text x="498" y="599" text-anchor="start" style="fill:var(--ink-3);font-size:11px;font-weight:400">cancel</text></svg><figcaption>fix-across-repos: the 10 nodes this run goes through</figcaption></figure></div><div class="plain"><div><b>In plain words.</b> Compared with the one-repo workflow, three things moved into the YAML: the implement prompt says <i>which repos</i> and <i>which branch in each</i>, the checks node loops over both repos, and the push node pushes a branch only where there are commits. Archon does none of it for a folder project.</div></div>
+</textarea></div></div></div><div class="gwrap"><figure class="dia"><svg viewBox="0 0 820 614" role="img" aria-label="fix-across-repos: the 10 nodes this run goes through" style="width:100%;height:auto;font-family:var(--font-text);"><defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" style="fill:var(--ink-3)"/></marker></defs><rect x="145" y="20" width="200" height="44" rx="9" style="fill:var(--plan);fill-opacity:0.13;stroke:var(--plan);stroke-width:1.6"/><text x="245.0" y="39" text-anchor="middle" style="font-family:var(--font-mono);fill:var(--ink);font-size:12.5px;font-weight:700">scan</text><text x="245.0" y="55" text-anchor="middle" style="fill:var(--ink-3);font-size:10.5px;font-weight:400">AI command</text><text x="359" y="46.0" text-anchor="start" style="fill:var(--ink-2);font-size:11px;font-weight:400">step 8</text><rect x="145" y="90" width="200" height="44" rx="9" style="fill:var(--plan);fill-opacity:0.13;stroke:var(--plan);stroke-width:1.6"/><text x="245.0" y="109" text-anchor="middle" style="font-family:var(--font-mono);fill:var(--ink);font-size:12.5px;font-weight:700">plan</text><text x="245.0" y="125" text-anchor="middle" style="fill:var(--ink-3);font-size:10.5px;font-weight:400">AI prompt</text><text x="359" y="116.0" text-anchor="start" style="fill:var(--ink-2);font-size:11px;font-weight:400">step 8</text><rect x="145" y="160" width="200" height="44" rx="9" style="fill:var(--gate);fill-opacity:0.13;stroke:var(--gate);stroke-width:1.6;stroke-dasharray:5 4"/><text x="245.0" y="179" text-anchor="middle" style="font-family:var(--font-mono);fill:var(--ink);font-size:12.5px;font-weight:700">approve-plan</text><text x="245.0" y="195" text-anchor="middle" style="fill:var(--ink-3);font-size:10.5px;font-weight:400">wait</text><text x="359" y="186.0" text-anchor="start" style="fill:var(--ink-2);font-size:11px;font-weight:400">step 9</text><rect x="30" y="230" width="200" height="44" rx="9" style="fill:var(--bad);fill-opacity:0.13;stroke:var(--bad);stroke-width:1.6"/><text x="130.0" y="249" text-anchor="middle" style="font-family:var(--font-mono);fill:var(--ink);font-size:12.5px;font-weight:700">stop-plan</text><text x="130.0" y="265" text-anchor="middle" style="fill:var(--ink-3);font-size:10.5px;font-weight:400">cancel</text><rect x="260" y="230" width="200" height="44" rx="9" style="fill:var(--build);fill-opacity:0.13;stroke:var(--build);stroke-width:1.6"/><text x="360.0" y="249" text-anchor="middle" style="font-family:var(--font-mono);fill:var(--ink);font-size:12.5px;font-weight:700">implement</text><text x="360.0" y="265" text-anchor="middle" style="fill:var(--ink-3);font-size:10.5px;font-weight:400">AI loop</text><text x="474" y="256.0" text-anchor="start" style="fill:var(--ink-2);font-size:11px;font-weight:400">step 10</text><rect x="145" y="300" width="200" height="44" rx="9" style="fill:var(--ship);fill-opacity:0.13;stroke:var(--ship);stroke-width:1.6"/><text x="245.0" y="319" text-anchor="middle" style="font-family:var(--font-mono);fill:var(--ink);font-size:12.5px;font-weight:700">checks</text><text x="245.0" y="335" text-anchor="middle" style="fill:var(--ink-3);font-size:10.5px;font-weight:400">bash</text><text x="359" y="326.0" text-anchor="start" style="fill:var(--ink-2);font-size:11px;font-weight:400">step 11</text><rect x="145" y="370" width="200" height="44" rx="9" style="fill:var(--plan);fill-opacity:0.13;stroke:var(--plan);stroke-width:1.6"/><text x="245.0" y="389" text-anchor="middle" style="font-family:var(--font-mono);fill:var(--ink);font-size:12.5px;font-weight:700">review</text><text x="245.0" y="405" text-anchor="middle" style="fill:var(--ink-3);font-size:10.5px;font-weight:400">AI prompt</text><text x="359" y="396.0" text-anchor="start" style="fill:var(--ink-2);font-size:11px;font-weight:400">step 11</text><rect x="145" y="440" width="200" height="44" rx="9" style="fill:var(--gate);fill-opacity:0.13;stroke:var(--gate);stroke-width:1.6;stroke-dasharray:5 4"/><text x="245.0" y="459" text-anchor="middle" style="font-family:var(--font-mono);fill:var(--ink);font-size:12.5px;font-weight:700">approve-change</text><text x="245.0" y="475" text-anchor="middle" style="fill:var(--ink-3);font-size:10.5px;font-weight:400">wait</text><text x="359" y="466.0" text-anchor="start" style="fill:var(--ink-2);font-size:11px;font-weight:400">step 13</text><rect x="30" y="510" width="200" height="44" rx="9" style="fill:var(--bad);fill-opacity:0.13;stroke:var(--bad);stroke-width:1.6"/><text x="130.0" y="529" text-anchor="middle" style="font-family:var(--font-mono);fill:var(--ink);font-size:12.5px;font-weight:700">stop-change</text><text x="130.0" y="545" text-anchor="middle" style="fill:var(--ink-3);font-size:10.5px;font-weight:400">cancel</text><rect x="260" y="510" width="200" height="44" rx="9" style="fill:var(--ship);fill-opacity:0.13;stroke:var(--ship);stroke-width:1.6"/><text x="360.0" y="529" text-anchor="middle" style="font-family:var(--font-mono);fill:var(--ink);font-size:12.5px;font-weight:700">push</text><text x="360.0" y="545" text-anchor="middle" style="fill:var(--ink-3);font-size:10.5px;font-weight:400">bash</text><text x="474" y="536.0" text-anchor="start" style="fill:var(--ink-2);font-size:11px;font-weight:400">step 13</text><path d="M245.0 64 C245.0 78, 245.0 76, 245.0 87" style="fill:none;stroke:var(--ink-3);stroke-width:1.5" marker-end="url(#ah)"/><path d="M245.0 134 C245.0 148, 245.0 146, 245.0 157" style="fill:none;stroke:var(--ink-3);stroke-width:1.5" marker-end="url(#ah)"/><path d="M245.0 204 C245.0 218, 130.0 216, 130.0 227" style="fill:none;stroke:var(--ink-3);stroke-width:1.5" marker-end="url(#ah)"/><text x="122.0" y="222" text-anchor="end" style="fill:var(--gate);font-size:10px;font-weight:600">reject</text><path d="M245.0 204 C245.0 218, 360.0 216, 360.0 227" style="fill:none;stroke:var(--ink-3);stroke-width:1.5" marker-end="url(#ah)"/><text x="368.0" y="222" text-anchor="start" style="fill:var(--gate);font-size:10px;font-weight:600">approve</text><path d="M360.0 274 C360.0 288, 245.0 286, 245.0 297" style="fill:none;stroke:var(--ink-3);stroke-width:1.5" marker-end="url(#ah)"/><path d="M245.0 344 C245.0 358, 245.0 356, 245.0 367" style="fill:none;stroke:var(--ink-3);stroke-width:1.5" marker-end="url(#ah)"/><path d="M245.0 414 C245.0 428, 245.0 426, 245.0 437" style="fill:none;stroke:var(--ink-3);stroke-width:1.5" marker-end="url(#ah)"/><path d="M245.0 484 C245.0 498, 130.0 496, 130.0 507" style="fill:none;stroke:var(--ink-3);stroke-width:1.5" marker-end="url(#ah)"/><text x="122.0" y="502" text-anchor="end" style="fill:var(--gate);font-size:10px;font-weight:600">reject</text><path d="M245.0 484 C245.0 498, 360.0 496, 360.0 507" style="fill:none;stroke:var(--ink-3);stroke-width:1.5" marker-end="url(#ah)"/><text x="368.0" y="502" text-anchor="start" style="fill:var(--gate);font-size:10px;font-weight:600">approve</text><rect x="30" y="588" width="14" height="14" rx="3" style="fill:var(--plan);fill-opacity:0.13;stroke:var(--plan);stroke-width:1.6"/><text x="50" y="599" text-anchor="start" style="fill:var(--ink-3);font-size:11px;font-weight:400">AI prompt</text><rect x="142" y="588" width="14" height="14" rx="3" style="fill:var(--build);fill-opacity:0.13;stroke:var(--build);stroke-width:1.6"/><text x="162" y="599" text-anchor="start" style="fill:var(--ink-3);font-size:11px;font-weight:400">AI loop</text><rect x="254" y="588" width="14" height="14" rx="3" style="fill:var(--ship);fill-opacity:0.13;stroke:var(--ship);stroke-width:1.6"/><text x="274" y="599" text-anchor="start" style="fill:var(--ink-3);font-size:11px;font-weight:400">bash</text><rect x="366" y="588" width="14" height="14" rx="3" style="fill:var(--gate);fill-opacity:0.13;stroke:var(--gate);stroke-width:1.6;stroke-dasharray:5 4"/><text x="386" y="599" text-anchor="start" style="fill:var(--ink-3);font-size:11px;font-weight:400">wait</text><rect x="478" y="588" width="14" height="14" rx="3" style="fill:var(--bad);fill-opacity:0.13;stroke:var(--bad);stroke-width:1.6"/><text x="498" y="599" text-anchor="start" style="fill:var(--ink-3);font-size:11px;font-weight:400">cancel</text></svg><figcaption>fix-across-repos: the 10 nodes this run goes through</figcaption></figure></div><div class="plain"><div><b>In plain words.</b> Compared with the one-repo workflow, three things moved into the YAML: the implement prompt says <i>which repos</i> and <i>which branch in each</i>, the checks node loops over both repos, and the push node pushes a branch only where there are commits. Archon does none of it for a folder project.</div></div>
 </section>
-<section class="step" id="s03" data-step="3" data-phase="Set up" style="--c:var(--setup)">
-  <div class="step__head"><span class="step__n">3</span><div><span class="chip">before</span><h2>Before the run: it builds, and the bug shows</h2><p class="step__why">The check passes on main, and the jar gives the numbers Ravi complained about.</p></div><span class="who">Kiran · 2 min</span></div>
+<section class="step" id="s06" data-step="6" data-phase="Set up" style="--c:var(--setup)">
+  <div class="step__head"><span class="step__n">6</span><div><span class="chip">before</span><h2>Before the run: it builds, and the bug shows</h2><p class="step__why">The check passes on main, and the jar gives the numbers Ravi complained about.</p></div><span class="who">Kiran · 2 min</span></div>
 <div class="io"><div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">Git Bash</span><span class="os-mac">Git Bash</span></span></div><pre class="os-win">./scripts/verify.sh
 cd priorauth-api; mvn -q -DskipTests package
 java -jar target/priorauth-api-1.2.0.jar
@@ -539,17 +681,17 @@ PA-10231  received 2026-10-01  63 bd OVER 5
 PA-10244  received 2026-10-06  60 bd OVER 5
 PA-10263  received 2026-10-09  57 bd OVER 5</pre></div></div><div class="note">1 January 2027 lies inside all three requests' periods, so with New Year's Day counted as a working day every age is one too high. The 2026 holiday file is the only one the library ships.</div>
 </section>
-<section class="step" id="s04" data-step="4" data-phase="Set up" style="--c:var(--setup)">
-  <div class="step__head"><span class="step__n">4</span><div><span class="chip">free check</span><h2>Dry-run it: not with --folder</h2><p class="step__why">A dry run walks the graph with stub outputs, no model and no cost. For a folder project it has to run without the flag.</p></div><span class="who">Kiran · 1 min</span></div>
+<section class="step" id="s07" data-step="7" data-phase="Set up" style="--c:var(--setup)">
+  <div class="step__head"><span class="step__n">7</span><div><span class="chip">free check</span><h2>Dry-run it: not with --folder</h2><p class="step__why">A dry run walks the graph with stub outputs, no model and no cost. For a folder project it has to run without the flag.</p></div><span class="who">Kiran · 1 min</span></div>
 <div class="io"><div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">any shell</span><span class="os-mac">any shell</span></span></div><pre class="os-win">archon workflow run fix-across-repos --folder --dry-run --default-stubs &quot;Fix the bug in docs-in/bug-report.md&quot;</pre><pre class="os-mac">archon workflow run fix-across-repos --folder --dry-run --default-stubs &quot;Fix the bug in docs-in/bug-report.md&quot;</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Archon returns <span class="tag">real</span></div><pre>Error: --dry-run cannot be combined with --folder.</pre></div></div><div class="io"><div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">any shell</span><span class="os-mac">any shell</span></span></div><pre class="os-win">archon workflow run fix-across-repos --dry-run --default-stubs &quot;Fix the bug in docs-in/bug-report.md&quot;</pre><pre class="os-mac">archon workflow run fix-across-repos --dry-run --default-stubs &quot;Fix the bug in docs-in/bug-report.md&quot;</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Archon returns <span class="tag">real · 1.2s</span></div><pre>…
 PAUSED    approve-plan (wait) — durable wait
 …
 Simulation outcome: paused
 Authored outcome: undeclared</pre></div></div><div class="note">Without <code>--folder</code> the dry run treats the workspace (a git repo) as an ordinary repo, which is fine for checking the graph: a dry run registers nothing and creates no run. <code>archon project list</code> was the same before and after.</div>
 </section>
-<div class="phase" style="--c:var(--plan)"><i></i>Plan<span>steps 5–6 · start from the root, approve the plan</span></div>
-<section class="step" id="s05" data-step="5" data-phase="Plan" style="--c:var(--plan)">
-  <div class="step__head"><span class="step__n">5</span><div><span class="chip">start</span><h2>Start the run from the workspace root</h2><p class="step__why">The first run with --folder registers the folder project; Archon then works in place, with no worktree.</p></div><span class="who">Kiran · scan 1m 16s · $0.53 · plan 1m 05s · $0.55</span></div>
+<div class="phase" style="--c:var(--plan)"><i></i>Plan<span>steps 8–9 · start from the root, approve the plan</span></div>
+<section class="step" id="s08" data-step="8" data-phase="Plan" style="--c:var(--plan)">
+  <div class="step__head"><span class="step__n">8</span><div><span class="chip">start</span><h2>Start the run from the workspace root</h2><p class="step__why">The first run with --folder registers the folder project; Archon then works in place, with no worktree.</p></div><span class="who">Kiran · scan 1m 16s · $0.53 · plan 1m 05s · $0.55</span></div>
 <div class="io"><div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">any shell</span><span class="os-mac">any shell</span></span></div><pre class="os-win">archon workflow run fix-across-repos --folder --detach &quot;Fix the bug in docs-in/bug-report.md (Ravi, 17 Oct): New Year&#x27;s Day counted as a working day&quot;</pre><pre class="os-mac">archon workflow run fix-across-repos --folder --detach &quot;Fix the bug in docs-in/bug-report.md (Ravi, 17 Oct): New Year&#x27;s Day counted as a working day&quot;</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Archon returns <span class="tag">real</span></div><pre>Discovery: root=C:\work\archon-multirepo\priorauth-workspace workflows=26 bundled=25 global=0 project=1 installed=0
 Registered folder project &quot;priorauth-workspace&quot; (C:\work\archon-multirepo\priorauth-workspace)
 Started &#x27;fix-across-repos&#x27; in the background.
@@ -825,8 +967,8 @@ API serves the corrected age. Recommended: add the two failing tests first and r
   either. It is out of scope.
 </textarea></div></div></div><div class="note"><code>_folder/priorauth-workspace</code>: the run's transcript and artifacts live under the folder project in <code>~/.archon/workspaces/</code>, not under either repo. The scan read both repos from the root, found the cause in the library (<code>HolidayCalendar</code> loads only one year's file) and saw that the API needs only the new version.</div>
 </section>
-<section class="step" id="s06" data-step="6" data-phase="Plan" style="--c:var(--plan)">
-  <div class="step__head"><span class="step__n">6</span><div><span class="chip">wait 1</span><h2>Approve the plan, with a correction</h2><p class="step__why">The plan is right about the code and the versions, and wrong about two of the expected numbers.</p></div><span class="who">Meena · 23s to answer</span></div>
+<section class="step" id="s09" data-step="9" data-phase="Plan" style="--c:var(--plan)">
+  <div class="step__head"><span class="step__n">9</span><div><span class="chip">wait 1</span><h2>Approve the plan, with a correction</h2><p class="step__why">The plan is right about the code and the versions, and wrong about two of the expected numbers.</p></div><span class="who">Meena · 23s to answer</span></div>
 <div class="io"><div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">any shell</span><span class="os-mac">any shell</span></span></div><pre class="os-win">archon workflow wait 5138e1be… --json</pre><pre class="os-mac">archon workflow wait 5138e1be… --json</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">The run is waiting <span class="tag">real · approve-plan</span></div><pre>Approve the plan before any code is written.
 
 I&#x27;ve written `plan.md`; nothing in either repo or the workspace has changed yet. The plan is to fix priorauth-aging, which has the bug, and have priorauth-api move to the fixed version. `HolidayCalendar.forTenant(String)` keeps its signature but will return the holidays from every year&#x27;s file for the tenant, found with the pattern `data/holidays-&lt;tenant&gt;-????.json`. The four-character `????` stops a short tenant id like `TX` from matching another tenant&#x27;s files such as `TX-01`. The plan also adds the TX-01 2027 holiday file from `docs-in`. priorauth-api&#x27;s code doesn&#x27;t change; only its pom is updated and one test is added. Order: priorauth-aging changes and is released first (tag v1.0.1), then priorauth-api (tag v1.2.1). Pushing and opening the PRs is left to the workflow&#x27;s last node. One open question for the team: when a year&#x27;s holiday file is missing, the code still quietly uses no holidays, so this will happen again in January 2028. The plan leaves that alone because nobody asked for it. Not checked: remotes, open PRs, other users of the library outside these two repos, whether the nightly report uses the same holiday list, and whether the holiday files are found when the API runs as a packaged jar (`./scripts/verify.sh` doesn&#x27;t test that).
@@ -835,9 +977,9 @@ Branch: fix/holidays-across-years (in both repos, from main)
 Versions: priorauth-aging 1.0.0 -&gt; 1.0.1 (patch: the fix keeps its API). priorauth-api 1.2.0 -&gt; 1.2.1 (patch: depends on priorauth-aging 1.0.1). Current tags are v1.0.0 and v1.2.0, matching the poms.
 Tests: priorauth-aging, new `HolidayCalendarTest`: TX-01 returns the holidays from both years, including 2026-01-01, 2026-10-12 and 2027-01-01 (22 dates; fails on today&#x27;s code); an unknown tenant returns no holidays; 1 Oct 2026 to 5 Jan 2027 using the real calendar is 62 business days (63 today). priorauth-api, new controller test `newYearsDayIsNotABusinessDay`: asOf=2027-01-05 gives PA-10231 62 bd (&quot;62 bd OVER 5&quot;), PA-10244 60 bd and PA-10263 57 bd. These figures are my hand count and I have not run them; if `./scripts/verify.sh` disagrees, re-count before changing a number. The existing test for 13 Oct 2026 (7 and 4 business days) stays as it is and checks that the 2026 holidays still load. `./scripts/verify.sh` installs priorauth-aging 1.0.1 and runs its tests, then tests priorauth-api against that version.</pre></div></div><div class="gate"><div><b>Approved with a correction: Meena Iyer</b><p>Approved - Meena Iyer. One correction: 1 Jan 2027 falls inside all three requests&#x27; periods, so all three drop by one on 2027-01-05: PA-10231 62, PA-10244 59, PA-10263 56 (today 63, 60, 57; Ravi says the others are off too). Leave the missing-2028-file behaviour as it is; I&#x27;ll raise it separately. Kiran checks the packaged jar by hand before we push.</p><p class="by">archon workflow approve &lt;run&gt; "…"</p></div></div><div class="plain"><div><b>In plain words.</b> New Year's Day is in every one of the three periods, so all three ages drop by one: 62, 59, 56. The plan said 62, 60, 57. In this workflow a reject cancels the run, so Meena approves and puts the correction in the approval text, which the implement prompt reads as <code>$approve-plan.output.text</code>.</div></div>
 </section>
-<div class="phase" style="--c:var(--build)"><i></i>Build<span>steps 7–8 · fix in both repos, check, review</span></div>
-<section class="step" id="s07" data-step="7" data-phase="Build" style="--c:var(--build)">
-  <div class="step__head"><span class="step__n">7</span><div><span class="chip">in place</span><h2>Implement in both repos, in the live checkouts</h2><p class="step__why">The agent branches and commits in each repo itself; the loop ends when ./scripts/verify.sh passes.</p></div><span class="who">Archon · implement 2m 10s · $0.53</span></div>
+<div class="phase" style="--c:var(--build)"><i></i>Build<span>steps 10–11 · fix in both repos, check, review</span></div>
+<section class="step" id="s10" data-step="10" data-phase="Build" style="--c:var(--build)">
+  <div class="step__head"><span class="step__n">10</span><div><span class="chip">in place</span><h2>Implement in both repos, in the live checkouts</h2><p class="step__why">The agent branches and commits in each repo itself; the loop ends when ./scripts/verify.sh passes.</p></div><span class="who">Archon · implement 2m 10s · $0.53</span></div>
 <div class="box claude"><div class="box__bar">Archon returns, after the approval <span class="tag">real</span></div><pre>[scan] Skipped (prior_success)
 [plan] Skipped (prior_success)
 [approve-plan] Completed (23.2s)
@@ -1102,8 +1244,8 @@ index 898e73b..7399996 100644
          mvc.perform(get(&quot;/requests/pending&quot;).param(&quot;asOf&quot;, &quot;2026-09-30&quot;))
 </textarea></div></div></div><div class="gwrap"><table class="kv"><thead><tr><th>Repo</th><th>Branch</th><th>Commit</th><th>Change</th></tr></thead><tbody><tr><td>priorauth-aging</td><td><code>fix/holidays-across-years</code></td><td><code>074d524</code></td><td>1.0.0 → 1.0.1: every year's holiday file is loaded; the 2027 file added; 3 tests</td></tr><tr><td>priorauth-api</td><td><code>fix/holidays-across-years</code></td><td><code>8d65a37</code></td><td>1.2.0 → 1.2.1: depends on aging 1.0.1; one test for 2027-01-05; no code change</td></tr></tbody></table></div><div class="note">Archon's own check passed: the loop's <code>until_bash: ./scripts/verify.sh</code> ran in Archon's shell. Inside the agent's session, Git Bash's <code>mvn</code> failed to start (<code>ClassNotFoundException: …classworlds.launcher.Launcher</code>), so the agent ran <code>scripts\verify.cmd</code> for its own check, as CLAUDE.md allows on Windows, and said so. Nothing ran in a worktree: these are Kiran's own clones, switched to the new branch.</div>
 </section>
-<section class="step" id="s08" data-step="8" data-phase="Build" style="--c:var(--review)">
-  <div class="step__head"><span class="step__n">8</span><div><span class="chip">checks + review</span><h2>Checks, then a second reader</h2><p class="step__why">The checks node runs the workspace check and shows each repo's branch; the review node reads both diffs.</p></div><span class="who">Archon · checks 17s · review 1m 06s · $0.54</span></div>
+<section class="step" id="s11" data-step="11" data-phase="Build" style="--c:var(--review)">
+  <div class="step__head"><span class="step__n">11</span><div><span class="chip">checks + review</span><h2>Checks, then a second reader</h2><p class="step__why">The checks node runs the workspace check and shows each repo's branch; the review node reads both diffs.</p></div><span class="who">Archon · checks 17s · review 1m 06s · $0.54</span></div>
 <div class="box claude"><div class="box__bar">Archon returns <span class="tag">real · the checks node</span></div><pre>… (4 lines of the Spring Boot test log)
 
 … (6 lines of the Spring Boot test log)
@@ -1227,9 +1369,9 @@ The workspace folder is clean. Nothing was committed there.
   - remotes, open PRs and other consumers of priorauth-aging
 </textarea></div></div></div><div class="note">The reviewer recounted the ages on its own and agreed with Meena's numbers. What it did not check: the packaged jar, which is where the new <code>classpath*:</code> lookup could behave differently from the tests.</div>
 </section>
-<div class="phase" style="--c:var(--ship)"><i></i>Ship<span>steps 9–10 · check by hand, push a branch per repo</span></div>
-<section class="step" id="s09" data-step="9" data-phase="Ship" style="--c:var(--ship)">
-  <div class="step__head"><span class="step__n">9</span><div><span class="chip">by hand</span><h2>Check the packaged jar by hand</h2><p class="step__why">Meena asked for it at the plan: the jar must find both years' files inside the library jar.</p></div><span class="who">Kiran · 1 min</span></div>
+<div class="phase" style="--c:var(--ship)"><i></i>Ship<span>steps 12–13 · check by hand, push a branch per repo</span></div>
+<section class="step" id="s12" data-step="12" data-phase="Ship" style="--c:var(--ship)">
+  <div class="step__head"><span class="step__n">12</span><div><span class="chip">by hand</span><h2>Check the packaged jar by hand</h2><p class="step__why">Meena asked for it at the plan: the jar must find both years' files inside the library jar.</p></div><span class="who">Kiran · 1 min</span></div>
 <div class="io"><div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">Git Bash</span><span class="os-mac">Git Bash</span></span></div><pre class="os-win">cd priorauth-api; mvn -q -DskipTests package
 java -jar target/priorauth-api-1.2.1.jar
 curl &quot;localhost:8080/requests/pending?asOf=2027-01-05&quot;
@@ -1248,8 +1390,8 @@ PA-10231  received 2026-10-01  7 bd OVER 5
 PA-10244  received 2026-10-06  4 bd
 PA-10263  received 2026-10-09  1 bd</pre></div></div><div class="note">62, 59, 56 on 5 Jan 2027 (63, 60, 57 before), and still 7, 4, 1 on 13 Oct 2026: the 2026 holidays still load. The same three numbers as the AI-DLC course's answer for 13 Oct.</div>
 </section>
-<section class="step" id="s10" data-step="10" data-phase="Ship" style="--c:var(--ship)">
-  <div class="step__head"><span class="step__n">10</span><div><span class="chip">wait 2</span><h2>Approve; one branch pushed per repo</h2><p class="step__why">The push node pushes a branch only where there are commits, library first.</p></div><span class="who">Meena · push 1s</span></div>
+<section class="step" id="s13" data-step="13" data-phase="Ship" style="--c:var(--ship)">
+  <div class="step__head"><span class="step__n">13</span><div><span class="chip">wait 2</span><h2>Approve; one branch pushed per repo</h2><p class="step__why">The push node pushes a branch only where there are commits, library first.</p></div><span class="who">Meena · push 1s</span></div>
 <div class="gate"><div><b>Approved: Meena Iyer</b><p>Approved - Meena Iyer. Kiran ran the 1.2.1 jar: 2027-01-05 gives 62/59/56, 2026-10-13 still 7/4/1. Push both; aging merges first.</p><p class="by">archon workflow approve &lt;run&gt; "…"</p></div></div><div class="box claude"><div class="box__bar">Archon returns <span class="tag">real</span></div><pre>branch &#x27;fix/holidays-across-years&#x27; set up to track &#x27;origin/fix/holidays-across-years&#x27;.
 To C:\work\archon-multirepo\remotes\priorauth-aging.git
  * [new branch]      fix/holidays-across-years -&gt; fix/holidays-across-years
@@ -1263,11 +1405,11 @@ Workflow completed successfully.
   Usage (recorded totals; completeness unknown):
     Cost: $2.1466047
     Input tokens: 1180203
-    Output tokens: 29527</pre></div><div class="note">Two pull requests to open, one per repo, and in order: priorauth-aging's first, because priorauth-api 1.2.1 needs aging 1.0.1 to be published. No <code>gh</code> login here, so the merge in step 12 stands in for both.</div>
+    Output tokens: 29527</pre></div><div class="note">Two pull requests to open, one per repo, and in order: priorauth-aging's first, because priorauth-api 1.2.1 needs aging 1.0.1 to be published. No <code>gh</code> login here, so the merge in step 15 stands in for both.</div>
 </section>
-<div class="phase" style="--c:var(--setup)"><i></i>After<span>steps 11–13 · the record, the merges, AI-DLC</span></div>
-<section class="step" id="s11" data-step="11" data-phase="After" style="--c:var(--setup)">
-  <div class="step__head"><span class="step__n">11</span><div><span class="chip">the record</span><h2>What a folder project leaves behind</h2><p class="step__why">No worktree, no branch of Archon's: a run row, a transcript, artifacts and the captured workflow source.</p></div><span class="who">Kiran · 2 min</span></div>
+<div class="phase" style="--c:var(--setup)"><i></i>After<span>steps 14–16 · the record, the merges, AI-DLC</span></div>
+<section class="step" id="s14" data-step="14" data-phase="After" style="--c:var(--setup)">
+  <div class="step__head"><span class="step__n">14</span><div><span class="chip">the record</span><h2>What a folder project leaves behind</h2><p class="step__why">No worktree, no branch of Archon's: a run row, a transcript, artifacts and the captured workflow source.</p></div><span class="who">Kiran · 2 min</span></div>
 <div class="io"><div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">any shell</span><span class="os-mac">any shell</span></span></div><pre class="os-win">archon workflow get 5138e1be…
 archon project list
 archon isolation list
@@ -1321,8 +1463,8 @@ _folder/priorauth-workspace/workflow-source/
 _folder/priorauth-workspace/workflow-source/runs/
 _folder/priorauth-workspace/workflow-source/runs/5138e1be8e01d39ed631d192df3bb2c1/</pre></div><div class="note"><code>workflow get</code> calls the workspace itself the worktree, marked <i>(live)</i>. <code>isolation list</code> has nothing to show, in odd words. <code>doctor</code> names the two repos the folder holds.</div>
 </section>
-<section class="step" id="s12" data-step="12" data-phase="After" style="--c:var(--setup)">
-  <div class="step__head"><span class="step__n">12</span><div><span class="chip">merge</span><h2>Merge in release order; tidy up by hand</h2><p class="step__why">Meena merges the library first and tags it, then the API. Archon has nothing to complete: Kiran deletes his own branches.</p></div><span class="who">Meena, Kiran · 3 min</span></div>
+<section class="step" id="s15" data-step="15" data-phase="After" style="--c:var(--setup)">
+  <div class="step__head"><span class="step__n">15</span><div><span class="chip">merge</span><h2>Merge in release order; tidy up by hand</h2><p class="step__why">Meena merges the library first and tags it, then the API. Archon has nothing to complete: Kiran deletes his own branches.</p></div><span class="who">Meena, Kiran · 3 min</span></div>
 <div class="box claude"><div class="box__bar">git: Meena's merges <span class="tag">real</span></div><pre>== priorauth-aging
 *   317874b Merge fix/holidays-across-years: holidays across years (Ravi, 17 Oct)
 |\  
@@ -1355,23 +1497,23 @@ Deleted branch fix/holidays-across-years (was 074d524).
 Deleted branch fix/holidays-across-years (was 8d65a37).
 * main</pre></div></div><div class="note">In the one-repo run <code>archon complete</code> removed the worktree and the local branch. Here there is no isolation environment, so it finds nothing: the branches were the agent's and Kiran's, and so is the tidy-up.</div>
 </section>
-<section class="step" id="s13" data-step="13" data-phase="After" style="--c:var(--setup)">
-  <div class="step__head"><span class="step__n">13</span><div><span class="chip">compare</span><h2>The same bug in AI-DLC and in Archon</h2><p class="step__why">Both runs started from the same two repos at the same versions, with the same bug report.</p></div><span class="who">read · 3 min</span></div>
+<section class="step" id="s16" data-step="16" data-phase="After" style="--c:var(--setup)">
+  <div class="step__head"><span class="step__n">16</span><div><span class="chip">compare</span><h2>The same bug in AI-DLC and in Archon</h2><p class="step__why">Both runs started from the same two repos at the same versions, with the same bug report.</p></div><span class="who">read · 3 min</span></div>
 <div class="gwrap"><table><thead><tr><th></th><th>AI-DLC (28 Oct 2026)</th><th>Archon folder project (this run)</th></tr></thead><tbody><tr><td>Where the process lives</td><td>the workspace's <code>aidlc/</code> and the plugin's stages</td><td>the workspace's <code>.archon/workflows/</code>, written by the team</td></tr><tr><td>Git in each repo</td><td>the agent: a branch <code>request-age/new-year-holiday</code> in both</td><td>the agent: a branch <code>fix/holidays-across-years</code> in both; the push node pushed them</td></tr><tr><td>People's approvals</td><td>Reverse Engineering (Kiran), Code Generation and Build and Test (Meena)</td><td>the plan, with a correction, and the change (Meena)</td></tr><tr><td>The library's fix</td><td><code>forTenant</code> got the period as arguments: <b>2.0.0</b> (breaking)</td><td><code>forTenant</code> kept its signature: <b>1.0.1</b> (patch)</td></tr><tr><td>The API's change</td><td>1.2.1: the controller passes the period; depends on aging 2.0.0</td><td>1.2.1: depends on aging 1.0.1; no code change</td></tr><tr><td>Record</td><td><code>aidlc/</code>, committed with the workspace</td><td>artifacts + transcript under <code>~/.archon/workspaces/_folder/</code>, not committed</td></tr><tr><td>Result on 2027-01-05</td><td>62 / 59 / 56 (its API test)</td><td>62 / 59 / 56 (its API test, and the jar by hand)</td></tr></tbody></table></div><div class="plain"><div><b>In plain words.</b> Two correct fixes of different size: the graph showed AI-DLC's planner a caller in the other repo and it changed the method; Archon's planner kept the method and changed what it loads. AI-DLC's run: <a href="../../ai-dlc-execution/aidlc-hello-world-java/aidlc-graphify.html#gx-two-repos">Two repos, one graph</a>.</div></div>
 </section>
 <section class="card" id="yourself">
   <h2>Run it yourself</h2>
 <ol>
 <li>Set up Archon as on the <a href="../archon-workspace-setup.html">setup page</a> (steps 1–4), with JDK 21, Maven and Git Bash.</li>
-<li>Build the two repos from the starter at <code>v1.1.0</code>: move <code>src/main/java/…/aging/</code>, its tests and the holiday files to a new Maven library <code>priorauth-aging</code> 1.0.0, and make priorauth-api 1.2.0 depend on it (the course's <code>tools/setup_multirepo_run.py</code> does exactly this).</li>
-<li>Make a workspace folder with the team's files from step 2, clone both repos inside it, and run <code>archon workflow run fix-across-repos --folder …</code> from the workspace root.</li>
+<li>Take the workspace from the course repo: <code>archon-hello-world-java/multirepo-workspace/</code> holds the team's files and both repos as they are after the run (library 1.0.1, API 1.2.1). To start where the run started, do steps 1–4 instead: they build the two repos from the public starter at <code>v1.1.0</code> (the course's <code>tools/setup_multirepo_run.py</code> runs exactly those commands).</li>
+<li>Make each folder a git repo with a remote (steps 2–4), and run <code>archon workflow run fix-across-repos --folder …</code> from the workspace root.</li>
 <li>Answer the two waits. Check the plan's numbers: the course's plan miscounted two of them.</li></ol>
 <div class="note">Your run id, times, cost and commit hashes will differ. The course's transcript is in <code>archon-hello-world-java/multirepo-run/logs/</code>, its artifacts in <code>multirepo-run/artifacts/</code>, each repo's diff in <code>multirepo-run/git/</code>.</div>
 </section>
 <section class="card" id="real">
   <h2>What is real here</h2>
-<p>Everything in the Archon and git boxes is real output from the course's run on Windows (4 Nov 2026, Archon 0.13.2, Claude Code on a claude.ai plan), captured by <code>tools/archon_step.py</code> and copied by <code>tools/capture_multirepo_run.py</code>. Local paths are mapped to <code>C:\Users\you</code> and <code>C:\work</code>; long Spring Boot logs are folded.</p>
-<p>Not run: opening the two pull requests (no <code>gh</code> login; the repos' remotes are local bare repos standing in for GitHub). The merges are plain <code>git merge --no-ff</code>, standing in for merging the PRs. The clone URLs in step 1 are illustrative. The people are fictional; their answers were typed by the course author. The reported cost is Archon's API-price equivalent; the run used a claude.ai plan.</p>
+<p>Everything in the Archon and git boxes is real output, setup included, from the course's run on Windows (4 Nov 2026, Archon 0.13.2, Claude Code on a claude.ai plan), captured by <code>tools/archon_step.py</code> and copied by <code>tools/capture_multirepo_run.py</code>. Local paths are mapped to <code>C:\Users\you</code> and <code>C:\work</code>; long Spring Boot logs are folded.</p>
+<p>Not run: opening the two pull requests (no <code>gh</code> login; the repos' remotes are local bare repos standing in for GitHub). The merges are plain <code>git merge --no-ff</code>, standing in for merging the PRs. The people are fictional; their answers were typed by the course author. The reported cost is Archon's API-price equivalent; the run used a claude.ai plan.</p>
 </section>
 
 </main>

@@ -4,8 +4,10 @@
   java-run/logs/<run-id>.jsonl            each run's transcript, paths mapped
   java-run/artifacts/<run-id>/            the files each run wrote to $ARTIFACTS_DIR (engine-internal .archon/ left out)
   java-run/nodes.json                     per run, per node: kind of event, duration, tokens, cost (from the transcripts)
-  java-run/git/                           the branch graph, the diff main..request-age/age-api, its stat
-  java-workspace/                         the repo as it is at the end of the branch (git archive, no .git)
+  java-run/git/                           priorauth-api's graph, the merged branch's log, diff, stat, file list and
+                                          per-commit patches (base = the merge's first parent, branch = its second)
+  java-workspace/                         the team workspace at its main, with priorauth-api/ inside it at its main
+                                          after the merge (git archive of each, no .git): real, buildable files
 
 Usage: py -3.12 tools/capture_java_run.py
 """
@@ -24,9 +26,10 @@ ROOT = Path(__file__).resolve().parent.parent
 DEST = ROOT / "archon-hello-world-java"
 RUNDIR = DEST / "java-run"
 WS = DEST / "java-workspace"
-ORIGIN = Path(r"D:\tmp\archon-java\origin.git")
-PROJ = Path.home() / ".archon" / "workspaces" / "_local" / "priorauth-api"
-BRANCH = "request-age/age-api"
+REMOTES = Path(r"D:\tmp\archon-java\remotes")
+ORIGIN = REMOTES / "priorauth-api.git"
+PROJ = Path.home() / ".archon" / "workspaces" / "_folder" / "java-workspace"
+BASE, BRANCH = "main^1", "main^2"  # Meena's --no-ff merge: main before it, and the branch it merged
 
 
 def git(*args):
@@ -89,20 +92,29 @@ def main():
     g = RUNDIR / "git"
     g.mkdir()
     (g / "graph.txt").write_text(git("log", "--graph", "--oneline", "--decorate", "--all"), encoding="utf-8")
-    (g / "branch-log.txt").write_text(git("log", "--format=%h %an %ad%n    %s", "--date=format:%a %d %b %H:%M", f"main^1..{BRANCH}"), encoding="utf-8")
-    (g / "diff.patch").write_text(git("diff", f"main^1..{BRANCH}"), encoding="utf-8")
-    (g / "diffstat.txt").write_text(git("diff", "--stat=100", f"main^1..{BRANCH}"), encoding="utf-8")
+    (g / "branch-log.txt").write_text(git("log", "--format=%h %an %ad%n    %s", "--date=format:%a %d %b %H:%M", f"{BASE}..{BRANCH}"), encoding="utf-8")
+    (g / "diff.patch").write_text(git("diff", f"{BASE}..{BRANCH}"), encoding="utf-8")
+    (g / "diffstat.txt").write_text(git("diff", "--stat=100", f"{BASE}..{BRANCH}"), encoding="utf-8")
     (g / "files.txt").write_text(git("ls-tree", "-r", "--name-only", BRANCH), encoding="utf-8")
-    for c in git("rev-list", "--reverse", f"main^1..{BRANCH}").split():
+    for c in git("rev-list", "--reverse", f"{BASE}..{BRANCH}").split():
         (g / f"commit-{c[:7]}.patch").write_text(git("show", "--stat=100", "--patch", c), encoding="utf-8")
 
-    if WS.exists():
-        shutil.rmtree(WS)
-    WS.mkdir()
-    tar = subprocess.run(["git", "-C", str(ORIGIN), "archive", "--format=tar", BRANCH], capture_output=True, check=True).stdout
-    with tarfile.open(fileobj=io.BytesIO(tar)) as t:
-        t.extractall(WS, filter="data")
-    print("java-workspace:", sum(1 for p in WS.rglob("*") if p.is_file()), "files")
+    (RUNDIR / "storage.txt").write_text(
+        "\n".join(str(p.relative_to(PROJ.parent.parent)).replace("\\", "/") + ("/" if p.is_dir() else "")
+                  for p in sorted(PROJ.rglob("*")) if len(p.relative_to(PROJ).parts) <= 3) + "\n", encoding="utf-8")
+    archive(REMOTES / "java-workspace.git", WS, {"priorauth-api": ORIGIN})
+
+
+def archive(workspace_remote, dest, repos):
+    """The workspace at its main, each code repo at its main inside it (plain files, no .git)."""
+    if dest.exists():
+        shutil.rmtree(dest)
+    for remote, target in [(workspace_remote, dest)] + [(r, dest / name) for name, r in repos.items()]:
+        target.mkdir(parents=True)
+        tar = subprocess.run(["git", "-C", str(remote), "archive", "--format=tar", "main"], capture_output=True, check=True).stdout
+        with tarfile.open(fileobj=io.BytesIO(tar)) as t:
+            t.extractall(target, filter="data")
+    print(dest.name + ":", sum(1 for p in dest.rglob("*") if p.is_file()), "files")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,15 @@
+_folder/java-workspace/artifacts/
+_folder/java-workspace/artifacts/runs/
+_folder/java-workspace/artifacts/runs/0d14ca47-f987-4952-a4d0-d5762506f97a/
+_folder/java-workspace/artifacts/runs/a377c8e0-015b-4954-80e3-26b928885c5e/
+_folder/java-workspace/artifacts/runs/d9d9f6523154ac4773648b9a08d84989/
+_folder/java-workspace/logs/
+_folder/java-workspace/logs/0d14ca47-f987-4952-a4d0-d5762506f97a.jsonl
+_folder/java-workspace/logs/a377c8e0-015b-4954-80e3-26b928885c5e.jsonl
+_folder/java-workspace/logs/d9d9f6523154ac4773648b9a08d84989.jsonl
+_folder/java-workspace/state/
+_folder/java-workspace/workflow-source/
+_folder/java-workspace/workflow-source/runs/
+_folder/java-workspace/workflow-source/runs/0d14ca47-f987-4952-a4d0-d5762506f97a/
+_folder/java-workspace/workflow-source/runs/a377c8e0-015b-4954-80e3-26b928885c5e/
+_folder/java-workspace/workflow-source/runs/d9d9f6523154ac4773648b9a08d84989/

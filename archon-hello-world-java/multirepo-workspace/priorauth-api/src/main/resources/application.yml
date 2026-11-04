@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: priorauth-api
+server:
+  port: 8080
+priorauth:
+  aging:
+    threshold-days: 5   # FR2: flag a request after this many business days; tenants may override per environment

@@ -1,6 +1,6 @@
 """Capture the real Archon CLI output the introduction and setup pages quote (no Claude, seconds).
 
-Needs Archon installed (~/.archon/bin/archon.exe) and the run repo from setup_java_run.py (D:\\tmp\\archon-java).
+Needs Archon installed (~/.archon/bin/archon.exe) and the workspace from setup_java_run.py (D:\\tmp\\archon-java\\java-workspace).
 Writes tools/data/cli/cli.json ({label: {cmd, exit, out}}), inventory.json (every file under ~/.archon, with sizes),
 and bundled/ (the sdlc pack's YAML at the installed release's tag, read from a shallow clone of the Archon repo).
 
@@ -18,7 +18,7 @@ from pagekit import scrub, strip_ansi  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "tools" / "data" / "cli"
-REPO = Path(r"D:\tmp\archon-java\priorauth-api")
+REPO = Path(r"D:\tmp\archon-java\java-workspace")  # the team workspace (a folder project), priorauth-api inside it
 HOME = Path.home() / ".archon"
 
 CMDS = [

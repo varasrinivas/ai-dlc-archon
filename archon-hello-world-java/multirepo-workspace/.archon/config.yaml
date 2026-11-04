@@ -1,0 +1,2 @@
+# Archon settings for this workspace (committed). It is a folder project: no worktree settings apply.
+assistant: claude          # workflows use Claude Code unless a workflow or node says otherwise

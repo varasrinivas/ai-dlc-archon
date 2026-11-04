@@ -5,27 +5,29 @@
 <text x="30" y="66" font-size="12.5" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">Three questions a beginner asks: where does everything live, how does one run flow, and who decides what. Analogy throughout: a restaurant kitchen with a recipe card for every dish.</text>
 <rect x="30" y="92" width="500" height="650" rx="16" fill="#FAFAF9" stroke="#E7E5E4" stroke-width="1"/>
 <text x="48" y="122" font-size="17" font-weight="700" fill="#5B6B7F" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">Where things live</text>
-<text x="48" y="142" font-size="11.5" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">two places: the repo the team shares, and your machine&#x27;s ~/.archon</text>
+<text x="48" y="142" font-size="11.5" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">two places: the team&#x27;s workspace with its repos, and your machine&#x27;s ~/.archon</text>
 <rect x="48" y="158" width="464" height="268" rx="12" fill="#FFFFFF" stroke="#1C1917" stroke-width="1.8"/>
-<text x="60" y="180" font-size="13" font-weight="700" fill="#1C1917" text-anchor="start" font-family="ui-monospace, Consolas, Menlo, monospace">priorauth-api/</text>
-<text x="182" y="180" font-size="11" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">the repo · committed · git clone gives it to all</text>
-<text x="60" y="198" font-size="10.5" font-weight="400" fill="#5B6B7F" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">the cookbook: it lives in the restaurant</text>
-<rect x="60" y="210" width="440" height="140" rx="8" fill="#F5F5F4" stroke="#6B6560" stroke-width="1.8"/>
-<text x="72" y="230" font-size="12" font-weight="700" fill="#1C1917" text-anchor="start" font-family="ui-monospace, Consolas, Menlo, monospace">.archon/</text>
-<text x="140" y="230" font-size="10.5" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">what Archon reads from the repo</text>
-<text x="84" y="252" font-size="11" font-weight="600" fill="#1C1917" text-anchor="start" font-family="ui-monospace, Consolas, Menlo, monospace">config.yaml</text>
-<text x="166" y="252" font-size="10" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">assistant: claude · worktree.baseBranch: main</text>
-<text x="84" y="272" font-size="11" font-weight="600" fill="#1C1917" text-anchor="start" font-family="ui-monospace, Consolas, Menlo, monospace">workflows/team/request-to-pr/</text>
-<text x="277" y="272" font-size="10" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">a pack (team) with one workflow</text>
-<text x="100" y="292" font-size="11" font-weight="600" fill="#1C1917" text-anchor="start" font-family="ui-monospace, Consolas, Menlo, monospace">request-to-pr.yaml</text>
-<text x="225" y="292" font-size="10" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">the recipe card: 15 nodes, 4 waits</text>
-<text x="100" y="312" font-size="11" font-weight="600" fill="#1C1917" text-anchor="start" font-family="ui-monospace, Consolas, Menlo, monospace">commands/scan.md, implement.md</text>
-<text x="299" y="312" font-size="10" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">long prompts, kept out of YAML</text>
-<text x="84" y="336" font-size="10" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">a repo workflow overrides a ~/.archon one, which overrides a bundled one</text>
-<rect x="60" y="360" width="440" height="56" rx="8" fill="#FFFFFF" stroke="#6B6560" stroke-width="1.8" stroke-dasharray="6 4"/>
-<text x="72" y="380" font-size="11" font-weight="600" fill="#1C1917" text-anchor="start" font-family="ui-monospace, Consolas, Menlo, monospace">CLAUDE.md · scripts/verify.sh · .gitattributes · docs-in/</text>
-<text x="72" y="396" font-size="10" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">OURS: the team&#x27;s rules, its one check, LF for verify.sh, Ravi&#x27;s request.</text>
-<text x="72" y="409" font-size="10" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">Claude Code reads CLAUDE.md in every AI node.</text>
+<text x="60" y="180" font-size="13" font-weight="700" fill="#1C1917" text-anchor="start" font-family="ui-monospace, Consolas, Menlo, monospace">java-workspace/</text>
+<text x="190" y="180" font-size="11" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">the team&#x27;s workspace · its own git repo · committed</text>
+<text x="60" y="198" font-size="10.5" font-weight="400" fill="#5B6B7F" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">the kitchen: the cookbook lives here; a folder project</text>
+<rect x="60" y="208" width="440" height="104" rx="8" fill="#F5F5F4" stroke="#6B6560" stroke-width="1.8"/>
+<text x="72" y="226" font-size="12" font-weight="700" fill="#1C1917" text-anchor="start" font-family="ui-monospace, Consolas, Menlo, monospace">.archon/</text>
+<text x="140" y="226" font-size="10.5" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">what Archon reads from the workspace root</text>
+<text x="84" y="246" font-size="11" font-weight="600" fill="#1C1917" text-anchor="start" font-family="ui-monospace, Consolas, Menlo, monospace">config.yaml</text>
+<text x="166" y="246" font-size="10" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">assistant: claude (no worktree settings)</text>
+<text x="84" y="264" font-size="11" font-weight="600" fill="#1C1917" text-anchor="start" font-family="ui-monospace, Consolas, Menlo, monospace">workflows/team/request-to-pr/</text>
+<text x="277" y="264" font-size="10" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">a pack (team) with one workflow</text>
+<text x="100" y="282" font-size="11" font-weight="600" fill="#1C1917" text-anchor="start" font-family="ui-monospace, Consolas, Menlo, monospace">request-to-pr.yaml</text>
+<text x="225" y="282" font-size="10" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">the recipe card: 15 nodes, 4 waits</text>
+<text x="100" y="300" font-size="11" font-weight="600" fill="#1C1917" text-anchor="start" font-family="ui-monospace, Consolas, Menlo, monospace">commands/scan.md, implement.md</text>
+<text x="299" y="300" font-size="10" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">long prompts, kept out of YAML</text>
+<rect x="60" y="318" width="440" height="44" rx="8" fill="#FFFFFF" stroke="#6B6560" stroke-width="1.8" stroke-dasharray="6 4"/>
+<text x="72" y="336" font-size="11" font-weight="600" fill="#1C1917" text-anchor="start" font-family="ui-monospace, Consolas, Menlo, monospace">CLAUDE.md · scripts/verify.sh · docs-in/ · .gitignore</text>
+<text x="72" y="352" font-size="10" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">OURS: the rules (read in every AI node), the check, the request</text>
+<rect x="60" y="368" width="440" height="50" rx="8" fill="#FFFFFF" stroke="#1C1917" stroke-width="1.8"/>
+<text x="72" y="387" font-size="12" font-weight="700" fill="#1C1917" text-anchor="start" font-family="ui-monospace, Consolas, Menlo, monospace">priorauth-api/</text>
+<text x="184" y="387" font-size="10.5" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">the code repo · cloned inside · its own git, PRs</text>
+<text x="72" y="405" font-size="10" font-weight="400" fill="#5B6B7F" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">the pantry: .gitignore keeps it out; the agent branches here</text>
 <rect x="48" y="440" width="464" height="286" rx="12" fill="#FFFFFF" stroke="#1C1917" stroke-width="1.8"/>
 <text x="60" y="462" font-size="13" font-weight="700" fill="#1C1917" text-anchor="start" font-family="ui-monospace, Consolas, Menlo, monospace">~/.archon/</text>
 <text x="146" y="462" font-size="11" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">your machine · never committed · the cook&#x27;s locker</text>
@@ -40,17 +42,17 @@
 <text x="72" y="566" font-size="11" font-weight="600" fill="#1C1917" text-anchor="start" font-family="ui-monospace, Consolas, Menlo, monospace">web-dist/ · server/</text>
 <text x="203" y="566" font-size="10" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">the Web UI, fetched by archon serve</text>
 <rect x="60" y="584" width="440" height="130" rx="8" fill="#F5F5F4" stroke="#6B6560" stroke-width="1.8"/>
-<text x="72" y="604" font-size="12" font-weight="700" fill="#1C1917" text-anchor="start" font-family="ui-monospace, Consolas, Menlo, monospace">workspaces/&lt;owner&gt;/&lt;repo&gt;/</text>
-<text x="72" y="620" font-size="10" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">_local/priorauth-api here: the remote is a folder, not GitHub</text>
-<text x="84" y="644" font-size="11" font-weight="600" fill="#1C1917" text-anchor="start" font-family="ui-monospace, Consolas, Menlo, monospace">worktrees/request-age/age-api/</text>
-<text x="283" y="644" font-size="10" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">the run&#x27;s own checkout</text>
-<text x="84" y="666" font-size="11" font-weight="600" fill="#1C1917" text-anchor="start" font-family="ui-monospace, Consolas, Menlo, monospace">artifacts/runs/&lt;run-id&gt;/</text>
-<text x="246" y="666" font-size="10" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">scan.md … review.md</text>
-<text x="84" y="688" font-size="11" font-weight="600" fill="#1C1917" text-anchor="start" font-family="ui-monospace, Consolas, Menlo, monospace">logs/&lt;run-id&gt;.jsonl</text>
-<text x="215" y="688" font-size="10" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">the transcript: every event</text>
+<text x="72" y="604" font-size="12" font-weight="700" fill="#1C1917" text-anchor="start" font-family="ui-monospace, Consolas, Menlo, monospace">workspaces/_folder/java-workspace/</text>
+<text x="72" y="620" font-size="10" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">a folder project: no worktrees/, the run works in place</text>
+<text x="84" y="644" font-size="11" font-weight="600" fill="#1C1917" text-anchor="start" font-family="ui-monospace, Consolas, Menlo, monospace">artifacts/runs/&lt;run-id&gt;/</text>
+<text x="246" y="644" font-size="10" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">scan.md … review.md</text>
+<text x="84" y="666" font-size="11" font-weight="600" fill="#1C1917" text-anchor="start" font-family="ui-monospace, Consolas, Menlo, monospace">logs/&lt;run-id&gt;.jsonl</text>
+<text x="215" y="666" font-size="10" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">the transcript: every event</text>
+<text x="84" y="688" font-size="11" font-weight="600" fill="#1C1917" text-anchor="start" font-family="ui-monospace, Consolas, Menlo, monospace">workflow-source/runs/&lt;run-id&gt;/</text>
+<text x="283" y="688" font-size="10" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">the workflow as run</text>
 <rect x="550" y="92" width="580" height="650" rx="16" fill="#FAFAF9" stroke="#E7E5E4" stroke-width="1"/>
 <text x="568" y="122" font-size="17" font-weight="700" fill="#0E7490" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">How one run flows</text>
-<text x="568" y="142" font-size="11" font-weight="400" fill="#6B6560" text-anchor="start" font-family="ui-monospace, Consolas, Menlo, monospace">archon workflow run request-to-pr --branch request-age/age-api &quot;…&quot;</text>
+<text x="568" y="142" font-size="11" font-weight="400" fill="#6B6560" text-anchor="start" font-family="ui-monospace, Consolas, Menlo, monospace">cd java-workspace; archon workflow run request-to-pr --folder &quot;…&quot;</text>
 <rect x="568" y="156" width="544" height="176" rx="10" fill="#0E7490" fill-opacity=".05" stroke="#0E7490" stroke-opacity=".5" stroke-width="1"/>
 <text x="1102" y="172" font-size="11" font-weight="700" fill="#0E7490" text-anchor="end" font-family="'Segoe UI', system-ui, sans-serif">PLAN · what exactly?</text>
 <rect x="580" y="180" width="150" height="44" rx="8" fill="#FFFFFF" stroke="#6D28D9" stroke-width="1.8"/>
@@ -120,11 +122,11 @@
 <text x="578" y="642" font-size="11" font-weight="700" fill="#15803D" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">SHIP</text>
 <rect x="948" y="636" width="152" height="44" rx="8" fill="#FFFFFF" stroke="#15803D" stroke-width="1.8"/>
 <text x="958" y="655" font-size="12" font-weight="700" fill="#1C1917" text-anchor="start" font-family="ui-monospace, Consolas, Menlo, monospace">push</text>
-<text x="958" y="671" font-size="10" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">bash · git push</text>
+<text x="958" y="671" font-size="10" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">bash · git -C … push</text>
 <path d="M1058 552 L1058 634" fill="none" stroke="#15803D" stroke-width="1.6" marker-end="url(#ah)"/>
 <text x="1066" y="598" font-size="9" font-weight="700" fill="#15803D" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">approve</text>
-<text x="580" y="652" font-size="10.5" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">then archon complete &lt;branch&gt; removes the worktree;</text>
-<text x="580" y="668" font-size="10.5" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">the pull request and the merge are yours (OURS)</text>
+<text x="580" y="652" font-size="10.5" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">pushes the branch the agent made in priorauth-api;</text>
+<text x="580" y="668" font-size="10.5" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">the pull request, the merge, the tidy-up are yours (OURS)</text>
 <rect x="568" y="694" width="14" height="11" rx="3" fill="#FFFFFF" stroke="#6D28D9" stroke-width="1.6"/>
 <text x="588" y="704" font-size="10" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">AI node: Claude Code runs it</text>
 <rect x="840" y="694" width="14" height="11" rx="3" fill="#FFFFFF" stroke="#15803D" stroke-width="1.6"/>
@@ -133,7 +135,7 @@
 <text x="588" y="720" font-size="10" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">wait: the run pauses for you</text>
 <rect x="840" y="710" width="14" height="11" rx="3" fill="#FFFFFF" stroke="#9F1239" stroke-width="1.6"/>
 <text x="860" y="720" font-size="10" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">cancel: ends the run</text>
-<text x="568" y="734" font-size="10.5" font-weight="600" fill="#0E7490" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">each run: its own worktree and branch, artifacts and transcript, and a run id to find it by</text>
+<text x="568" y="734" font-size="10.5" font-weight="600" fill="#0E7490" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">each run: in place in the workspace, artifacts and transcript, and a run id to find it by</text>
 <rect x="1150" y="92" width="480" height="650" rx="16" fill="#FAFAF9" stroke="#E7E5E4" stroke-width="1"/>
 <text x="1168" y="122" font-size="17" font-weight="700" fill="#6D28D9" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">Who decides what</text>
 <text x="1168" y="142" font-size="11.5" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">you decide; Archon runs and records; the agent works; code checks</text>
@@ -143,12 +145,12 @@
 <text x="1180" y="216" font-size="10.5" font-weight="400" fill="#1C1917" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">answer at every wait; archon workflow attention lists them:</text>
 <text x="1180" y="232" font-size="10" font-weight="400" fill="#1C1917" text-anchor="start" font-family="ui-monospace, Consolas, Menlo, monospace">answer &lt;run&gt; --occurrence &lt;id&gt; --text &quot;…&quot;</text>
 <text x="1180" y="248" font-size="10" font-weight="400" fill="#1C1917" text-anchor="start" font-family="ui-monospace, Consolas, Menlo, monospace">approve &lt;run&gt; &quot;why&quot; · reject &lt;run&gt; &quot;what to change&quot;</text>
-<text x="1180" y="264" font-size="10.5" font-weight="400" fill="#1C1917" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">in the run: 6 questions answered, requirements rejected</text>
-<text x="1180" y="280" font-size="10.5" font-weight="400" fill="#1C1917" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">once, plan approved, change rejected (review: NOT-READY)</text>
+<text x="1180" y="264" font-size="10.5" font-weight="400" fill="#1C1917" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">in the run: 7 questions answered, requirements rejected</text>
+<text x="1180" y="280" font-size="10.5" font-weight="400" fill="#1C1917" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">once, plan approved, change rejected (a 500, by hand)</text>
 <rect x="1168" y="304" width="444" height="100" rx="10" fill="#FFFFFF" stroke="#0E7490" stroke-width="1.8"/>
 <text x="1180" y="325" font-size="13" font-weight="700" fill="#0E7490" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">Archon · the expediter calling the orders</text>
 <text x="1180" y="344" font-size="10.5" font-weight="400" fill="#1C1917" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">walks the graph: depends_on, when, trigger_rule</text>
-<text x="1180" y="360" font-size="10.5" font-weight="400" fill="#1C1917" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">starts each node, makes the worktree, pauses at waits</text>
+<text x="1180" y="360" font-size="10.5" font-weight="400" fill="#1C1917" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">starts each node in the workspace, pauses at waits</text>
 <text x="1180" y="376" font-size="10.5" font-weight="400" fill="#1C1917" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">routes reject only where the YAML says (when: … &#x27;reject&#x27;)</text>
 <text x="1180" y="392" font-size="10.5" font-weight="400" fill="#1C1917" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">records transcript, artifacts, tokens and cost per run</text>
 <rect x="1168" y="416" width="444" height="84" rx="10" fill="#FFFFFF" stroke="#6D28D9" stroke-width="1.8"/>
@@ -164,8 +166,8 @@
 <rect x="1168" y="608" width="444" height="120" rx="10" fill="#F5F5F4" stroke="#E7E5E4" stroke-width="1"/>
 <text x="1180" y="630" font-size="12.5" font-weight="700" fill="#9F1239" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">Reject is an answer, not a stop.</text>
 <text x="1180" y="648" font-size="10.5" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">Inside a loop_group it means &quot;revise&quot;; before a cancel node</text>
-<text x="1180" y="663" font-size="10.5" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">it ends the run. A worktree keeps your checkout clean;</text>
-<text x="1180" y="678" font-size="10.5" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">it is not a sandbox.</text>
+<text x="1180" y="663" font-size="10.5" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">it ends the run. In place means your own clones:</text>
+<text x="1180" y="678" font-size="10.5" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">what the agent committed stays on its branch.</text>
 <text x="1180" y="700" font-size="10.5" font-weight="700" fill="#1C1917" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">Every answer is kept with the run:</text>
 <text x="1180" y="715" font-size="10.5" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">who said what, and when, is in archon.db and the transcript.</text>
 <text x="1630" y="766" font-size="10" font-weight="400" fill="#6B6560" text-anchor="end" font-family="'Segoe UI', system-ui, sans-serif">Archon 0.13.2 (29 Oct 2026) and its docs at archon.diy · node ids and settings read from the course&#x27;s request-to-pr.yaml · analogies ours</text>

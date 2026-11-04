@@ -63,7 +63,7 @@ def ln(x1, y1, x2, y2, dash=False):
 def concept_map():
     A, G, O, K, I3 = "var(--accent)", "var(--gold)", "var(--ours)", "var(--ok)", "var(--ink-3)"
     p = ['<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" style="fill:var(--ink-3)"/></marker></defs>']
-    p.append(tx(20, 30, "A workflow file runs as a graph, in its own worktree, and stops where a person decides", 17, 700, anchor="start"))
+    p.append(tx(20, 30, "A workflow file runs as a graph, from the team workspace, and stops where a person decides", 17, 700, anchor="start"))
     p.append(tx(20, 52, "Left: where you start and answer. Middle: what one run is. Right: what it leaves behind. Dashed = a pause for a person.", 12, 400, I3, "start"))
     # you
     p.append(rect(20, 80, 190, 300, O, .06))
@@ -88,7 +88,7 @@ def concept_map():
                              (534, 291, 550, 171), (618, 192, 618, 208), (618, 252, 618, 268)]:
         p.append(ln(x1, y1, x2, y2))
     p.append(tx(475, 340, "AI nodes run Claude Code (or Codex, Pi) · bash and script nodes run code, no model", 11, 400, I3))
-    p.append(tx(475, 360, "in a git worktree on its own branch: request-age/age-api", 11, 600, A))
+    p.append(tx(475, 360, "in place, in the workspace: the agent branches in priorauth-api (request-age/pending-age)", 11, 600, A))
     # what stays
     p.append(rect(740, 80, 220, 300, K, .06))
     p.append(tx(850, 104, "What the run leaves", 15, 700, K))
@@ -113,7 +113,7 @@ C.append(concept(
     "workflow", "Workflow",
     "A YAML file that writes down how one kind of work gets done: its steps (nodes), the order between them, the checks that decide when a step is finished and the places where a person must decide. It needs a <code>name</code>, a <code>description</code> and <code>nodes</code>.",
     "A coding agent asked to \"fix this\" does what it likes on that run: it may skip the plan or the tests. Archon moves the process out of the model's head into a file the team owns and reviews, so every run follows the same steps.",
-    ul(["Lives in the repo at <code>.archon/workflows/&lt;pack&gt;/&lt;workflow&gt;/&lt;name&gt;.yaml</code> (flat <code>.archon/workflows/foo.yaml</code> still works), or in <code>~/.archon/workflows/</code> for every repo on your machine.",
+    ul(["Lives in the project at <code>.archon/workflows/&lt;pack&gt;/&lt;workflow&gt;/&lt;name&gt;.yaml</code> (the team workspace in this course, or a repo; flat <code>.archon/workflows/foo.yaml</code> still works), or in <code>~/.archon/workflows/</code> for every project on your machine.",
         f"{BUNDLED} workflows ship inside Archon {VERSION} (the <code>sdlc</code> pack). A repo workflow with the same name overrides a home one, and a home one overrides a bundled one.",
         "<code>archon workflow list</code> shows what it finds; <code>archon validate workflows</code> checks the file; <code>archon workflow run &lt;name&gt; \"message\"</code> starts it. Since 0.13.1 the name must match exactly."]),
     "The team's <code>request-to-pr</code> workflow: scan, ask, write requirements until approved, plan, approve, implement until <code>./scripts/verify.sh</code> passes, review, approve, push. Kiran ran it with the message <code>Implement the request in docs-in/request.md</code>.",
@@ -195,26 +195,26 @@ C.append(concept(
     "a conversation. A chat conversation can start runs; the run is the workflow execution with its own record.",
 ))
 C.append(concept(
-    "worktrees", "Isolation: a worktree per run",
-    "A run against a git repo works in its own git worktree, a second checkout of the same repo on its own branch, under <code>~/.archon/workspaces/&lt;owner&gt;/&lt;repo&gt;/worktrees/</code>. <code>--branch</code> names the branch; <code>--no-worktree</code> runs in your own checkout.",
-    "Several runs can change the same files at once without seeing each other, and your own checkout stays as you left it. If you don't like a result, you drop the branch.",
+    "worktrees", "Isolation: in place, or a worktree per run",
+    "Where a run does its work. In a <b>folder project</b> (a workspace that holds the repos, what this course uses) it runs in place, in your own clones, and the agent makes the branches. In a <b>repo project</b> (<code>.archon/</code> inside the repo) each run gets its own git worktree, a second checkout on its own branch under <code>~/.archon/workspaces/&lt;owner&gt;/&lt;repo&gt;/worktrees/</code>; <code>--branch</code> names it, <code>--no-worktree</code> runs in your checkout.",
+    "A worktree lets several runs change the same files at once without seeing each other, and keeps your checkout as you left it. In place is simpler and spans repos, but one run at a time per workspace, on the branches you can see. Either way, if you don't like a result, you drop the branch.",
     ul(["The worktree is cut from the base branch (<code>worktree.baseBranch</code> in <code>.archon/config.yaml</code>, else detected). Only tracked files are in it, so commit what the run needs (or list ignored files in <code>worktree.copyFiles</code>).",
         "<code>archon isolation list</code> shows them; <code>archon complete &lt;branch&gt;</code> removes a worktree and its local branch (the remote branch stays); <code>archon isolation cleanup --merged</code> removes the merged ones.",
         "<b>Not a sandbox.</b> A worktree separates checkouts; commands a run executes can still touch files elsewhere.",
-        "A <b>folder project</b> (a root holding several repos, see <a href=\"#places\">Where things live</a>) gets no worktree: it runs in place, and <code>--branch</code> is rejected."]),
-    "The run's branch <code>request-age/age-api</code> lived in <code>~/.archon/workspaces/_local/priorauth-api/worktrees/request-age/age-api</code> (<code>_local</code> because the repo's remote is a folder, not GitHub). Kiran's own checkout stayed on <code>main</code> throughout.",
+        "A <b>folder project</b> (see <a href=\"#places\">Where things live</a>) gets no worktree: it runs in place, <code>--branch</code> is rejected, <code>isolation list</code> says <i>No codebases registered.</i> and <code>archon complete</code> finds nothing. <code>--container</code> is its optional isolation."]),
+    "The course ran from <code>java-workspace/</code>, a folder project: the agent made <code>request-age/pending-age</code> in Kiran's own <code>priorauth-api</code> clone and committed there, and <code>workflow get</code> listed the workspace itself as the worktree, <i>(live)</i>. The fix run that adopted it was told so: <i>folder projects run in place; adoption carries provenance and $ADOPTED_RUN_DIR access only</i>.",
     "A builder gets a copy of the plans to draw on, not the originals in the office. Several builders can draw at once; the office keeps the clean set.",
-    "you can say where a run's edits are, and how to get rid of them.",
+    "you can say where a run's edits are in each layout, and how to get rid of them.",
     "a container. Container isolation exists for folder projects and is a separate option.",
 ))
 C.append(concept(
     "artifacts", "Artifacts and variables",
     "Artifacts are files a run writes to <code>$ARTIFACTS_DIR</code>, a folder per run outside the repo. Variables are the placeholders Archon fills in prompts, commands and bash: <code>$USER_MESSAGE</code> (the run message), <code>$ARTIFACTS_DIR</code>, <code>$BASE_BRANCH</code>, <code>$WORKFLOW_ID</code>, <code>$&lt;node&gt;.output</code> and its fields.",
     "Nodes hand work to each other through files, not through one long chat. A fresh agent session can read just <code>plan.md</code> and stay focused, and the artifacts stay for people to read after the run, without cluttering the repo.",
-    ul(["Artifacts live in <code>~/.archon/workspaces/&lt;owner&gt;/&lt;repo&gt;/artifacts/runs/&lt;run-id&gt;/</code>, never in git.",
+    ul(["Artifacts live in <code>~/.archon/workspaces/&lt;project&gt;/artifacts/runs/&lt;run-id&gt;/</code> (<code>_folder/java-workspace</code> in this course), never in git.",
         "<code>archon workflow artifacts &lt;run-id&gt;</code> lists them; add a file name to print one.",
         "Node outputs used in <code>bash:</code> are shell-quoted; a reply over 32,768 characters is spilled to a file and substituted as <code>$(cat …)</code>."]),
-    "The run left <code>scan.md</code>, <code>questions.md</code>, <code>requirements.md</code>, <code>plan.md</code>, <code>implementation.md</code> and <code>review.md</code>. The repo got only the code and tests.",
+    "The run left <code>scan.md</code>, <code>questions.md</code>, <code>requirements.md</code>, <code>plan.md</code>, <code>implementation.md</code> and <code>review.md</code>. The code repo got only the code and tests; the workspace repo got nothing.",
     "The folder of working papers a surveyor leaves with the client: the house only gets the finished work, the folder explains how it was decided.",
     "you can say where to look for a run's requirements a month later, and why they are not in the repo.",
     "AI-DLC's record in <code>aidlc/</code>, which is committed with the workspace. Archon's artifacts are per run and stay on the machine that ran it unless you copy them.",
@@ -224,28 +224,28 @@ C.append(concept(
     "A provider connects Archon to an agent: Claude Code, Codex or Pi (OpenCode and Copilot are deprecated). Archon brings no model of its own; it runs the agent with your login or key. A tier (<code>small</code>, <code>medium</code>, <code>large</code>) names a provider and model, so a workflow can say <code>model: large</code>.",
     "Teams already pay for an agent and have its project guidance (<code>CLAUDE.md</code>). Archon uses that agent as it is, and lets a workflow pick a cheaper model for easy steps.",
     ul(["<code>archon provider add claude</code> installs the provider plugin (it does not install Claude Code itself). Re-run it after each Archon upgrade.",
-        "The repo's <code>.archon/config.yaml</code> <code>assistant:</code> sets the default; a workflow or node can override <code>provider</code> and <code>model</code>.",
+        "The project's <code>.archon/config.yaml</code> <code>assistant:</code> sets the default; a workflow or node can override <code>provider</code> and <code>model</code>.",
         "<code>archon ai tier list</code> shows the tiers; on this install: small = claude/haiku, medium = claude/sonnet, large = claude/opus.",
-        "Claude Code reads the repo's <code>CLAUDE.md</code> in every AI node, so the team's rules reach each step."]),
+        "Claude Code reads the <code>CLAUDE.md</code> of the folder it runs in (the workspace's, here) in every AI node, so the team's rules reach each step."]),
     "<code>assistant: claude</code> in <code>.archon/config.yaml</code>; no node sets a model, so every AI node used the provider's default. The run used the machine's claude.ai login: <code>archon doctor</code> reported <code>Assistant login: claude: usable</code>.",
     "A staffing agency: Archon books the work and keeps the timesheets; the people come from the agencies you already use.",
     "you can say which agent runs a node and where that is set.",
     "the workflow. Swapping the provider changes who does each step, not the steps.",
 ))
 C.append(concept(
-    "places", "Where things live: the repo, a folder project, and ~/.archon",
-    "Two places. The project's <code>.archon/</code> holds what the team shares and commits: <code>workflows/</code>, <code>config.yaml</code>, optionally <code>commands/</code> and <code>scripts/</code>. Your home's <code>~/.archon/</code> holds the install: the binary, plugins, global config, <code>archon.db</code>, and <code>workspaces/</code> with every run's worktrees, logs and artifacts. The project is usually one repo; when a feature spans several repos, it is a <b>folder project</b>: a root that holds them, with the <code>.archon/</code> at the root.",
-    "The process is the team's and travels with the code; the runs are yours and stay on your machine.",
-    ul(["<code>~/.archon/config.yaml</code> holds your defaults (assistant, tiers, concurrency); the repo's <code>.archon/config.yaml</code> holds the repo's (assistant, worktree settings) and wins.",
-        "Credentials go in <code>~/.archon/.env</code> (or the repo's <code>.archon/.env</code>, never committed); <code>archon setup</code> writes them.",
-        "The first run in a repo registers it as a project (<code>archon project list</code>).",
-        "<b>Several repos, one feature:</b> put them under one root, with <code>.archon/</code> and <code>CLAUDE.md</code> at the root, and run from there once with <code>--folder</code>. The agent works at the root, in place, and sees every repo. Archon makes no worktree, branch or PR for a folder project: the agent branches, commits and pushes in each repo, so the workflow's prompts must say so. <code>--container</code> adds a Docker overlay with an approval before writes reach the folders. Runs are stored in <code>~/.archon/workspaces/_folder/&lt;slug&gt;/</code>. The course ran one: <a href=\"archon-hello-world-java/archon-two-repos-run.html\">one bug fixed across two repos</a>.",
-        "Archon does not give one run a worktree in each of two repos. The docs' advice: the root as a folder project for cross-repo work, and each repo also its own project for changes that touch only it.",
+    "places", "Where things live: the workspace, its repos, and ~/.archon",
+    "Two places. The project's <code>.archon/</code> holds what the team shares and commits: <code>workflows/</code>, <code>config.yaml</code>, optionally <code>commands/</code> and <code>scripts/</code>. Your home's <code>~/.archon/</code> holds the install: the binary, plugins, global config, <code>archon.db</code>, and <code>workspaces/</code> with every run's logs and artifacts. In this course the project is a <b>team workspace</b>, as in AI-DLC: a git repo of its own with <code>.archon/</code>, <code>CLAUDE.md</code>, the check and the requests at its root, and the code repos cloned inside it. Archon calls it a <b>folder project</b>. The other layout puts <code>.archon/</code> inside a single code repo: the repo is the project.",
+    "The process is the team's and is shared through the workspace repo; the code keeps its own repos and PRs; the runs are yours and stay on your machine.",
+    ul(["<code>~/.archon/config.yaml</code> holds your defaults (assistant, tiers, concurrency); the project's <code>.archon/config.yaml</code> holds the team's (assistant; worktree settings only matter in a repo project) and wins.",
+        "Credentials go in <code>~/.archon/.env</code> (or the project's <code>.archon/.env</code>, never committed); <code>archon setup</code> writes them.",
+        "The first run with <code>--folder</code> from the workspace root registers it as a folder project (<code>archon project list</code>: <code>folder · java-workspace · _folder/java-workspace</code>); the first run inside a plain repo registers the repo.",
+        "<b>One repo or several:</b> clone them under the workspace, with <code>.archon/</code> and <code>CLAUDE.md</code> at the root, and run from there (the first time with <code>--folder</code>). The agent works at the root, in place, and sees every repo. Archon makes no worktree, branch or PR for a folder project: the agent branches, commits and pushes in each repo, so the workflow's prompts must say so. <code>--container</code> adds a Docker overlay with an approval before writes reach the folders. Runs are stored in <code>~/.archon/workspaces/_folder/&lt;slug&gt;/</code>. The course ran two: <a href=\"archon-hello-world-java/archon-hello-world-java-run.html\">one request, one repo</a>, and <a href=\"archon-hello-world-java/archon-two-repos-run.html\">one bug fixed across two repos</a>.",
+        "Archon does not give one run a worktree in each of two repos. If you want worktrees for single-repo changes, the docs' advice is to also register each repo as its own project and run from inside it.",
         "Workflows can also live outside every repo: <code>~/.archon/workflows/</code> (in all your projects, not shared), or <code>--workflow-source &lt;dir&gt;</code> (read the workflow from one folder, run it against <code>--cwd</code>)."]),
-    "Committed in <code>priorauth-api</code>: <code>.archon/config.yaml</code>, the <code>team/request-to-pr</code> workflow and its two commands, next to <code>CLAUDE.md</code> and <code>scripts/verify.sh</code>. Not committed: everything under <code>~/.archon/workspaces/_local/priorauth-api/</code>.",
-    "The cookbook lives in the restaurant (repo); each cook's notebook and apron live in their locker (home).",
-    "you can say which of the two folders a new teammate gets with <code>git clone</code>, and where the <code>.archon/</code> goes when a feature spans two repos.",
-    "AI-DLC's workspace, a folder around the repos. For one repo Archon needs none: the repo is the project. For several, a folder project is that workspace, without per-run worktrees.",
+    "Committed in the workspace repo <code>java-workspace</code>: <code>.archon/config.yaml</code>, the <code>team/request-to-pr</code> workflow and its two commands, <code>CLAUDE.md</code>, <code>scripts/verify.sh</code>, <code>docs-in/request.md</code>, and a <code>.gitignore</code> that leaves out <code>priorauth-api/</code>. Committed in <code>priorauth-api</code>: only the code, through its own PR. Not committed: everything under <code>~/.archon/workspaces/_folder/java-workspace/</code>.",
+    "The cookbook lives in the kitchen (the workspace), the ingredients come from the pantry (the code repos, each with its own supplier), and each cook's notebook and apron live in their locker (home).",
+    "you can say what a new teammate clones (the workspace, then each repo inside it), and why a second repo changes nothing but one more clone.",
+    "a worktree. A workspace is a folder you keep and commit; a worktree is a per-run checkout Archon makes and removes, and only a repo project gets one. AI-DLC's workspace is the same idea as Archon's folder project.",
 ))
 C.append(concept(
     "surfaces", "Where you work: CLI, Web UI, chat, triggers",
@@ -279,7 +279,7 @@ MAPPING = [("Intent (one request, one record)", "One run of a workflow, with its
            ("Plan approval switch", "A <code>wait</code> node before the implement node", "In Archon it exists only if the workflow has it."),
            ("Verification command, checkpoint", "<code>until_bash</code> on the implement loop, a <code>bash</code> checks node", "The check is in the YAML, not recorded at a stage."),
            ("The record in <code>aidlc/</code>, committed", "Artifacts + transcript + run row, under <code>~/.archon</code>", "Not committed by default; copy artifacts into the repo (or a PR) if the team must keep them."),
-           ("Workspace around the repos", "One repo: the repo itself, with <code>.archon/</code>. Several: a folder project around them", "A folder project (<code>--folder</code>) runs in place: no worktree, and the agent does the git in each repo. AI-DLC had no per-run worktree either."),
+           ("Workspace around the repos", "The same: a team workspace with the repos cloned inside, registered as a folder project (<code>--folder</code>)", "Runs in place: no worktree, and the agent does the git in each repo, as in AI-DLC. Archon also allows <code>.archon/</code> inside one repo, with a worktree per run."),
            ("AI personas (developer, quality…)", "Each AI node's prompt; optional inline <code>agents</code>", "No built-in cast: the prompt says who the agent is."),
            ("<code>/aidlc</code> inside Claude Code", "<code>archon workflow run</code> in a terminal (or Web UI, chat)", "Archon starts the agent; you don't sit in the agent's session.")]
 
@@ -290,7 +290,7 @@ MIS = [("\"Reject stops the run.\"", "Only if the workflow says so. Reject is an
        ("\"The run's requirements end up in the repo.\"", "Artifacts live under <code>~/.archon</code>, per run. Commit them only if your workflow does."),
        ("\"Archon is the knowledge-base MCP server.\"", "That was Archon v1, kept on the <code>archive/v1-task-management-rag</code> branch. Today's Archon is the workflow engine."),
        ("\"bash: nodes need WSL on Windows.\"", "They need Git Bash. Archon looks in the usual Git locations; set <code>ARCHON_BASH_PATH</code> if Git is elsewhere."),
-       ("\"Archon's files must go into each repo.\"", "Only in a one-repo project. For a feature across repos, a folder project keeps <code>.archon/</code> at the root that holds them; <code>~/.archon/workflows/</code> and <code>--workflow-source</code> keep workflows out of any repo."),
+       ("\"Archon's files must go into each repo.\"", "Only if you choose the repo-is-the-project layout. This course keeps them in a team workspace that holds the repos (a folder project), as AI-DLC does; <code>~/.archon/workflows/</code> and <code>--workflow-source</code> keep workflows out of any repo too."),
        ("\"Telemetry is off by default.\"", "It is on. Set <code>ARCHON_TELEMETRY_DISABLED=1</code> (or <code>DO_NOT_TRACK=1</code>); <code>archon telemetry status</code> checks.")]
 
 QUIZ = [("Ravi sends a second request tomorrow. New workflow or new run?", "A new run of the same workflow, with the new request as its message. The workflow only changes if the team changes the process."),
@@ -299,8 +299,8 @@ QUIZ = [("Ravi sends a second request tomorrow. New workflow or new run?", "A ne
         ("Who decides the implement loop is finished?", "<code>./scripts/verify.sh</code>: exit 0 after a pass ends the loop. Three failing passes fail the node."),
         ("Kiran's terminal crashed while the run was paused. Is the run lost?", "No. A paused run holds no process; answer it from any terminal or the Web UI with its run id."),
         ("Which nodes cost model tokens in <code>request-to-pr</code>?", "The prompt, command and loop nodes. <code>checks</code> and <code>push</code> (bash) and the waits cost none."),
-        ("Why did the course add a <code>.gitattributes</code> before the run?", "The machine converts line endings (<code>core.autocrlf</code>), so a fresh worktree would get <code>verify.sh</code> with CRLF and bash would fail on it. <code>*.sh text eol=lf</code> keeps it runnable."),
-        ("Ravi's next request needs priorauth-api and the reviewer screen's UI repo. Where does the team's <code>.archon/</code> go?", "At a root folder that holds both repos, registered as a folder project (<code>--folder</code>). The agent works there in place and does the git in each repo; Archon makes no worktree or PR for it.")]
+        ("Why does the workspace have a <code>.gitignore</code> with <code>/priorauth-api/</code>?", "The code repo is cloned inside the workspace but has its own git, remote and PRs. The ignore keeps the workspace repo to the team's files, so a code change never shows up as a workspace change."),
+        ("Ravi's next request needs priorauth-api and the reviewer screen's UI repo. Where does the team's <code>.archon/</code> go?", "Where it already is: the team workspace. Clone the UI repo into it next to priorauth-api and add it to CLAUDE.md's repo map; the run starts from the same root, in place, and the agent does the git in each repo. Archon makes no worktree or PR for it.")]
 
 SOURCES = [("https://github.com/coleam00/Archon", f"coleam00/Archon on GitHub (v{VERSION}, 29 Oct 2026): README"),
            ("https://archon.diy/getting-started/why-archon/", "Why Archon (core concepts, YAML coordinates / code computes / agents judge)"),
@@ -316,7 +316,7 @@ SOURCES = [("https://github.com/coleam00/Archon", f"coleam00/Archon on GitHub (v
            ("https://archon.diy/reference/configuration/", "Configuration (repo config, ARCHON_BASH_PATH, telemetry)")]
 
 head = f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Archon Concepts, Explained</title>
-<meta name="description" content="Archon {VERSION}'s concepts: workflows, nodes, the graph, commands and packs, loops, waits and the attention queue, runs, worktree isolation, artifacts, providers, where things live, the surfaces, and the sdlc pack. What each is, why Archon has it, how the tool does it, with examples from a real run and everyday analogies.">
+<meta name="description" content="Archon {VERSION}'s concepts: workflows, nodes, the graph, commands and packs, loops, waits and the attention queue, runs, isolation (in place or a worktree), artifacts, providers, where things live (the workspace and its repos), the surfaces, and the sdlc pack. What each is, why Archon has it, how the tool does it, with examples from a real run and everyday analogies.">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -324,7 +324,7 @@ head = f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name
 """
 ids = [("workflow", "Workflow"), ("nodes", "Nodes: one job each"), ("graph", "The graph: depends_on, when"), ("commands", "Commands and packs"),
        ("loops", "Loops and completion checks"), ("waits", "Waits and the attention queue"), ("runs", "Runs: id, status, transcript, cost"),
-       ("worktrees", "Isolation: a worktree per run"), ("artifacts", "Artifacts and variables"), ("providers", "Providers, models and tiers"),
+       ("worktrees", "Isolation: in place, or a worktree"), ("artifacts", "Artifacts and variables"), ("providers", "Providers, models and tiers"),
        ("places", "Where things live"), ("surfaces", "CLI, Web UI, chat, triggers"), ("factory", "The sdlc pack")]
 assert len(ids) == len(C)
 rail = ('<nav class="rail" aria-label="Contents"><h4>Start</h4><a href="#thesis" data-k="thesis">The big idea</a><a href="#map" data-k="map">One picture</a><h4>Concepts</h4>'
@@ -332,7 +332,7 @@ rail = ('<nav class="rail" aria-label="Contents"><h4>Start</h4><a href="#thesis"
         + '<h4>Then</h4><a href="#mapping" data-k="mapping">AI-DLC → Archon</a><a href="#mistakes" data-k="mistakes">Misunderstandings</a><a href="#quiz" data-k="quiz">Check yourself</a><a href="#sources" data-k="sources">Sources</a></nav>')
 thesis = (f'<section class="card thesis" id="thesis"><h1>The big idea, in one paragraph</h1><p class="big">Archon turns how your team works into a file. '
           "A workflow is a YAML graph of steps: some are an AI agent with a prompt, some are plain code, some are a pause where a person decides. "
-          "Archon runs that graph the same way every time, each run in its own git branch and worktree, checks the agent's work with commands instead of taking its word, "
+          "Archon runs that graph the same way every time, each run from the team's workspace, in place, with the agent branching in each repo, checks the agent's work with commands instead of taking its word, "
           "and keeps a transcript, the files each step wrote and the cost of every run. "
           "It brings no model: it drives the agent you already use (Claude Code, Codex or Pi). "
           "The docs put the split in six words: <i>YAML coordinates, code computes, agents judge.</i></p>"

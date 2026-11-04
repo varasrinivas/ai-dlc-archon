@@ -1,0 +1,496 @@
+commit a3972b42ef31bf68500d39389b0d5f8caf9724d1
+Author: Kiran Rao <kiran@acme-health.example>
+Date:   Wed Nov 4 17:53:18 2026 +0530
+
+    Pending list: business-day age, over-limit flag and label (asOf)
+    
+    Request: docs-in/request.md (request age on the pending list, Ravi Menon).
+    Requirements: FR1-FR13, NFR1-NFR7 (requirements.md rev 2; plan approved by Meena Iyer).
+    
+    - RequestAging: business days after receipt up to asOf, excluding weekends and
+      tenant holidays from data/holidays-<tenant>-<yyyy>.json; fails fast on a bad
+      holiday file or negative threshold.
+    - priorauth.aging.threshold-days: 5; TX-01 2026 holiday calendar.
+    - GET /requests/pending adds ageBusinessDays, overLimit, ageLabel; optional
+      ?asOf=YYYY-MM-DD (400 if invalid or before a row's receivedAt); today from a
+      Clock bean.
+    - Tests: RequestAgingTest, controller tests with a fixed clock.
+    README unchanged (updated at release). pom.xml unchanged (1.0.2).
+---
+ .../java/com/acmehealth/priorauth/PriorAuthApiApplication.java  |   9 ++
+ src/main/java/com/acmehealth/priorauth/aging/RequestAging.java  | 125 ++++++++++++++++++++++++++++
+ .../com/acmehealth/priorauth/api/PendingRequestResponse.java    |  11 ++-
+ .../com/acmehealth/priorauth/api/PendingRequestsController.java |  31 ++++++-
+ src/main/resources/application.yml                              |   3 +
+ src/main/resources/data/holidays-TX-01-2026.json                |   1 +
+ .../java/com/acmehealth/priorauth/aging/RequestAgingTest.java   | 106 +++++++++++++++++++++++
+ .../acmehealth/priorauth/api/PendingRequestsControllerTest.java |  71 ++++++++++++++++
+ 8 files changed, 350 insertions(+), 7 deletions(-)
+
+diff --git a/src/main/java/com/acmehealth/priorauth/PriorAuthApiApplication.java b/src/main/java/com/acmehealth/priorauth/PriorAuthApiApplication.java
+index 068d79f..a1dee49 100644
+--- a/src/main/java/com/acmehealth/priorauth/PriorAuthApiApplication.java
++++ b/src/main/java/com/acmehealth/priorauth/PriorAuthApiApplication.java
+@@ -2,6 +2,9 @@ package com.acmehealth.priorauth;
+ 
+ import org.springframework.boot.SpringApplication;
+ import org.springframework.boot.autoconfigure.SpringBootApplication;
++import org.springframework.context.annotation.Bean;
++
++import java.time.Clock;
+ 
+ /** Entry point. Spring Boot scans this package and below for controllers and services. */
+ @SpringBootApplication
+@@ -10,4 +13,10 @@ public class PriorAuthApiApplication {
+     public static void main(String[] args) {
+         SpringApplication.run(PriorAuthApiApplication.class, args);
+     }
++
++    /** "Today" for request ages: the JVM's default time zone. Tests replace it with a fixed clock. */
++    @Bean
++    Clock clock() {
++        return Clock.systemDefaultZone();
++    }
+ }
+diff --git a/src/main/java/com/acmehealth/priorauth/aging/RequestAging.java b/src/main/java/com/acmehealth/priorauth/aging/RequestAging.java
+new file mode 100644
+index 0000000..7dc6a4b
+--- /dev/null
++++ b/src/main/java/com/acmehealth/priorauth/aging/RequestAging.java
+@@ -0,0 +1,125 @@
++package com.acmehealth.priorauth.aging;
++
++import org.slf4j.Logger;
++import org.slf4j.LoggerFactory;
++import org.springframework.beans.factory.annotation.Autowired;
++import org.springframework.beans.factory.annotation.Value;
++import org.springframework.core.io.Resource;
++import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
++import org.springframework.stereotype.Component;
++import tools.jackson.core.JacksonException;
++import tools.jackson.databind.json.JsonMapper;
++
++import java.io.IOException;
++import java.io.InputStream;
++import java.time.DayOfWeek;
++import java.time.LocalDate;
++import java.util.HashMap;
++import java.util.HashSet;
++import java.util.List;
++import java.util.Map;
++import java.util.Set;
++import java.util.TreeMap;
++import java.util.concurrent.ConcurrentHashMap;
++import java.util.regex.Matcher;
++import java.util.regex.Pattern;
++
++/**
++ * Age of a request in business days: the days after the received day, up to and including the "as of" day, that are
++ * not a Saturday, a Sunday or a holiday of the request's tenant. Over the limit when the age exceeds the configured
++ * threshold. Holidays come from {@code data/holidays-<tenant>-<yyyy>.json}, loaded once at startup.
++ */
++@Component
++public class RequestAging {
++
++    private static final Logger log = LoggerFactory.getLogger(RequestAging.class);
++    private static final Pattern HOLIDAY_FILE = Pattern.compile("holidays-(.+)-(\\d{4})\\.json");
++
++    private final Map<String, Set<LocalDate>> holidaysByTenant;
++    private final int thresholdDays;
++    private final Set<String> warnedTenants = ConcurrentHashMap.newKeySet();
++
++    @Autowired
++    public RequestAging(JsonMapper mapper, @Value("${priorauth.aging.threshold-days}") int thresholdDays)
++            throws IOException {
++        this(loadHolidays(mapper), thresholdDays);
++    }
++
++    RequestAging(Map<String, Set<LocalDate>> holidaysByTenant, int thresholdDays) {
++        if (thresholdDays < 0) {
++            throw new IllegalArgumentException("priorauth.aging.threshold-days must be >= 0, was " + thresholdDays);
++        }
++        Map<String, Set<LocalDate>> copy = new HashMap<>();
++        holidaysByTenant.forEach((tenant, days) -> copy.put(tenant, Set.copyOf(days)));
++        this.holidaysByTenant = Map.copyOf(copy);
++        this.thresholdDays = thresholdDays;
++    }
++
++    /** Business days d with receivedAt < d <= asOf; 0 when asOf is not after receivedAt. */
++    public int ageBusinessDays(String tenantId, LocalDate receivedAt, LocalDate asOf) {
++        if (!asOf.isAfter(receivedAt)) {
++            return 0;
++        }
++        Set<LocalDate> holidays = holidaysOf(tenantId);
++        return (int) receivedAt.plusDays(1).datesUntil(asOf.plusDays(1))
++                .filter(d -> d.getDayOfWeek() != DayOfWeek.SATURDAY && d.getDayOfWeek() != DayOfWeek.SUNDAY)
++                .filter(d -> !holidays.contains(d))
++                .count();
++    }
++
++    public boolean overLimit(int age) {
++        return age > thresholdDays;
++    }
++
++    public String label(int age) {
++        return overLimit(age) ? age + " bd OVER " + thresholdDays : age + " bd";
++    }
++
++    private Set<LocalDate> holidaysOf(String tenantId) {
++        Set<LocalDate> holidays = holidaysByTenant.get(tenantId);
++        if (holidays == null) {
++            if (warnedTenants.add(String.valueOf(tenantId))) {
++                log.warn("No holiday calendar for tenant {}; its ages count weekends only", tenantId);
++            }
++            return Set.of();
++        }
++        return holidays;
++    }
++
++    private static Map<String, Set<LocalDate>> loadHolidays(JsonMapper mapper) throws IOException {
++        Map<String, Set<LocalDate>> holidays = new TreeMap<>();
++        Resource[] files = new PathMatchingResourcePatternResolver().getResources("classpath*:data/holidays-*.json");
++        for (Resource file : files) {
++            try (InputStream in = file.getInputStream()) {
++                readHolidayFile(mapper, file.getFilename(), in, holidays);
++            }
++        }
++        log.info("Loaded holiday calendars: {}", holidays.isEmpty() ? "none" : holidays.keySet());
++        return holidays;
++    }
++
++    /** Reads one holiday file into {@code into}; fails with the file's name when name or content is not as expected. */
++    static void readHolidayFile(JsonMapper mapper, String fileName, InputStream in, Map<String, Set<LocalDate>> into) {
++        Matcher name = HOLIDAY_FILE.matcher(fileName == null ? "" : fileName);
++        if (!name.matches()) {
++            throw new IllegalStateException("Holiday file " + fileName + " is not named holidays-<tenant>-<yyyy>.json");
++        }
++        String tenant = name.group(1);
++        int year = Integer.parseInt(name.group(2));
++        List<LocalDate> dates;
++        try {
++            dates = mapper.readValue(in, mapper.getTypeFactory().constructCollectionType(List.class, LocalDate.class));
++        } catch (JacksonException e) {
++            throw new IllegalStateException("Holiday file " + fileName + " is not a JSON array of ISO dates", e);
++        }
++        if (dates == null) {
++            throw new IllegalStateException("Holiday file " + fileName + " is not a JSON array of ISO dates");
++        }
++        for (LocalDate date : dates) {
++            if (date == null || date.getYear() != year) {
++                throw new IllegalStateException("Holiday file " + fileName + " holds " + date + ", not a date in " + year);
++            }
++        }
++        into.computeIfAbsent(tenant, t -> new HashSet<>()).addAll(dates);
++    }
++}
+diff --git a/src/main/java/com/acmehealth/priorauth/api/PendingRequestResponse.java b/src/main/java/com/acmehealth/priorauth/api/PendingRequestResponse.java
+index 349d10c..853f45d 100644
+--- a/src/main/java/com/acmehealth/priorauth/api/PendingRequestResponse.java
++++ b/src/main/java/com/acmehealth/priorauth/api/PendingRequestResponse.java
+@@ -1,5 +1,6 @@
+ package com.acmehealth.priorauth.api;
+ 
++import com.acmehealth.priorauth.aging.RequestAging;
+ import com.acmehealth.priorauth.model.PriorAuthRequest;
+ 
+ import java.time.LocalDate;
+@@ -10,10 +11,14 @@ public record PendingRequestResponse(
+         String tenantId,
+         String service,
+         String status,
+-        LocalDate receivedAt) {
++        LocalDate receivedAt,
++        int ageBusinessDays,
++        boolean overLimit,
++        String ageLabel) {
+ 
+-    public static PendingRequestResponse from(PriorAuthRequest request) {
++    public static PendingRequestResponse from(PriorAuthRequest request, RequestAging aging, LocalDate asOf) {
++        int age = aging.ageBusinessDays(request.tenantId(), request.receivedAt(), asOf);
+         return new PendingRequestResponse(request.id(), request.tenantId(), request.service(), request.status(),
+-                request.receivedAt());
++                request.receivedAt(), age, aging.overLimit(age), aging.label(age));
+     }
+ }
+diff --git a/src/main/java/com/acmehealth/priorauth/api/PendingRequestsController.java b/src/main/java/com/acmehealth/priorauth/api/PendingRequestsController.java
+index cdeae56..d336a54 100644
+--- a/src/main/java/com/acmehealth/priorauth/api/PendingRequestsController.java
++++ b/src/main/java/com/acmehealth/priorauth/api/PendingRequestsController.java
+@@ -1,23 +1,46 @@
+ package com.acmehealth.priorauth.api;
+ 
++import com.acmehealth.priorauth.aging.RequestAging;
++import com.acmehealth.priorauth.model.PriorAuthRequest;
+ import com.acmehealth.priorauth.store.RequestStore;
++import org.springframework.format.annotation.DateTimeFormat;
++import org.springframework.http.HttpStatus;
+ import org.springframework.web.bind.annotation.GetMapping;
++import org.springframework.web.bind.annotation.RequestParam;
+ import org.springframework.web.bind.annotation.RestController;
++import org.springframework.web.server.ResponseStatusException;
+ 
++import java.time.Clock;
++import java.time.LocalDate;
+ import java.util.List;
+ 
+-/** GET /requests/pending: the list the reviewer screen shows, oldest first. */
++/** GET /requests/pending: the list the reviewer screen shows, oldest first, each row with its business-day age. */
+ @RestController
+ public class PendingRequestsController {
+ 
+     private final RequestStore store;
++    private final RequestAging aging;
++    private final Clock clock;
+ 
+-    public PendingRequestsController(RequestStore store) {
++    public PendingRequestsController(RequestStore store, RequestAging aging, Clock clock) {
+         this.store = store;
++        this.aging = aging;
++        this.clock = clock;
+     }
+ 
+     @GetMapping("/requests/pending")
+-    public List<PendingRequestResponse> pending() {
+-        return store.pending().stream().map(PendingRequestResponse::from).toList();
++    public List<PendingRequestResponse> pending(
++            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate asOf) {
++        List<PriorAuthRequest> rows = store.pending();
++        if (asOf != null) {
++            for (PriorAuthRequest r : rows) {
++                if (r.receivedAt().isAfter(asOf)) {
++                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
++                            "asOf " + asOf + " is before receivedAt " + r.receivedAt() + " of " + r.id());
++                }
++            }
++        }
++        LocalDate day = asOf != null ? asOf : LocalDate.now(clock);
++        return rows.stream().map(r -> PendingRequestResponse.from(r, aging, day)).toList();
+     }
+ }
+diff --git a/src/main/resources/application.yml b/src/main/resources/application.yml
+index dd31e5e..e1da2aa 100644
+--- a/src/main/resources/application.yml
++++ b/src/main/resources/application.yml
+@@ -3,3 +3,6 @@ spring:
+     name: priorauth-api
+ server:
+   port: 8080
++priorauth:
++  aging:
++    threshold-days: 5
+diff --git a/src/main/resources/data/holidays-TX-01-2026.json b/src/main/resources/data/holidays-TX-01-2026.json
+new file mode 100644
+index 0000000..1efa3ab
+--- /dev/null
++++ b/src/main/resources/data/holidays-TX-01-2026.json
+@@ -0,0 +1 @@
++["2026-01-01","2026-01-19","2026-02-16","2026-05-25","2026-07-03","2026-09-07","2026-10-12","2026-11-11","2026-11-26","2026-11-27","2026-12-25"]
+diff --git a/src/test/java/com/acmehealth/priorauth/aging/RequestAgingTest.java b/src/test/java/com/acmehealth/priorauth/aging/RequestAgingTest.java
+new file mode 100644
+index 0000000..fcd2ff9
+--- /dev/null
++++ b/src/test/java/com/acmehealth/priorauth/aging/RequestAgingTest.java
+@@ -0,0 +1,106 @@
++package com.acmehealth.priorauth.aging;
++
++import org.junit.jupiter.api.Test;
++import tools.jackson.databind.json.JsonMapper;
++
++import java.io.ByteArrayInputStream;
++import java.io.InputStream;
++import java.nio.charset.StandardCharsets;
++import java.time.LocalDate;
++import java.util.HashMap;
++import java.util.Map;
++import java.util.Set;
++
++import static org.assertj.core.api.Assertions.assertThat;
++import static org.assertj.core.api.Assertions.assertThatThrownBy;
++
++/** The business-day rule on its own, without Spring. */
++class RequestAgingTest {
++
++    private static final String TX = "TX-01";
++    private final RequestAging aging = new RequestAging(Map.of(TX, Set.of(d("2026-10-12"))), 5);
++
++    @Test
++    void sameDayIsZero() {
++        assertThat(aging.ageBusinessDays(TX, d("2026-10-13"), d("2026-10-13"))).isZero();
++    }
++
++    @Test
++    void weekendIsSkipped() {
++        assertThat(aging.ageBusinessDays(TX, d("2026-10-02"), d("2026-10-05"))).isEqualTo(1);
++    }
++
++    @Test
++    void holidayIsSkipped() {
++        assertThat(aging.ageBusinessDays(TX, d("2026-10-09"), d("2026-10-13"))).isEqualTo(1);
++        assertThat(aging.ageBusinessDays("NO-CAL", d("2026-10-09"), d("2026-10-13"))).isEqualTo(2);
++    }
++
++    @Test
++    void weekendReceiptStartsNextBusinessDay() {
++        assertThat(aging.ageBusinessDays(TX, d("2026-10-03"), d("2026-10-05"))).isEqualTo(1);
++    }
++
++    @Test
++    void asOfOnWeekendAddsNothing() {
++        assertThat(aging.ageBusinessDays(TX, d("2026-10-01"), d("2026-10-03"))).isEqualTo(1);
++        assertThat(aging.ageBusinessDays(TX, d("2026-10-01"), d("2026-10-04"))).isEqualTo(1);
++    }
++
++    @Test
++    void asOfBeforeReceivedIsZero() {
++        assertThat(aging.ageBusinessDays(TX, d("2026-10-13"), d("2026-10-12"))).isZero();
++    }
++
++    @Test
++    void workedCheckAges() {
++        assertThat(aging.ageBusinessDays(TX, d("2026-10-01"), d("2026-10-13"))).isEqualTo(7);
++        assertThat(aging.ageBusinessDays(TX, d("2026-10-06"), d("2026-10-13"))).isEqualTo(4);
++        assertThat(aging.ageBusinessDays(TX, d("2026-10-09"), d("2026-10-13"))).isEqualTo(1);
++    }
++
++    @Test
++    void thresholdBoundary() {
++        assertThat(aging.overLimit(5)).isFalse();
++        assertThat(aging.label(5)).isEqualTo("5 bd");
++        assertThat(aging.overLimit(6)).isTrue();
++        assertThat(aging.label(6)).isEqualTo("6 bd OVER 5");
++        assertThat(aging.label(0)).isEqualTo("0 bd");
++        assertThat(new RequestAging(Map.of(), 3).label(7)).isEqualTo("7 bd OVER 3");
++    }
++
++    @Test
++    void negativeThresholdFails() {
++        assertThatThrownBy(() -> new RequestAging(Map.of(), -1)).isInstanceOf(IllegalArgumentException.class);
++    }
++
++    @Test
++    void loadsTheTx01Calendar() throws Exception {
++        RequestAging real = new RequestAging(JsonMapper.builder().build(), 5);
++        assertThat(real.ageBusinessDays(TX, d("2026-10-09"), d("2026-10-13"))).isEqualTo(1);
++        assertThat(real.ageBusinessDays(TX, d("2026-11-25"), d("2026-11-30"))).isEqualTo(1);
++    }
++
++    @Test
++    void malformedHolidayFileFails() {
++        JsonMapper mapper = JsonMapper.builder().build();
++        Map<String, Set<LocalDate>> into = new HashMap<>();
++        assertThatThrownBy(() -> RequestAging.readHolidayFile(mapper, "holidays-TX-01-2026.json",
++                json("{\"not\": \"an array\"}"), into))
++                .isInstanceOf(IllegalStateException.class).hasMessageContaining("holidays-TX-01-2026.json");
++        assertThatThrownBy(() -> RequestAging.readHolidayFile(mapper, "holidays-TX-01.json", json("[]"), into))
++                .isInstanceOf(IllegalStateException.class).hasMessageContaining("holidays-TX-01.json");
++        assertThatThrownBy(() -> RequestAging.readHolidayFile(mapper, "holidays-TX-01-2026.json",
++                json("[\"2027-01-01\"]"), into))
++                .isInstanceOf(IllegalStateException.class);
++        assertThat(into).isEmpty();
++    }
++
++    private static LocalDate d(String iso) {
++        return LocalDate.parse(iso);
++    }
++
++    private static InputStream json(String s) {
++        return new ByteArrayInputStream(s.getBytes(StandardCharsets.UTF_8));
++    }
++}
+diff --git a/src/test/java/com/acmehealth/priorauth/api/PendingRequestsControllerTest.java b/src/test/java/com/acmehealth/priorauth/api/PendingRequestsControllerTest.java
+index ddd6116..dd69b64 100644
+--- a/src/test/java/com/acmehealth/priorauth/api/PendingRequestsControllerTest.java
++++ b/src/test/java/com/acmehealth/priorauth/api/PendingRequestsControllerTest.java
+@@ -3,9 +3,17 @@ package com.acmehealth.priorauth.api;
+ import org.junit.jupiter.api.Test;
+ import org.springframework.beans.factory.annotation.Autowired;
+ import org.springframework.boot.test.context.SpringBootTest;
++import org.springframework.boot.test.context.TestConfiguration;
+ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
++import org.springframework.context.annotation.Bean;
++import org.springframework.context.annotation.Primary;
+ import org.springframework.test.web.servlet.MockMvc;
+ 
++import java.time.Clock;
++import java.time.Instant;
++import java.time.ZoneOffset;
++
++import static org.hamcrest.Matchers.containsString;
+ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+@@ -15,6 +23,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
+ @AutoConfigureMockMvc
+ class PendingRequestsControllerTest {
+ 
++    /** "Today" is Tue 2026-10-13 in every test, so no test depends on the real date. */
++    @TestConfiguration
++    static class FixedClock {
++        @Bean
++        @Primary
++        Clock fixedClock() {
++            return Clock.fixed(Instant.parse("2026-10-13T12:00:00Z"), ZoneOffset.UTC);
++        }
++    }
++
+     @Autowired
+     private MockMvc mvc;
+ 
+@@ -26,4 +44,57 @@ class PendingRequestsControllerTest {
+                 .andExpect(jsonPath("$[0].id").value("PA-10231"))
+                 .andExpect(jsonPath("$[0].receivedAt").value("2026-10-01"));
+     }
++
++    @Test
++    void agesAsOfWorkedCheck() throws Exception {
++        mvc.perform(get("/requests/pending").param("asOf", "2026-10-13"))
++                .andExpect(status().isOk())
++                .andExpect(jsonPath("$.length()").value(3))
++                .andExpect(jsonPath("$[0].id").value("PA-10231"))
++                .andExpect(jsonPath("$[1].id").value("PA-10244"))
++                .andExpect(jsonPath("$[2].id").value("PA-10263"))
++                .andExpect(jsonPath("$[0].ageBusinessDays").value(7))
++                .andExpect(jsonPath("$[1].ageBusinessDays").value(4))
++                .andExpect(jsonPath("$[2].ageBusinessDays").value(1))
++                .andExpect(jsonPath("$[0].overLimit").value(true))
++                .andExpect(jsonPath("$[1].overLimit").value(false))
++                .andExpect(jsonPath("$[2].overLimit").value(false))
++                .andExpect(jsonPath("$[0].ageLabel").value("7 bd OVER 5"))
++                .andExpect(jsonPath("$[1].ageLabel").value("4 bd"))
++                .andExpect(jsonPath("$[2].ageLabel").value("1 bd"))
++                .andExpect(jsonPath("$[0].tenantId").value("TX-01"))
++                .andExpect(jsonPath("$[0].service").value("MRI lumbar spine"))
++                .andExpect(jsonPath("$[0].status").value("PENDED"))
++                .andExpect(jsonPath("$[0].receivedAt").value("2026-10-01"));
++    }
++
++    @Test
++    void defaultsToTodayFromClock() throws Exception {
++        mvc.perform(get("/requests/pending"))
++                .andExpect(status().isOk())
++                .andExpect(jsonPath("$[0].ageBusinessDays").value(7))
++                .andExpect(jsonPath("$[1].ageBusinessDays").value(4))
++                .andExpect(jsonPath("$[2].ageBusinessDays").value(1));
++    }
++
++    @Test
++    void asOfEqualToNewestReceivedIsValid() throws Exception {
++        mvc.perform(get("/requests/pending").param("asOf", "2026-10-09"))
++                .andExpect(status().isOk())
++                .andExpect(jsonPath("$[2].ageBusinessDays").value(0))
++                .andExpect(jsonPath("$[2].ageLabel").value("0 bd"));
++    }
++
++    @Test
++    void invalidAsOfIs400() throws Exception {
++        mvc.perform(get("/requests/pending").param("asOf", "2026-13-45")).andExpect(status().isBadRequest());
++        mvc.perform(get("/requests/pending").param("asOf", "yesterday")).andExpect(status().isBadRequest());
++    }
++
++    @Test
++    void asOfBeforeReceivedIs400() throws Exception {
++        mvc.perform(get("/requests/pending").param("asOf", "2026-10-05"))
++                .andExpect(status().isBadRequest())
++                .andExpect(status().reason(containsString("2026-10-06")));
++    }
+ }

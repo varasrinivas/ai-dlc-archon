@@ -1,0 +1,9 @@
+[
+  {
+    "title": "TX-01 holiday calendar ends 2026-12-31; 2027 holidays will silently count as business days",
+    "claim": "From 2027-01-01, ages for TX-01 will count 2027 holidays (e.g. 2027-01-01) as business days, with no warning, because only a 2026 calendar ships and the missing-calendar warning fires only when a tenant has no file at all, not when a year is missing.",
+    "evidence": "priorauth-api/src/main/resources/data/ holds only holidays-TX-01-2026.json; RequestAging.java:91 loads classpath*:data/holidays-*.json; RequestAging.java:82 warns only when holidaysByTenant has no entry for the tenant (TX-01 has one), so a 2027 date is checked against the 2026-only set and counted.",
+    "relation": "unrelated",
+    "source_node": "plan"
+  }
+]

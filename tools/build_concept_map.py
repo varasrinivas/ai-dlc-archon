@@ -27,15 +27,20 @@ assert KIND["implement"] == "loop" and "until_bash: ./scripts/verify.sh" in WF_T
 assert "fresh_context: true" in WF_TEXT and "enum: [READY, NOT-READY]" in WF_TEXT and "required: [summary, files, tests]" in WF_TEXT
 assert NODES["stop-plan"]["when"] == "$approve-plan.output.decision == 'reject'"
 assert NODES["push"]["when"] == "$approve-change.output.decision == 'approve'"
-assert "git push -u origin HEAD" in WF_TEXT
+assert "git -C priorauth-api push -u origin" in WF_TEXT and "git -C priorauth-api log --oneline main..HEAD" in WF_TEXT
 
 INV = [x["path"] for x in json.loads((ROOT / "tools/data/cli/inventory.json").read_text(encoding="utf-8"))]
 for p in ["archon.db", "bin/archon.exe", "config.yaml"]:
     assert p in INV, p
-for pre in ["plugins/", "web-dist/", "workspaces/_local/priorauth-api/artifacts/runs/", "workspaces/_local/priorauth-api/logs/",
-            "workspaces/_local/priorauth-api/worktrees/request-age/"]:
+for pre in ["plugins/", "web-dist/", "workspaces/_folder/java-workspace/artifacts/runs/", "workspaces/_folder/java-workspace/logs/",
+            "workspaces/_folder/java-workspace/workflow-source/runs/"]:
     assert any(x.startswith(pre) for x in INV), pre
-ARTS = sorted(p.name for p in (ROOT / "archon-hello-world-java/java-run/artifacts/cd54631b99f7e43dc9739bb63499690f").glob("*.md"))
+assert not any(x.startswith("workspaces/_folder/java-workspace/worktrees/") for x in INV)
+_NODES = json.loads((ROOT / "archon-hello-world-java/java-run/nodes.json").read_text(encoding="utf-8"))
+RID = next(k for k, v in _NODES.items() if v["workflow"] == "request-to-pr")
+ARTS = sorted(p.name for p in (ROOT / "archon-hello-world-java/java-run/artifacts" / RID).glob("*.md"))
+_WS = ROOT / "archon-hello-world-java/java-workspace"
+assert (_WS / ".gitignore").read_text(encoding="utf-8").strip().endswith("/priorauth-api/") and (_WS / "priorauth-api/pom.xml").exists()
 assert ARTS == ["implementation.md", "plan.md", "questions.md", "requirements.md", "review.md", "scan.md"], ARTS
 CLI = json.loads((ROOT / "tools/data/cli/cli.json").read_text(encoding="utf-8"))
 VERSION = re.search(r"Archon CLI v([\d.]+)", CLI["version"]["out"]).group(1)
@@ -97,24 +102,26 @@ t(30, 66, "Three questions a beginner asks: where does everything live, how does
 # ==== column 1: where things live =========================================================
 r(30, 92, 500, 650, fill=PANEL, stroke=LINE, sw=1, rx=16)
 t(48, 122, "Where things live", 17, 700, PH["setup"])
-t(48, 142, "two places: the repo the team shares, and your machine's ~/.archon", 11.5, 400, INK2)
+t(48, 142, "two places: the team's workspace with its repos, and your machine's ~/.archon", 11.5, 400, INK2)
 
 r(48, 158, 464, 268, rx=12, stroke=INK)
-t(60, 180, "priorauth-api/", 13, 700, mono=True)
-t(182, 180, "the repo · committed · git clone gives it to all", 11, 400, INK2)
-t(60, 198, "the cookbook: it lives in the restaurant", 10.5, 400, PH["setup"])
-r(60, 210, 440, 140, fill=SOFT, rx=8)
-t(72, 230, ".archon/", 12, 700, mono=True)
-t(140, 230, "what Archon reads from the repo", 10.5, 400, INK2)
-files(84, 252, [("config.yaml", "assistant: claude · worktree.baseBranch: main"),
-                ("workflows/team/request-to-pr/", "a pack (team) with one workflow")], right=496)
-files(100, 292, [("request-to-pr.yaml", "the recipe card: 15 nodes, 4 waits"),
-                 ("commands/scan.md, implement.md", "long prompts, kept out of YAML")], right=496)
-t(84, 336, "a repo workflow overrides a ~/.archon one, which overrides a bundled one", 10, 400, INK2)
-r(60, 360, 440, 56, fill="#FFFFFF", stroke=INK2, dash=True, rx=8)
-t(72, 380, "CLAUDE.md · scripts/verify.sh · .gitattributes · docs-in/", 11, 600, mono=True)
-t(72, 396, "OURS: the team's rules, its one check, LF for verify.sh, Ravi's request.", 10, 400, INK2)
-t(72, 409, "Claude Code reads CLAUDE.md in every AI node.", 10, 400, INK2)
+t(60, 180, "java-workspace/", 13, 700, mono=True)
+t(190, 180, "the team's workspace · its own git repo · committed", 11, 400, INK2)
+t(60, 198, "the kitchen: the cookbook lives here; a folder project", 10.5, 400, PH["setup"])
+r(60, 208, 440, 104, fill=SOFT, rx=8)
+t(72, 226, ".archon/", 12, 700, mono=True)
+t(140, 226, "what Archon reads from the workspace root", 10.5, 400, INK2)
+files(84, 246, [("config.yaml", "assistant: claude (no worktree settings)"),
+                ("workflows/team/request-to-pr/", "a pack (team) with one workflow")], step=18, right=496)
+files(100, 282, [("request-to-pr.yaml", "the recipe card: 15 nodes, 4 waits"),
+                 ("commands/scan.md, implement.md", "long prompts, kept out of YAML")], step=18, right=496)
+r(60, 318, 440, 44, fill="#FFFFFF", stroke=INK2, dash=True, rx=8)
+t(72, 336, "CLAUDE.md · scripts/verify.sh · docs-in/ · .gitignore", 11, 600, mono=True)
+t(72, 352, "OURS: the rules (read in every AI node), the check, the request", 10, 400, INK2)
+r(60, 368, 440, 50, fill="#FFFFFF", stroke=INK, rx=8)
+t(72, 387, "priorauth-api/", 12, 700, mono=True)
+t(184, 387, "the code repo · cloned inside · its own git, PRs", 10.5, 400, INK2)
+t(72, 405, "the pantry: .gitignore keeps it out; the agent branches here", 10, 400, PH["setup"])
 
 r(48, 440, 464, 286, rx=12, stroke=INK)
 t(60, 462, "~/.archon/", 13, 700, mono=True)
@@ -125,17 +132,17 @@ files(72, 486, [("bin/archon.exe", "the CLI, one binary"),
                 ("archon.db", "every run: status, answers, tokens, cost"),
                 ("web-dist/ · server/", "the Web UI, fetched by archon serve")], right=500)
 r(60, 584, 440, 130, fill=SOFT, rx=8)
-t(72, 604, "workspaces/<owner>/<repo>/", 12, 700, mono=True)
-t(72, 620, "_local/priorauth-api here: the remote is a folder, not GitHub", 10, 400, INK2)
-files(84, 644, [("worktrees/request-age/age-api/", "the run's own checkout"),
-                ("artifacts/runs/<run-id>/", "scan.md … review.md"),
-                ("logs/<run-id>.jsonl", "the transcript: every event")], step=22, right=496)
+t(72, 604, "workspaces/_folder/java-workspace/", 12, 700, mono=True)
+t(72, 620, "a folder project: no worktrees/, the run works in place", 10, 400, INK2)
+files(84, 644, [("artifacts/runs/<run-id>/", "scan.md … review.md"),
+                ("logs/<run-id>.jsonl", "the transcript: every event"),
+                ("workflow-source/runs/<run-id>/", "the workflow as run")], step=22, right=496)
 
 # ==== column 2: how one run flows ==========================================================
 X2 = 568
 r(X2 - 18, 92, 580, 650, fill=PANEL, stroke=LINE, sw=1, rx=16)
 t(X2, 122, "How one run flows", 17, 700, PH["plan"])
-t(X2, 142, 'archon workflow run request-to-pr --branch request-age/age-api "…"', 11, 400, INK2, mono=True)
+t(X2, 142, 'cd java-workspace; archon workflow run request-to-pr --folder "…"', 11, 400, INK2, mono=True)
 
 
 def band(y, h, ph, label, right=True):
@@ -188,11 +195,11 @@ a(X2 + 420, 552, X2 + 348, 576, col=STOP)
 
 # Ship
 band(626, 62, "ship", "SHIP", right=False)
-node("push", X2 + 380, 636, 152, "bash · git push")
+node("push", X2 + 380, 636, 152, "bash · git -C … push")
 a(X2 + 490, 552, X2 + 490, 634, col=CODE)
 t(X2 + 498, 598, "approve", 9, 700, CODE)
-t(X2 + 12, 652, "then archon complete <branch> removes the worktree;", 10.5, 400, INK2)
-t(X2 + 12, 668, "the pull request and the merge are yours (OURS)", 10.5, 400, INK2)
+t(X2 + 12, 652, "pushes the branch the agent made in priorauth-api;", 10.5, 400, INK2)
+t(X2 + 12, 668, "the pull request, the merge, the tidy-up are yours (OURS)", 10.5, 400, INK2)
 
 # legend
 for i, (lab, c, dash) in enumerate([("AI node: Claude Code runs it", AI, False), ("code: bash, no model", CODE, False),
@@ -200,7 +207,7 @@ for i, (lab, c, dash) in enumerate([("AI node: Claude Code runs it", AI, False),
     x, y = X2 + (i % 2) * 272, 704 + (i // 2) * 16
     r(x, y - 10, 14, 11, fill="#FFFFFF", stroke=c, sw=1.6, rx=3, dash=dash)
     t(x + 20, y, lab, 10, 400, INK2)
-t(X2, 734, "each run: its own worktree and branch, artifacts and transcript, and a run id to find it by", 10.5, 600, PH["plan"])
+t(X2, 734, "each run: in place in the workspace, artifacts and transcript, and a run id to find it by", 10.5, 600, PH["plan"])
 
 # ==== column 3: who decides what ===========================================================
 X3 = 1168
@@ -214,11 +221,11 @@ cards = [
       ("answer at every wait; archon workflow attention lists them:", False),
       ("answer <run> --occurrence <id> --text \"…\"", True),
       ("approve <run> \"why\" · reject <run> \"what to change\"", True),
-      ("in the run: 6 questions answered, requirements rejected", False),
-      ("once, plan approved, change rejected (review: NOT-READY)", False)]),
+      ("in the run: 7 questions answered, requirements rejected", False),
+      ("once, plan approved, change rejected (a 500, by hand)", False)]),
     ("Archon · the expediter calling the orders", PH["plan"], False,
      [("walks the graph: depends_on, when, trigger_rule", False),
-      ("starts each node, makes the worktree, pauses at waits", False),
+      ("starts each node in the workspace, pauses at waits", False),
       ("routes reject only where the YAML says (when: … 'reject')", False),
       ("records transcript, artifacts, tokens and cost per run", False)]),
     ("The agent · the cooks", AI, False,
@@ -242,8 +249,8 @@ for title, c, dash, lines in cards:
 r(X3, y, 444, 728 - y, fill=SOFT, stroke=LINE, sw=1, rx=10)
 t(X3 + 12, y + 22, "Reject is an answer, not a stop.", 12.5, 700, STOP)
 t(X3 + 12, y + 40, "Inside a loop_group it means \"revise\"; before a cancel node", 10.5, 400, INK2)
-t(X3 + 12, y + 55, "it ends the run. A worktree keeps your checkout clean;", 10.5, 400, INK2)
-t(X3 + 12, y + 70, "it is not a sandbox.", 10.5, 400, INK2)
+t(X3 + 12, y + 55, "it ends the run. In place means your own clones:", 10.5, 400, INK2)
+t(X3 + 12, y + 70, "what the agent committed stays on its branch.", 10.5, 400, INK2)
 t(X3 + 12, y + 92, "Every answer is kept with the run:", 10.5, 700, INK)
 t(X3 + 12, y + 107, "who said what, and when, is in archon.db and the transcript.", 10.5, 400, INK2)
 

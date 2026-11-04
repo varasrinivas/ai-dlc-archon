@@ -1,0 +1,65 @@
+commit 4ea9e9dd1a240dfa440ce082a6b957cfe149588b
+Author: Kiran Rao <kiran@acme-health.example>
+Date:   Wed Nov 4 17:58:28 2026 +0530
+
+    Pending list: asOf after today is a 400
+    
+    A future asOf is a caller error under FR11, as Meena decided. It used to be accepted, and asOf=+999999999-12-31 overflowed in the age count and returned 500. An empty asOf still means today; both now have a test.
+---
+ src/main/java/com/acmehealth/priorauth/api/PendingRequestsController.java  |  7 ++++++-
+ .../java/com/acmehealth/priorauth/api/PendingRequestsControllerTest.java   | 18 ++++++++++++++++++
+ 2 files changed, 24 insertions(+), 1 deletion(-)
+
+diff --git a/src/main/java/com/acmehealth/priorauth/api/PendingRequestsController.java b/src/main/java/com/acmehealth/priorauth/api/PendingRequestsController.java
+index d336a54..eb4dfb1 100644
+--- a/src/main/java/com/acmehealth/priorauth/api/PendingRequestsController.java
++++ b/src/main/java/com/acmehealth/priorauth/api/PendingRequestsController.java
+@@ -32,7 +32,12 @@ public class PendingRequestsController {
+     public List<PendingRequestResponse> pending(
+             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate asOf) {
+         List<PriorAuthRequest> rows = store.pending();
++        LocalDate today = LocalDate.now(clock);
+         if (asOf != null) {
++            if (asOf.isAfter(today)) {
++                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
++                        "asOf " + asOf + " is after today " + today);
++            }
+             for (PriorAuthRequest r : rows) {
+                 if (r.receivedAt().isAfter(asOf)) {
+                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+@@ -40,7 +45,7 @@ public class PendingRequestsController {
+                 }
+             }
+         }
+-        LocalDate day = asOf != null ? asOf : LocalDate.now(clock);
++        LocalDate day = asOf != null ? asOf : today;
+         return rows.stream().map(r -> PendingRequestResponse.from(r, aging, day)).toList();
+     }
+ }
+diff --git a/src/test/java/com/acmehealth/priorauth/api/PendingRequestsControllerTest.java b/src/test/java/com/acmehealth/priorauth/api/PendingRequestsControllerTest.java
+index dd69b64..cda2182 100644
+--- a/src/test/java/com/acmehealth/priorauth/api/PendingRequestsControllerTest.java
++++ b/src/test/java/com/acmehealth/priorauth/api/PendingRequestsControllerTest.java
+@@ -97,4 +97,22 @@ class PendingRequestsControllerTest {
+                 .andExpect(status().isBadRequest())
+                 .andExpect(status().reason(containsString("2026-10-06")));
+     }
++
++    @Test
++    void asOfAfterTodayIs400() throws Exception {
++        mvc.perform(get("/requests/pending").param("asOf", "2026-10-14"))
++                .andExpect(status().isBadRequest())
++                .andExpect(status().reason(containsString("2026-10-13")));
++        mvc.perform(get("/requests/pending").param("asOf", "+999999999-12-31"))
++                .andExpect(status().isBadRequest());
++    }
++
++    @Test
++    void emptyAsOfIsToday() throws Exception {
++        mvc.perform(get("/requests/pending").param("asOf", ""))
++                .andExpect(status().isOk())
++                .andExpect(jsonPath("$[0].ageBusinessDays").value(7))
++                .andExpect(jsonPath("$[1].ageBusinessDays").value(4))
++                .andExpect(jsonPath("$[2].ageBusinessDays").value(1));
++    }
+ }

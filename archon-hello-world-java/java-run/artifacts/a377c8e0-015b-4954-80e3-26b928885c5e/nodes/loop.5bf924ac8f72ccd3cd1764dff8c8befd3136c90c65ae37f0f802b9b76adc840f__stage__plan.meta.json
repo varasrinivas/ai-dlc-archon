@@ -1,0 +1,14 @@
+{
+  "nodeId": "stage__plan",
+  "outputType": "implementation-plan",
+  "loopGroupPath": [
+    {
+      "groupId": "cycle",
+      "iteration": 1
+    }
+  ],
+  "path": "nodes\\loop.5bf924ac8f72ccd3cd1764dff8c8befd3136c90c65ae37f0f802b9b76adc840f__stage__plan.md",
+  "runId": "a377c8e0-015b-4954-80e3-26b928885c5e",
+  "producedAt": "2026-11-04T12:32:51.938Z",
+  "size": 1536
+}

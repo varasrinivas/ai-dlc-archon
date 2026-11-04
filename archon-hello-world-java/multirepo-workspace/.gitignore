@@ -1,0 +1,3 @@
+# The code repos are git repos of their own, cloned here side by side: not part of the workspace repo.
+/priorauth-aging/
+/priorauth-api/
