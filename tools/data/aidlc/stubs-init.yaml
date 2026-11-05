@@ -1,0 +1,74 @@
+workspace-scaffold: TODO
+workspace-detection: 
+  greenfield: false
+  has_pipeline: false
+  repos: 
+    []
+  summary: TODO
+state-init: 
+  scope: TODO
+  intent_capture: false
+  market_research: false
+  feasibility: false
+  scope_definition: false
+  team_formation: false
+  rough_mockups: false
+  approval_handoff: false
+  reverse_engineering: false
+  practices_discovery: false
+  requirements_analysis: false
+  user_stories: false
+  refined_mockups: false
+  domain_design: false
+  units_generation: false
+  contract_design: false
+  delivery_planning: false
+  functional_design: false
+  nfr_requirements: false
+  nfr_design: false
+  infrastructure_design: false
+  code_generation: false
+  build_and_test: false
+  ci_pipeline: false
+  deployment_pipeline: false
+  environment_provisioning: false
+  deployment_execution: false
+  observability_setup: false
+  incident_response: false
+  performance_validation: false
+  feedback_optimization: false
+intent-capture-work: TODO
+market-research-work: TODO
+feasibility-work: TODO
+scope-definition-work: TODO
+team-formation-work: TODO
+rough-mockups-work: TODO
+approval-handoff-work: TODO
+ideation-check: TODO
+reverse-engineering-work: TODO
+practices-discovery-work: TODO
+requirements-analysis-work: TODO
+user-stories-work: TODO
+refined-mockups-work: TODO
+domain-design-work: TODO
+units-generation-work: TODO
+contract-design-work: TODO
+delivery-planning-work: TODO
+inception-check: TODO
+functional-design-work: TODO
+nfr-requirements-work: TODO
+nfr-design-work: TODO
+infrastructure-design-work: TODO
+code-generation-work: TODO
+code-generation-verify: TODO
+build-and-test-work: TODO
+ci-pipeline-work: TODO
+construction-check: TODO
+deployment-pipeline-work: TODO
+environment-provisioning-work: TODO
+deployment-execution-work: TODO
+observability-setup-work: TODO
+incident-response-work: TODO
+performance-validation-work: TODO
+feedback-optimization-work: TODO
+operation-check: TODO

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Archon, Step by Step</title>
-<meta name="description" content="Archon, the open-source workflow engine for AI coding, run with Claude Code, in 5 modules over 3 parts: the introduction and concepts, setting up a team workspace around the repo, a 20-step real run of one request on a Spring Boot repo, and a 16-step real run of one bug across two repos.">
+<meta name="description" content="Archon, the open-source workflow engine for AI coding, run with Claude Code, in 6 modules over 4 parts: the introduction and concepts, setting up a team workspace around the repo, a 20-step real run of one request on a Spring Boot repo, a 16-step real run of one bug across two repos, and AWS AI-DLC's 33 stages as one Archon workflow.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@600;700;800&family=Red+Hat+Text:wght@400;500;600&display=swap" rel="stylesheet">
@@ -53,7 +53,7 @@ code{font-size:.88em;background:var(--accent-soft);padding:1px 5px;border-radius
 <main>
   <p class="kicker">Archon 0.13.2 · Claude Code</p>
   <h1>Archon, Step by Step</h1>
-  <p class="lead">Archon turns how your team works into a YAML workflow and runs it with the agent you already use: agents where judgment is needed, commands where it isn't, and a pause wherever a person must decide. 5 modules in 3 parts, built from real runs and real output.</p>
+  <p class="lead">Archon turns how your team works into a YAML workflow and runs it with the agent you already use: agents where judgment is needed, commands where it isn't, and a pause wherever a person must decide. 6 modules in 4 parts, built from real runs and real output.</p>
   <a class="start" href="archon-introduction.html">Start with module 1: Introduction →</a>
   <nav aria-label="Parts"><ol class="path"><li><a href="#part1"><span>1</span>Understand Archon</a></li><li><a href="#part2"><span>2</span>Set up</a></li><li><a href="#part3"><span>3</span>Real runs</a></li><li><a href="#reference"><span>★</span>Reference</a></li></ol></nav>
 
@@ -72,6 +72,11 @@ code{font-size:.88em;background:var(--accent-soft);padding:1px 5px;border-radius
   <ol class="mods">
     <li class="mod"><span class="n">4</span><div class="body"><a class="t" href="archon-hello-world-java/archon-hello-world-java-run.html">One request, one repo: 20 steps (Java)</a><p>Ravi's request through the team's <code>request-to-pr</code> workflow: seven questions answered, requirements sent back once, a plan approved, code written until the tests pass, a review that says READY, a 500 that Kiran finds by hand, a fix with the bundled <code>archon-implement</code>, and the merge. Then the bundled <code>archon-plan</code> on the same request.</p><small>Real run · 21 tests · the workspace and repo are in the course files</small></div></li>
     <li class="mod"><span class="n">5</span><div class="body"><a class="t" href="archon-hello-world-java/archon-two-repos-run.html">One bug, two repos: 16 steps</a><p>Ravi's New Year bug, whose fix spans the aging library and the API that depends on it. Archon works in place, the agent branches and commits in each repo, Meena corrects the plan's numbers, the packaged jar is checked by hand, and a branch is pushed per repo, library first.</p><small>Real run · 2 repos · the workspace and both repos are in the course files</small></div></li>
+  </ol></section>
+
+  <section class="part" id="part4"><header><p class="pn">Part 4</p><h2>Archon and AI-DLC</h2><p class="why">AWS AI-DLC's lifecycle written as an Archon workflow, stage by stage.</p></header>
+  <ol class="mods">
+    <li class="mod"><span class="n">6</span><div class="body"><a class="t" href="archon-aidlc-on-archon.html">AI-DLC on Archon: 33 stages as one workflow</a><p>An interactive map of AI-DLC's 33 stages, each drawn as the Archon nodes it becomes: an agent node that does the stage's work and an approval gate. The scope becomes an input, a script turns it into one true/false per stage, and <code>when:</code> skips the rest. Pick a scope and see which stages Archon ran.</p><small>Generated from AI-DLC's stage table · validated · 13 real dry runs, no model called</small></div></li>
   </ol></section>
 
   <section class="part" id="reference"><header><p class="pn">Reference</p><h2>Keep these at hand</h2><p class="why">Cheat sheet, concept map and the repos the modules use.</p></header>

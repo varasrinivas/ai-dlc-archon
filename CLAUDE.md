@@ -8,15 +8,16 @@ An Archon course (coleam00/Archon 0.13.2, the YAML workflow engine for AI coding
 
 | Page | Generator | Built from |
 |---|---|---|
-| `archon-introduction.html` | `tools/build_intro_page.py` | `tools/data/cli/cli.json`, the team workflow, `java-run/steps.json` |
+| `archon-introduction.html` | `tools/build_intro_page.py` | `tools/data/cli/cli.json`, the team workflow, `java-run/steps.json` and `nodes.json` (steps 1–3 are the newcomer's path: the problem, ten basic words, the run as a story; the glossary is `pagekit.ARCHON_WORDS`, shared with the run page) |
 | `archon-concepts-explained.html` | `tools/build_concepts_page.py` | the Archon 0.13.2 docs, the team workflow, `cli.json` |
 | `archon-concepts-onepage.html` (A4 landscape cheat sheet, same design as `aidlc-concepts-onepage.html`) | `tools/build_onepage.py` | the concepts page's content condensed; asserts node kinds, tiers, bundled count, the run's commands |
 | `archon-concepts-map.svg` (standalone, fixed light colours, like `aidlc-concepts-map.svg`) | `tools/build_concept_map.py` | the team workflow (node ids, kinds, loop checks), `inventory.json` (`~/.archon` layout), the run's artifacts |
 | `archon-workspace-setup.html` | `tools/build_setup_page.py` | `install.txt`, `cli.json`, `home-config.yaml`, `inventory.json`, `java-run/setup-steps.json`, `tools/data/setup/`, `img/webui-*.png` |
 | `archon-hello-world-java/archon-hello-world-java-run.html` (20 steps, every setup command included) | `tools/build_run_page.py` | `archon-hello-world-java/java-run/` and `java-workspace/` |
 | `archon-hello-world-java/archon-two-repos-run.html` (one bug across two repos, 16 steps, every setup command included) | `tools/build_multirepo_page.py` | `archon-hello-world-java/multirepo-run/`, `tools/data/multirepo/files/`, `setup_multirepo_run.py`'s pom constants; checks step 16 against `../ai-dlc-execution/aidlc-hello-world-java/graphify-multirepo-run/` when that sibling is checked out |
+| `archon-aidlc-on-archon.html` (AWS AI-DLC's 33 stages as one Archon workflow; interactive stage map with a scope switch) | `tools/build_aidlc_map_page.py` | `tools/data/aidlc/` (AI-DLC 2.11's stage and scope tables, the generated workflow, `steps.json` from Archon's validate and 13 dry runs) |
 
-Edit the generators, never the HTML. Each generator asserts the numbers it prints (bundled workflow count, node and wait counts, test counts, costs, the review verdict, the curl output), and `pagekit.write()` fails if a local path (your user folder, `D:\tmp`, the hostname, the Claude projects slug; `pagekit` reads the user and hostname from the machine, so neither is written in the repo) leaks onto a page. Rebuild all: `for p in intro concepts setup run; do py -3.12 tools/build_${p}_page.py; done; py -3.12 tools/build_onepage.py; py -3.12 tools/build_concept_map.py; py -3.12 tools/build_multirepo_page.py`. The sheet's text has no room to spare: after changing it, check in a browser that no `.tile` overflows (`scrollHeight > clientHeight`).
+Edit the generators, never the HTML. Each generator asserts the numbers it prints (bundled workflow count, node and wait counts, test counts, costs, the review verdict, the curl output), and `pagekit.write()` fails if a local path (your user folder, `D:\tmp`, the hostname, the Claude projects slug; `pagekit` reads the user and hostname from the machine, so neither is written in the repo) leaks onto a page. Rebuild all: `for p in intro concepts setup run; do py -3.12 tools/build_${p}_page.py; done; py -3.12 tools/build_onepage.py; py -3.12 tools/build_concept_map.py; py -3.12 tools/build_multirepo_page.py; py -3.12 tools/build_aidlc_map_page.py`. The sheet's text has no room to spare: after changing it, check in a browser that no `.tile` overflows (`scrollHeight > clientHeight`).
 
 ## Shared pieces
 
@@ -61,6 +62,16 @@ What happened: `--dry-run` with `--folder` is refused (a plain dry run works and
 
 Cast and story match the AI-DLC course on purpose: Ravi Menon (nurse manager), Kiran Rao (developer), Meena Iyer (tech lead), Ravi's Slack request of Tue 13 Oct; the runs themselves happened 4 Nov 2026.
 
+## AI-DLC on Archon (no model run)
+
+`tools/data/aidlc/stage-table.md`, `scope-table.md` and `scopes/scope-<scope>.txt` are AI-DLC Workflows 2.11's own tables, copied from `../ai-dlc-execution/aidlc-hello-world-java/scopes-data/` (re-copy after an AI-DLC update). `tools/aidlc_map.py` reads them (33 stages, 11 scopes) and holds the course's own words: each persona's short role (`ROLE`) and each stage's one-line job (`WORK`).
+
+1. `py -3.12 tools/make_aidlc_workflow.py` writes `tools/data/aidlc/files/.archon/workflows/aidlc/aidlc-on-archon/` (`aidlc-on-archon.yaml`, 98 nodes, and `scripts/state-init.ts`): each gated stage is a `loop_group` of `<slug>-work` (agent) and `<slug>-gate` (approval wait; reject redoes the stage), Code Generation adds `code-generation-verify` (bash, `scripts/verify.sh`), a bash `<phase>-check` follows each phase, and the scope is `--input scope=…` → `state-init` (a bun script: AI-DLC's scope lists, plus two rules: greenfield skips 2.1, no pipeline skips Operation) → `when:` on every stage. Long inline `script:` bodies fail on Windows (`ERR_INVALID_ARG_VALUE`), hence the script file.
+2. `py -3.12 tools/capture_aidlc_map.py` rebuilds `D:\tmp\archon-aidlc\aidlc-workspace` (a copy of `java-workspace/`, both repos git-inited) and records `tools/data/aidlc/steps.json`: `validate`, `stubs-init`, `dry-<scope>` for the 11 scopes, `dry-feature-pipeline`, `dry-poc-greenfield` (`--dry-run --exec-code --stubs`: bash and the script really run, including `verify.sh`; agent nodes and gates are stubbed by `tools/data/aidlc/stubs*.yaml`). No model call, no cost. Then `scrub_captures.py`.
+3. `py -3.12 tools/build_aidlc_map_page.py` asserts that every dry run ran exactly `aidlc_map.runs(scope, …)`, that express = 0.1–0.3, 2.1, 2.3, 3.5, 3.6, and (when the sibling is checked out) that this matches the AI-DLC course's real express run.
+
+The page says plainly that the workflow has not been run with a model. A real run would go through `archon_step.py` like the other runs.
+
 ## After an Archon update
 
 Re-run steps 1–5 above in an empty `D:\tmp` (a full run takes about 30 minutes and several Claude sessions; answer the waits with the same text, read from the old `steps.json`), re-capture, rebuild, and fix whichever assert breaks. Also re-check: workflow names (0.13.1 made them exact), the node-kind list, the `archon help` command count, and the bash/bun/serve findings.
@@ -69,7 +80,7 @@ Re-run steps 1–5 above in an empty `D:\tmp` (a full run takes about 30 minutes
 
 GitHub: `varasrinivas/ai-dlc-archon` (**public** since 4 Nov 2026; history squashed to one commit at that point), branch `main`. The raw captures are scrubbed (`tools/scrub_captures.py`); run `py -3.12 tools/scrub_captures.py --check` before every push.
 
-The course is deployed to two sites, same files to both: `index.html`, the five pages, the cheat sheet, `archon-concepts-map.svg` and `img/*.png` (the pages link nothing else locally, and the run pages' `../../ai-dlc-execution/...` links resolve on both sites as-is, so no link rewriting).
+The course is deployed to two sites, same files to both: `index.html`, the six pages, the cheat sheet, `archon-concepts-map.svg` and `img/*.png` (the pages link nothing else locally, and the run pages' `../../ai-dlc-execution/...` links resolve on both sites as-is, so no link rewriting).
 
 | Site | Bucket path | CloudFront | Hub card |
 |---|---|---|---|
@@ -80,7 +91,7 @@ Redeploy after a rebuild (Git Bash, from this folder):
 
 ```bash
 for B in s3://agenticai.varasrinivas.com/courses/archon s3://learnings.varasrinivas.com/archon; do
-  for f in index.html archon-introduction.html archon-concepts-explained.html archon-concepts-onepage.html archon-workspace-setup.html archon-hello-world-java/archon-hello-world-java-run.html archon-hello-world-java/archon-two-repos-run.html; do
+  for f in index.html archon-introduction.html archon-concepts-explained.html archon-concepts-onepage.html archon-workspace-setup.html archon-aidlc-on-archon.html archon-hello-world-java/archon-hello-world-java-run.html archon-hello-world-java/archon-two-repos-run.html; do
     aws s3 cp "$f" "$B/$f" --content-type "text/html; charset=utf-8" --cache-control "public, max-age=300"; done
   aws s3 cp archon-concepts-map.svg "$B/archon-concepts-map.svg" --content-type image/svg+xml --cache-control "public, max-age=300"
   for f in img/*.png; do aws s3 cp "$f" "$B/$f" --content-type image/png --cache-control "public, max-age=86400"; done

@@ -1,0 +1,96 @@
+# Dry-run stubs: what workspace detection would answer, and every gate approved.
+workspace-detection:
+  greenfield: false
+  has_pipeline: false
+  repos: [priorauth-api]
+  summary: "One Spring Boot repo, priorauth-api; scripts/verify.sh runs its tests; no CI pipeline."
+intent-capture-gate:
+  decision: approve
+  text: ""
+market-research-gate:
+  decision: approve
+  text: ""
+feasibility-gate:
+  decision: approve
+  text: ""
+scope-definition-gate:
+  decision: approve
+  text: ""
+team-formation-gate:
+  decision: approve
+  text: ""
+rough-mockups-gate:
+  decision: approve
+  text: ""
+approval-handoff-gate:
+  decision: approve
+  text: ""
+reverse-engineering-gate:
+  decision: approve
+  text: ""
+practices-discovery-gate:
+  decision: approve
+  text: ""
+requirements-analysis-gate:
+  decision: approve
+  text: ""
+user-stories-gate:
+  decision: approve
+  text: ""
+refined-mockups-gate:
+  decision: approve
+  text: ""
+domain-design-gate:
+  decision: approve
+  text: ""
+units-generation-gate:
+  decision: approve
+  text: ""
+contract-design-gate:
+  decision: approve
+  text: ""
+delivery-planning-gate:
+  decision: approve
+  text: ""
+functional-design-gate:
+  decision: approve
+  text: ""
+nfr-requirements-gate:
+  decision: approve
+  text: ""
+nfr-design-gate:
+  decision: approve
+  text: ""
+infrastructure-design-gate:
+  decision: approve
+  text: ""
+code-generation-gate:
+  decision: approve
+  text: ""
+build-and-test-gate:
+  decision: approve
+  text: ""
+ci-pipeline-gate:
+  decision: approve
+  text: ""
+deployment-pipeline-gate:
+  decision: approve
+  text: ""
+environment-provisioning-gate:
+  decision: approve
+  text: ""
+deployment-execution-gate:
+  decision: approve
+  text: ""
+observability-setup-gate:
+  decision: approve
+  text: ""
+incident-response-gate:
+  decision: approve
+  text: ""
+performance-validation-gate:
+  decision: approve
+  text: ""
+feedback-optimization-gate:
+  decision: approve
+  text: ""
