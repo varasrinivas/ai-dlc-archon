@@ -12,7 +12,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from pagekit import E, ROOT, multirepo_facts, write  # noqa: E402
+from pagekit import CLAUDE_MAP, E, ROOT, claude_facts, multirepo_facts, write  # noqa: E402
 
 FRAME = ROOT / "tools" / "frame"
 WF = (ROOT / "tools/data/java/files/.archon/workflows/team/request-to-pr/request-to-pr.yaml").read_text(encoding="utf-8")
@@ -25,6 +25,16 @@ VERSION = re.search(r"Archon CLI v([\d.]+)", CLI["version"]["out"]).group(1)
 BUNDLED = sum(1 for w in json.loads(CLI["workflow-list-json"]["out"])["workflows"] if w["name"].startswith("archon-"))
 assert BUNDLED == 25, BUNDLED
 multirepo_facts(CLI)  # the folder-project lines below are documented, not run: tie them to the docs and the help
+claude_facts()  # the `claude` card's mapping, tied to the docs the same way
+
+# The `claude` card's example, from the request-to-pr transcript: which tools the run's Claude sessions called.
+_NODES = json.loads((ROOT / "archon-hello-world-java/java-run/nodes.json").read_text(encoding="utf-8"))
+_RID = next(k for k, v in _NODES.items() if v["workflow"] == "request-to-pr")
+_LOG = next((ROOT / "archon-hello-world-java/java-run/logs").glob(f"{_RID}*.jsonl")).read_text(encoding="utf-8")
+_TOOLS = {json.loads(l)["event"]["name"] for l in _LOG.splitlines() if '"type":"tool_call"' in l and '"type":"provider_event"' in l}
+assert "StructuredOutput" in _TOOLS and not _TOOLS & {"Skill", "Task", "Agent"}, _TOOLS
+assert "command: scan" in WF and not re.search(r"^\s*(skills|agents|hooks|mcp):", WF, re.M)
+assert not (ROOT / "archon-hello-world-java/java-workspace/.claude").exists()
 
 BULB = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a7 7 0 0 0-4 12.7V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.3A7 7 0 0 0 12 2z"/><path d="M9 21h6"/></svg>'
 
@@ -233,6 +243,17 @@ C.append(concept(
     "the workflow. Swapping the provider changes who does each step, not the steps.",
 ))
 C.append(concept(
+    "claude", "Claude Code under each AI node",
+    "Every <code>prompt</code>, <code>command</code> or loop pass runs as one <b>Claude Code session</b>. Archon's Claude provider uses the Claude Agent SDK, which starts Claude Code as a background process in the run's folder, with your login. The node's fields decide what that session gets: its prompt, tools, skills, subagents, hooks and MCP servers. <code>bash</code>, <code>script</code> and <code>wait</code> nodes start no session at all.",
+    "Archon doesn't rebuild the agent; it reuses Claude Code's own pieces and scopes them per node. A review node can get a review skill and no <code>Write</code> tool while the implement node gets the opposite, and what each node may use is written in the file the team reviews.",
+    "<table><thead><tr><th>In the workflow</th><th>What Claude Code gets</th><th>In the course's run</th></tr></thead><tbody>"
+    + "".join(f"<tr><td>{a}</td><td>{b}</td><td>{c}</td></tr>" for a, b, c in CLAUDE_MAP) + "</tbody></table>",
+    "<code>scan</code>'s prompt came from <code>commands/scan.md</code>; <code>questions</code>, <code>plan</code> and <code>review</code> ended by calling Claude's <code>StructuredOutput</code> tool (their <code>output_format</code>). No node names <code>skills:</code> or <code>agents:</code>, so the transcript has no <code>Skill</code> or <code>Task</code> call, and the workspace has no <code>.claude/</code> folder: the one Claude Code file the run relied on was <code>CLAUDE.md</code>.",
+    "A staffing agency sends a contractor for each job with a kit packed for that job: this one gets the review checklist (a skill) and read-only keys (the tools); the next gets the power tools. Every contractor read the same house rules (<code>CLAUDE.md</code>) first.",
+    "you can say where a skill, a subagent or a hook has to be named for one particular node to use it.",
+    "Claude Code's slash commands (Archon's <code>command:</code> files are prompts Archon sends), or a subagent with a node: a subagent runs inside one node's session, started by that node's agent; a node is a step Archon schedules.",
+))
+C.append(concept(
     "places", "Where things live: the workspace, its repos, and ~/.archon",
     "Two places. The project's <code>.archon/</code> holds what the team shares and commits: <code>workflows/</code>, <code>config.yaml</code>, optionally <code>commands/</code> and <code>scripts/</code>. Your home's <code>~/.archon/</code> holds the install: the binary, plugins, global config, <code>archon.db</code>, and <code>workspaces/</code> with every run's logs and artifacts. In this course the project is a <b>team workspace</b>, as in AI-DLC: a git repo of its own with <code>.archon/</code>, <code>CLAUDE.md</code>, the check and the requests at its root, and the code repos cloned inside it. Archon calls it a <b>folder project</b>. The other layout puts <code>.archon/</code> inside a single code repo: the repo is the project.",
     "The process is the team's and is shared through the workspace repo; the code keeps its own repos and PRs; the runs are yours and stay on your machine.",
@@ -291,6 +312,7 @@ MIS = [("\"Reject stops the run.\"", "Only if the workflow says so. Reject is an
        ("\"Archon is the knowledge-base MCP server.\"", "That was Archon v1, kept on the <code>archive/v1-task-management-rag</code> branch. Today's Archon is the workflow engine."),
        ("\"bash: nodes need WSL on Windows.\"", "They need Git Bash. Archon looks in the usual Git locations; set <code>ARCHON_BASH_PATH</code> if Git is elsewhere."),
        ("\"Archon's files must go into each repo.\"", "Only if you choose the repo-is-the-project layout. This course keeps them in a team workspace that holds the repos (a folder project), as AI-DLC does; <code>~/.archon/workflows/</code> and <code>--workflow-source</code> keep workflows out of any repo too."),
+       ("\"My installed Claude skills work in every node.\"", "On Claude, a node gets only the skills it names in <code>skills:</code>. Your <code>CLAUDE.md</code>, subagents and hooks do load (project and user, by default); skills don't."),
        ("\"Telemetry is off by default.\"", "It is on. Set <code>ARCHON_TELEMETRY_DISABLED=1</code> (or <code>DO_NOT_TRACK=1</code>); <code>archon telemetry status</code> checks.")]
 
 QUIZ = [("Ravi sends a second request tomorrow. New workflow or new run?", "A new run of the same workflow, with the new request as its message. The workflow only changes if the team changes the process."),
@@ -300,6 +322,7 @@ QUIZ = [("Ravi sends a second request tomorrow. New workflow or new run?", "A ne
         ("Kiran's terminal crashed while the run was paused. Is the run lost?", "No. A paused run holds no process; answer it from any terminal or the Web UI with its run id."),
         ("Which nodes cost model tokens in <code>request-to-pr</code>?", "The prompt, command and loop nodes. <code>checks</code> and <code>push</code> (bash) and the waits cost none."),
         ("Why does the workspace have a <code>.gitignore</code> with <code>/priorauth-api/</code>?", "The code repo is cloned inside the workspace but has its own git, remote and PRs. The ignore keeps the workspace repo to the team's files, so a code change never shows up as a workspace change."),
+        ("The review node should use the team's <code>code-review</code> skill and must not edit. What goes in the YAML?", "<code>skills: [code-review]</code> and <code>denied_tools: [Write, Edit]</code> on that node, plus <code>mutates_checkout: false</code> so the engine checks. The skill must be installed in <code>.claude/skills/code-review/SKILL.md</code> (or <code>~/.claude/skills/</code>)."),
         ("Ravi's next request needs priorauth-api and the reviewer screen's UI repo. Where does the team's <code>.archon/</code> go?", "Where it already is: the team workspace. Clone the UI repo into it next to priorauth-api and add it to CLAUDE.md's repo map; the run starts from the same root, in place, and the agent does the git in each repo. Archon makes no worktree or PR for it.")]
 
 SOURCES = [("https://github.com/coleam00/Archon", f"coleam00/Archon on GitHub (v{VERSION}, 29 Oct 2026): README"),
@@ -308,6 +331,9 @@ SOURCES = [("https://github.com/coleam00/Archon", f"coleam00/Archon on GitHub (v
            ("https://archon.diy/guides/approval-nodes/", "Asking for an answer (wait forms, reject, rework until approved)"),
            ("https://archon.diy/guides/loop-nodes/", "Loop nodes (completion channels, fresh context, loop_group)"),
            ("https://archon.diy/guides/worktrees/", "Run work in parallel with worktrees (isolation, cleanup, not a sandbox)"),
+           ("https://archon.diy/guides/skills/", "Per-node skills (exact selection, where skills are found)"),
+           ("https://archon.diy/guides/hooks/", "Per-node hooks (SDK hooks, native hooks and settingSources)"),
+           ("https://archon.diy/reference/security/", "Security (bypassPermissions, tool restrictions)"),
            ("https://archon.diy/reference/archon-directories/", "Archon directories (~/.archon layout)"),
            ("https://archon.diy/guides/multi-repo-projects/", "Multi-repo projects (folder projects, in place, git per service)"),
            ("https://archon.diy/guides/global-workflows/", "Global workflows (~/.archon/workflows in every project)"),
@@ -316,7 +342,7 @@ SOURCES = [("https://github.com/coleam00/Archon", f"coleam00/Archon on GitHub (v
            ("https://archon.diy/reference/configuration/", "Configuration (repo config, ARCHON_BASH_PATH, telemetry)")]
 
 head = f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Archon Concepts, Explained</title>
-<meta name="description" content="Archon {VERSION}'s concepts: workflows, nodes, the graph, commands and packs, loops, waits and the attention queue, runs, isolation (in place or a worktree), artifacts, providers, where things live (the workspace and its repos), the surfaces, and the sdlc pack. What each is, why Archon has it, how the tool does it, with examples from a real run and everyday analogies.">
+<meta name="description" content="Archon {VERSION}'s concepts: workflows, nodes, the graph, commands and packs, loops, waits and the attention queue, runs, isolation (in place or a worktree), artifacts, providers, what each AI node hands Claude Code (skills, subagents, hooks, MCP), where things live (the workspace and its repos), the surfaces, and the sdlc pack. What each is, why Archon has it, how the tool does it, with examples from a real run and everyday analogies.">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -324,7 +350,7 @@ head = f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name
 """
 ids = [("workflow", "Workflow"), ("nodes", "Nodes: one job each"), ("graph", "The graph: depends_on, when"), ("commands", "Commands and packs"),
        ("loops", "Loops and completion checks"), ("waits", "Waits and the attention queue"), ("runs", "Runs: id, status, transcript, cost"),
-       ("worktrees", "Isolation: in place, or a worktree"), ("artifacts", "Artifacts and variables"), ("providers", "Providers, models and tiers"),
+       ("worktrees", "Isolation: in place, or a worktree"), ("artifacts", "Artifacts and variables"), ("providers", "Providers, models and tiers"), ("claude", "Claude Code under each node"),
        ("places", "Where things live"), ("surfaces", "CLI, Web UI, chat, triggers"), ("factory", "The sdlc pack")]
 assert len(ids) == len(C)
 rail = ('<nav class="rail" aria-label="Contents"><h4>Start</h4><a href="#thesis" data-k="thesis">The big idea</a><a href="#map" data-k="map">One picture</a><h4>Concepts</h4>'
@@ -337,7 +363,7 @@ thesis = (f'<section class="card thesis" id="thesis"><h1>The big idea, in one pa
           "It brings no model: it drives the agent you already use (Claude Code, Codex or Pi). "
           "The docs put the split in six words: <i>YAML coordinates, code computes, agents judge.</i></p>"
           f'<div class="ana">{BULB}<div><b>In everyday terms</b>A restaurant kitchen with a recipe card for every dish. The cooks (agents) bring the skill; the card fixes the order, the timer (a check) says when the bread is done, and the chef (you) tastes before anything leaves the pass.</div></div>'
-          f'<p class="lead" style="font-size:.95rem;margin:0">Thirteen concepts follow. Each: what it is, why Archon has it, how it shows up in the tool, an example from the course\'s real run (Kiran\'s <code>request-to-pr</code> run on priorauth-api), an analogy, a one-line test that you have understood it, and what not to confuse it with. Facts are from Archon {VERSION} and its docs.</p></section>\n')
+          f'<p class="lead" style="font-size:.95rem;margin:0">Fourteen concepts follow. Each: what it is, why Archon has it, how it shows up in the tool, an example from the course\'s real run (Kiran\'s <code>request-to-pr</code> run on priorauth-api), an analogy, a one-line test that you have understood it, and what not to confuse it with. Facts are from Archon {VERSION} and its docs.</p></section>\n')
 mapc = f'<section class="card" id="map"><h2>Archon in one picture</h2><div class="chart">{concept_map()}</div></section>\n'
 mapping = ('<section class="card" id="mapping"><h2>AI-DLC → Archon</h2><p>If you have done the AI-DLC course, this is where each idea went. Same request, same people; the hello-world run on this site lets you compare both on one change.</p>'
            "<table><thead><tr><th>AI-DLC</th><th>Archon</th><th>The difference</th></tr></thead><tbody>"

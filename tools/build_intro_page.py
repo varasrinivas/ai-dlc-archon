@@ -14,7 +14,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 from cli_parse import help_sections, workflow_nodes  # noqa: E402
 from diagrams import node_cycle, workflow_dag  # noqa: E402
-from pagekit import (ARCHON_WORDS, DOC, E, REAL, ROOT, card, disk, doc_says, gloss, io, multirepo_facts, note, page, phase, plain, rail, see, step, table, tabs,  # noqa: E402
+from pagekit import (ARCHON_WORDS, DOC, E, REAL, ROOT, CLAUDE_MAP, card, claude_facts, disk, gloss, io, multirepo_facts, note, page, phase, plain, rail, see, step, table, tabs,  # noqa: E402
                      write, you)
 
 DATA = ROOT / "tools" / "data"
@@ -314,27 +314,7 @@ S.append(step(10, "The workspace", "--build", "the files", "The workspace, its r
               + note("Archon does not give one run a worktree in each of two repos. Workflows can also live outside every repo and workspace: <code>~/.archon/workflows/</code> appear in all your projects (yours, not the team's), and <code>--workflow-source &lt;dir&gt;</code> reads the workflow from one folder and runs it against <code>--cwd</code>. From the Archon " + VERSION + " docs and <code>workflow run --help</code>. Workflow commands need a git repository or a registered folder: outside one, <code>archon workflow list</code> says <code>" + x(CLI["outside-repo"]["out"].strip().splitlines()[0]) + "</code>.")))
 
 # ---------------- step 11: what an AI node becomes in Claude Code ----------------
-# Documented claims, each tied to Archon 0.13.2's own docs (tools/data/docs/, copied from the release tag).
-doc_says("workflow-language.md",
-         "| `skills` | string[] | unset | Exact Claude-native skill selection (omission/`[]` selects none)",
-         "| `agents` | object | unset | Inline sub-agent definitions keyed by kebab-case ID. Claude only.",
-         "| `hooks` | object | unset | Per-node SDK hook callbacks. Claude only.",
-         "| `mcp` | string \\| `{ path, optional }` | unset | Path to MCP server config JSON file",
-         "| `plugins` | string[] | unset | Exact plugin ids (`name@marketplace`) the node loads; omission/`[]` loads no user-installed plugin.",
-         "Replaces the default `claude_code` prompt on Claude.",
-         "(for Claude: CLAUDE.md, skills, commands, agents)", "unset everywhere = `['project', 'user']`",
-         "`fresh` = new session; `shared` = inherit the ambient prior session in a sequential layer; `resume` = fork the exact completed upstream node's session",
-         "The main agent can spawn them in parallel via the `Task` tool",
-         "Both sources coexist: inline agents and on-disk agents are both available to `Task(subagent_type=...)` at runtime.")
-doc_says("authoring-commands.md", "Sends the entire document as a prompt to the AI", "**Commands are prompts, not code.**",
-         "In multi-step workflows, agents don't share memory.")
-doc_says("skills.md", "Claude workflow nodes use the Agent SDK's native skill selector.",
-         "On Claude, omission and `skills: []` both select no skills.", "| `.claude/skills/` (in cwd) | Project-level |",
-         "| `~/.claude/skills/` | User-level (all projects) |")
-doc_says("hooks.md", "Archon never loads\n`.claude/settings.local.json`.",
-         "| `['project', 'user']` (default) | `<cwd>/.claude/settings.json` and `~/.claude/settings.json` | Project and user hooks |")
-doc_says("skills.md", "Set `assistants.claude.settingSources: ['project']` in `.archon/config.yaml`")
-doc_says("security.md", "Archon runs the Claude Code SDK in `bypassPermissions` mode.")
+claude_facts()  # the documented half of step 11, asserted against tools/data/docs/ (shared with the concepts page)
 
 # Measured: each AI node's Claude session, and the tools its agent called, from the request-to-pr transcript.
 _LOG = next((ROOT / "archon-hello-world-java" / "java-run" / "logs").glob(f"{RID}*.jsonl"))
@@ -354,20 +334,8 @@ assert not (_WSDIR / ".claude").exists()  # the course's workspace has no skills
 _TOOLS_TXT = ", ".join(f"{k} {v}" for k, v in sorted(TOOLS.items(), key=lambda kv: -kv[1]))
 assert "command: scan" in WF and "fresh_context: true" in WF and "skills:" not in WF and "agents:" not in WF and "hooks:" not in WF
 
-MAP = [
-    ["<code>prompt:</code>", "a new Claude Code session (headless, the way <code>claude -p</code> runs) whose first message is the prompt, after Archon fills in <code>$USER_MESSAGE</code>, <code>$ARTIFACTS_DIR</code>, <code>$node.output</code>", "<code>questions</code>, <code>write-requirements</code>, <code>plan</code>, <code>review</code>"],
-    ["<code>command: scan</code>", "the same, with the prompt read from <code>commands/scan.md</code>. <b>Not</b> a Claude Code slash command: Archon reads the Markdown file and sends its text; <code>.claude/commands/</code> is a different folder that Archon doesn't use for this", "<code>scan</code>; each <code>implement</code> pass"],
-    ["<code>loop:</code> + <code>fresh_context: true</code>", "one new session per pass; the check (<code>until_bash</code>) is Archon's, not Claude's", "<code>implement</code>: 1 pass"],
-    ["<code>context:</code> <code>fresh</code> / <code>shared</code> / <code>resume</code>", "start a new session, continue the previous node's, or fork a named node's. Otherwise nodes share nothing but the files they write", "<code>questions</code> continued <code>scan</code>'s session"],
-    ["<code>output_format:</code>", "the SDK's structured output: the agent ends by calling a <code>StructuredOutput</code> tool with JSON that fits the schema", "3 calls: questions, plan, review"],
-    ["<code>allowed_tools</code> / <code>denied_tools</code>", "the session's tool list. Archon runs Claude Code with <code>bypassPermissions</code>: no permission prompts, so these lists (and <code>mutates_checkout</code>) are the limits", "not used; <code>mutates_checkout: false</code> on the read-only nodes"],
-    ["<code>skills: [name]</code>", "loads exactly those skills (<code>SKILL.md</code> from <code>.claude/skills/</code> or <code>~/.claude/skills/</code>) into that node's session. Leave it out and the node gets <b>no</b> skills, even ones you have installed", "none"],
-    ["<code>agents:</code>", "subagents defined in the YAML; the node's agent starts them with the <code>Task</code> tool. Subagents in <code>.claude/agents/*.md</code> are available too", "none"],
-    ["<code>hooks:</code>", "Claude Agent SDK hooks (<code>PreToolUse</code> …) with a fixed answer. Your own hooks in <code>.claude/settings.json</code> and <code>~/.claude/settings.json</code> also run", "none"],
-    ["<code>mcp:</code> · <code>plugins:</code>", "MCP servers from a JSON file, and Claude Code plugins, for that node only", "none"],
-    ["<code>model</code>, <code>effort</code>, <code>systemPrompt</code>", "the session's model and reasoning effort. The system prompt is Claude Code's own unless a node replaces it", "Opus, the default"],
-    ["<code>CLAUDE.md</code>, <code>settingSources</code>", "every session reads the project's and your user <code>CLAUDE.md</code>, agents and hooks (<code>settingSources: [project, user]</code>, the default)", "the workspace's <code>CLAUDE.md</code>"],
-    ["<code>bash:</code> · <code>script:</code> · <code>wait:</code> · <code>cancel:</code>", "no Claude at all: Archon runs the command, or waits for a person", "<code>checks</code>, <code>push</code>, the 4 waits"]]
+MAP = CLAUDE_MAP
+
 EXAMPLE = """# An example, not one of the course's workflows: every Claude Code feature, on one node
 - id: review
   depends_on: [checks]
