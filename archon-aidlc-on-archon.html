@@ -222,7 +222,7 @@ figure.dia{margin:14px 0}figure.dia figcaption{font-size:.82rem;color:var(--ink-
 <a class="sr" href="#main">Skip to content</a>
 <header class="top"><div class="top__in">
   <div class="brand">AI-DLC on Archon<small>33 stages · 30 gates · 11 scopes</small></div>
-  <div class="prog" aria-live="polite"><b id="progText">Step 0 of 11</b><div class="bar"><i id="progBar"></i></div><span class="ph" id="progPhase">Start at the top</span></div>
+  <div class="prog" aria-live="polite"><b id="progText">Step 0 of 12</b><div class="bar"><i id="progBar"></i></div><span class="ph" id="progPhase">Start at the top</span></div>
   <div class="top__btns"><button class="btn" id="osToggle" type="button" title="Show the commands for your computer">Windows</button><button class="btn" id="themeToggle" type="button" aria-pressed="false">Dark mode</button></div>
 </div></header>
 
@@ -240,10 +240,11 @@ figure.dia{margin:14px 0}figure.dia figcaption{font-size:.82rem;color:var(--ink-
   <a class="rl" href="#s07" data-step="7" style="--c:var(--build)"><b>7</b><span>Same, and not</span></a>
   <h4>The real run</h4>
   <a class="rl" href="#s08" data-step="8" style="--c:var(--review)"><b>8</b><span>A real express run</span></a>
-  <a class="rl" href="#s09" data-step="9" style="--c:var(--review)"><b>9</b><span>What it showed</span></a>
+  <a class="rl" href="#s09" data-step="9" style="--c:var(--review)"><b>9</b><span>The follow-up fix</span></a>
+  <a class="rl" href="#s10" data-step="10" style="--c:var(--review)"><b>10</b><span>What it showed</span></a>
   <h4>Try it</h4>
-  <a class="rl" href="#s10" data-step="10" style="--c:var(--ship)"><b>10</b><span>Run it yourself</span></a>
-  <a class="rl" href="#s11" data-step="11" style="--c:var(--ship)"><b>11</b><span>The files</span></a>
+  <a class="rl" href="#s11" data-step="11" style="--c:var(--ship)"><b>11</b><span>Run it yourself</span></a>
+  <a class="rl" href="#s12" data-step="12" style="--c:var(--ship)"><b>12</b><span>The files</span></a>
   <h4>Reference</h4>
   <a class="rl" href="#real" style="--c:var(--review)"><b>·</b><span>Where this comes from</span></a>
 </nav>
@@ -259,7 +260,7 @@ figure.dia{margin:14px 0}figure.dia figcaption{font-size:.82rem;color:var(--ink-
       <div><b>11</b>scopes, one input</div>
       <div><b>13</b>real dry runs, all matching</div>
       <div><b>98</b>nodes in one workflow file</div>
-      <div><b>$2.95</b>one real express run, 2 stages sent back</div>
+      <div><b>$3.67</b>one real express run and its follow-up fix</div>
     </div>
   </div>
   <aside class="slack" aria-label="The short version">
@@ -459,7 +460,7 @@ Simulation outcome: completed</pre></div></div><div class="plain"><div><b>In pla
   <div class="step__head"><span class="step__n">7</span><div><span class="chip">honest limits</span><h2>What's the same, and what isn't</h2><p class="step__why">The workflow runs AI-DLC's stages and gates. It is not AI-DLC's engine.</p></div><span class="who">read · 2 min</span></div>
 <div class="gwrap"><table class="kv"><thead><tr><th></th><th>AI-DLC's engine</th><th>aidlc-on-archon</th></tr></thead><tbody><tr><td>Stages, phases, gates</td><td>33, 5, a gate after each stage after setup</td><td>the same 33, 5 and 30 gates</td></tr><tr><td>Which stages run</td><td>decided by the engine from the scope, and re-planned as it goes</td><td>fixed when the run starts: the scope list and two rules</td></tr><tr><td>Personas</td><td>14 agent files with full instructions; support agents and two senior reviewers join in bigger scopes</td><td>a role named in each stage's prompt; one agent per stage</td></tr><tr><td>Mob mode (2.4 User Stories)</td><td>several personas work on one draft</td><td>one agent asked to weigh their views (could be parallel nodes and a merge node)</td></tr><tr><td>The record</td><td><code>aidlc-docs/</code>, an audit log, a state file the next session reads</td><td>the run's artifacts, transcript and cost in <code>~/.archon</code></td></tr><tr><td>Pausing and resuming</td><td>the session stops at a gate; you answer in Claude Code</td><td>a durable wait: answer later with <code>archon workflow approve</code>, the Web UI or chat</td></tr><tr><td>Run with a model</td><td>yes, in the AI-DLC course</td><td>yes: one express run, <a href="#s08">step 8</a></td></tr></tbody></table></div><div class="note">Use AI-DLC when you want its full method and record. Use this workflow when your team already runs Archon and wants AI-DLC's stages and sign-offs in it, or wants to cut the lifecycle down to the stages it actually uses.</div>
 </section>
-<div class="phase" style="--c:var(--review)"><i></i>The real run<span>steps 8–9 · one express run with Claude, gate by gate, and what it showed</span></div>
+<div class="phase" style="--c:var(--review)"><i></i>The real run<span>steps 8–10 · one express run with Claude, gate by gate, its follow-up fix, and what it showed</span></div>
 <section class="step" id="s08" data-step="8" data-phase="The real run" style="--c:var(--review)">
   <div class="step__head"><span class="step__n">8</span><div><span class="chip">a model run</span><h2>A real express run, gate by gate</h2><p class="step__why">The same request as the rest of the course, run with Claude Code on the claude.ai login: 4 stages, 6 gate answers, 2 of them rejects, 20 minutes, $2.95 reported.</p></div><span class="who">read · 6 min · <span class="lbl lbl-real">real</span></span></div>
 <p>Before the run the workspace got a fresh clone of the public starter (priorauth-api 1.0.2, 3 tests, no tags), as in the course's own run: the java workspace in the course files already has the feature merged. Every command below went through <code>tools/archon_step.py</code>, which removes the API key, so the run used the claude.ai login. The answers at the gates are the ones Ravi and Meena gave in the <a href="archon-hello-world-java/archon-hello-world-java-run.html">request-to-pr run</a>, so the two runs can be compared.</p><div class="io"><div class="box you"><div class="box__bar">You type <span class="tag">from the workspace root</span></div><pre>archon workflow run aidlc-on-archon --folder --detach --input scope=express "Implement the request in docs-in/request.md"</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Archon returns <span class="tag">real</span></div><pre>Discovery: root=C:\work\archon-aidlc\aidlc-workspace workflows=27 bundled=25 global=0 project=2 installed=0
@@ -533,7 +534,7 @@ HTTP/1.1 400
 Content-Type: application/problem+json
 
 {&quot;detail&quot;:&quot;asOf is after today; the latest allowed asOf is 2026-11-05&quot;,&quot;instance&quot;:&quot;/requests/pending&quot;,&quot;status&quot;:400,&quot;title&quot;:&quot;Bad Request&quot;}</pre></div></div><h3 style="margin:22px 0 8px">3.6: a defect found by reading the code</h3><div class="io io--stack"><div class="box claude"><div class="box__bar">The gate shows <span class="tag">real · 3.6's first decision</span></div><pre>(numbered at the top of `build-and-test.md`):**
-1. **The screen can go blank even when it sends no `asOf`.** If any pending row is dated after the server&#x27;s today, every call returns 400. That can come from one bad row, or near midnight when the intake system&#x27;s time zone is ahead of the server&#x27;s. This breaks R12 (&quot;never refuses&quot;). I found it by reading the code; the sample data can&#x27;t trigger it, so no test or HTTP call shows it. I recommend sending it back to 3.5 for a small fix plus one test.</pre></div><div class="box you"><div class="box__bar">You type <span class="tag">Meena types</span></div><pre>archon workflow approve 152af46d5da132b8c79dcb76acaac528 &quot;Approved for the record - Meena Iyer, not for release. 1: confirmed in the controller (a row received after today makes every call 400); it must be fixed before release, in a follow-up on the same branch: rows are never refused, only the caller&#x27;s asOf is checked. 2: yes, add it as R18. 3: follow-up owned by Kiran, due 2026-12-15. 4: accepted.&quot;</pre><button class="copy" type="button">copy</button></div></div><div class="note">Checked: in the controller, with no <code>asOf</code> the date is today, and if the newest row's <code>receivedAt</code> is after it the whole call is a 400. It follows from assumption A3 (“if asOf is earlier than even one row, the whole call is a 400”), which was approved at 2.3. The sample data can't trigger it. It is not fixed: rejecting 3.6 would only redo 3.6, which may not change code (step 9).</div><div class="io"><div class="box claude"><div class="box__bar">Archon returns <span class="tag">real · the end of the run</span></div><pre>Loop-group node &#x27;build-and-test&#x27;completed after 1 iteration
+1. **The screen can go blank even when it sends no `asOf`.** If any pending row is dated after the server&#x27;s today, every call returns 400. That can come from one bad row, or near midnight when the intake system&#x27;s time zone is ahead of the server&#x27;s. This breaks R12 (&quot;never refuses&quot;). I found it by reading the code; the sample data can&#x27;t trigger it, so no test or HTTP call shows it. I recommend sending it back to 3.5 for a small fix plus one test.</pre></div><div class="box you"><div class="box__bar">You type <span class="tag">Meena types</span></div><pre>archon workflow approve 152af46d5da132b8c79dcb76acaac528 &quot;Approved for the record - Meena Iyer, not for release. 1: confirmed in the controller (a row received after today makes every call 400); it must be fixed before release, in a follow-up on the same branch: rows are never refused, only the caller&#x27;s asOf is checked. 2: yes, add it as R18. 3: follow-up owned by Kiran, due 2026-12-15. 4: accepted.&quot;</pre><button class="copy" type="button">copy</button></div></div><div class="note">Checked: in the controller, with no <code>asOf</code> the date is today, and if the newest row's <code>receivedAt</code> is after it the whole call is a 400. It follows from assumption A3 (“if asOf is earlier than even one row, the whole call is a 400”), which was approved at 2.3. The sample data can't trigger it with no <code>asOf</code>. It could not be fixed inside this run: rejecting 3.6 would only redo 3.6, which may not change code. The fix is step 9.</div><div class="io"><div class="box claude"><div class="box__bar">Archon returns <span class="tag">real · the end of the run</span></div><pre>Loop-group node &#x27;build-and-test&#x27;completed after 1 iteration
 Operation: what the phase wrote
 (none: no Operation stage ran in this scope)
 
@@ -541,7 +542,7 @@ Workflow completed successfully.
   Usage (recorded totals; completeness unknown):
     Cost: $2.9511977
     Input tokens: 2094387
-    Output tokens: 52189</pre></div></div><div class="open"><div class="tabs" role="tablist"><button class="tab" role="tab" aria-selected="true" data-pane="rr-1">build-and-test.md</button><button class="tab" role="tab" aria-selected="false" data-pane="rr-2">code-generation.md</button><button class="tab" role="tab" aria-selected="false" data-pane="rr-3">requirements-analysis.md</button><button class="tab" role="tab" aria-selected="false" data-pane="rr-4">reverse-engineering.md</button><button class="tab" role="tab" aria-selected="false" data-pane="rr-5">the diff</button></div><div class="pane is-on" id="rr-1"><div class="code code--wrap"><div class="code__bar"><span class="path">$ARTIFACTS_DIR/record/construction/build-and-test.md</span><span>real · written by the run</span></div><textarea class="src" data-lang="markdown"># Build and Test (AI-DLC stage 3.6, Construction)
+    Output tokens: 52189</pre></div></div><div class="open"><div class="tabs" role="tablist"><button class="tab" role="tab" aria-selected="true" data-pane="rr-1">build-and-test.md</button><button class="tab" role="tab" aria-selected="false" data-pane="rr-2">code-generation.md</button><button class="tab" role="tab" aria-selected="false" data-pane="rr-3">requirements-analysis.md</button><button class="tab" role="tab" aria-selected="false" data-pane="rr-4">reverse-engineering.md</button></div><div class="pane is-on" id="rr-1"><div class="code code--wrap"><div class="code__bar"><span class="path">$ARTIFACTS_DIR/record/construction/build-and-test.md</span><span>real · written by the run</span></div><textarea class="src" data-lang="markdown"># Build and Test (AI-DLC stage 3.6, Construction)
 
 Request: `docs-in/request.md` (intent 261013-request-age-api). Checked against `record/inception/requirements-analysis.md` v2
 (R1–R17, A1–A8) and `record/construction/code-generation.md` (commits `6103fdd`, `d4a98c9`).
@@ -926,7 +927,226 @@ dependency.
 - Production `RequestStore` (queue DB) is not in this repo; only the sample-file version was read.
 - Verify printed a Mockito self-attach / dynamic agent warning on JDK 21: harmless today, not fixed (unrelated).
 - No auth or tenant scoping on the endpoint: noted, not in scope.
-</textarea></div></div><div class="pane" id="rr-5"><div class="code code--wrap"><div class="code__bar"><span class="path">priorauth-api: main..request-age/pending-list-age (9 files, +329 −8)</span><span>real · 2 commits</span></div><textarea class="src" data-lang="diff">diff --git a/src/main/java/com/acmehealth/priorauth/PriorAuthApiApplication.java b/src/main/java/com/acmehealth/priorauth/PriorAuthApiApplication.java
+</textarea></div></div></div>
+</section>
+<section class="step" id="s09" data-step="9" data-phase="The real run" style="--c:var(--review)">
+  <div class="step__head"><span class="step__n">9</span><div><span class="chip">the follow-up fix</span><h2>The follow-up fix, outside the workflow</h2><p class="step__why">3.6's finding had no way back to 3.5, so it went to a second run: Archon's bundled <code>archon-implement</code>, adopting the express run, as the request-to-pr run fixed its 500. One iteration, $0.72.</p></div><span class="who">read · 3 min · <span class="lbl lbl-real">real</span></span></div>
+<div class="io io--stack"><div class="box you"><div class="box__bar">You type <span class="tag">from the workspace root, Meena's decision as the message</span></div><pre>archon workflow run archon-implement --adopt 152af46d5da132b8c79dcb76acaac528 &quot;Apply Meena&#x27;s decision on 3.6 of the adopted run (record/construction/build-and-test.md, decision 1): a pending row whose receivedAt is after the as-of date must never make the call fail. Rows are never refused; only the caller&#x27;s asOf is checked (after today = 400, as now). A row received after the as-of date gets age 0, not over the limit. Drop the whole-list 400 for an asOf before a row&#x27;s receivedAt (assumption A3); keep the 400 for a malformed asOf and for an asOf after today. Add tests: a row received tomorrow with no asOf returns 200 with age 0, and the 7/4/1 example as of 2026-10-13 still holds. Work in priorauth-api on its current branch request-age/pending-list-age; commit there, do not push. Tests only through ./scripts/verify.sh from the workspace root.&quot;</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Archon returns <span class="tag">real</span></div><pre>Adopting run 152af46d5da132b8c79dcb76acaac528 — folder projects run in place; adoption carries provenance and $ADOPTED_RUN_DIR access only.
+Folder project — running in place (no worktree isolation).
+Loop node &#x27;implement&#x27; completed after 1 iteration
+Workflow finished.
+  Status: completed
+
+The agent&#x27;s summary:
+I applied Meena&#x27;s decision on 3.6 in commit a0f6fa4 in priorauth-api, on branch request-age/pending-list-age; nothing is pushed. A pending row received after the as-of date no longer makes the call fail: I removed the whole-list 400 that assumption A3 had added. Such a row now shows age 0, is not over the limit, and is labelled &quot;0 bd&quot;. The business-day count already gave 0 when the received date is after the as-of date, so no counting code changed; I only noted that in its doc comment. The 400 still applies to a malformed asOf and to an asOf after today. Tests added: with the clock set to 2026-10-08, the sample row received 2026-10-09 (tomorrow) returns 200 with age 0 and no asOf. The 7/4/1 ages still hold with an explicit asOf of 2026-10-13. The old test that expected a 400 for an asOf before a received date now expects age 0. The business-day count gets a test for a received date after the as-of date. ./scripts/verify.sh from the workspace root exited 0, with 22 tests run and none failing, on a clean HEAD. The decision document record/construction/build-and-test.md isn&#x27;t in this workspace, so I worked from the request as you wrote it. Not checked: the reviewer screen may have handled the old 400, and it will now get a 200 instead.</pre></div></div><div class="io"><div class="box you"><div class="box__bar">You type <span class="tag">Git Bash, Kiran checks</span></div><pre>./scripts/verify.sh > /dev/null 2>&1 && echo "verify: passed"
+git -C priorauth-api log --oneline -4
+grep -h "Tests run" priorauth-api/target/surefire-reports/*.txt</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Kiran sees <span class="tag">real</span></div><pre>verify: passed
+a0f6fa4 A row received after asOf is age 0, never a 400
+d4a98c9 Reject asOf after today with 400; test empty asOf is today (intent 261013-request-age-api)
+6103fdd Request age on the pending list (intent 261013-request-age-api)
+d9aa178 priorauth-api 1.0.2: pending list for the reviewer screen
+Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.639 s -- in com.acmehealth.priorauth.api.BusinessDayCalendarTest
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.022 s -- in com.acmehealth.priorauth.api.PendingRequestResponseTest
+Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.700 s -- in com.acmehealth.priorauth.api.PendingRequestsControllerTest
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.434 s -- in com.acmehealth.priorauth.api.PendingRequestsReceivedTomorrowTest
+Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.034 s -- in com.acmehealth.priorauth.store.RequestStoreTest</pre></div></div><div class="io"><div class="box claude"><div class="box__bar">Kiran sees <span class="tag">real · the jar check on a0f6fa4</span></div><pre>$ curl -i &quot;http://localhost:8093/requests/pending?asOf=2026-10-13&quot;
+HTTP/1.1 200 
+Content-Type: application/json
+Content-Length: 506
+
+[{&quot;id&quot;:&quot;PA-10231&quot;,&quot;tenantId&quot;:&quot;TX-01&quot;,&quot;service&quot;:&quot;MRI lumbar spine&quot;,&quot;status&quot;:&quot;PENDED&quot;,&quot;receivedAt&quot;:&quot;2026-10-01&quot;,&quot;ageBusinessDays&quot;:7,&quot;overLimit&quot;:true,&quot;ageLabel&quot;:&quot;7 bd OVER 5&quot;},{&quot;id&quot;:&quot;PA-10244&quot;,&quot;tenantId&quot;:&quot;TX-01&quot;,&quot;service&quot;:&quot;Physical therapy x12&quot;,&quot;status&quot;:&quot;IN_REVIEW&quot;,&quot;receivedAt&quot;:&quot;2026-10-06&quot;,&quot;ageBusinessDays&quot;:4,&quot;overLimit&quot;:false,&quot;ageLabel&quot;:&quot;4 bd&quot;},{&quot;id&quot;:&quot;PA-10263&quot;,&quot;tenantId&quot;:&quot;TX-01&quot;,&quot;service&quot;:&quot;CT abdomen&quot;,&quot;status&quot;:&quot;PENDED&quot;,&quot;receivedAt&quot;:&quot;2026-10-09&quot;,&quot;ageBusinessDays&quot;:1,&quot;overLimit&quot;:false,&quot;ageLabel&quot;:&quot;1 bd&quot;}]
+
+$ curl -i &quot;http://localhost:8093/requests/pending?asOf=2026-10-05&quot;
+HTTP/1.1 200 
+Content-Type: application/json
+Content-Length: 500
+
+[{&quot;id&quot;:&quot;PA-10231&quot;,&quot;tenantId&quot;:&quot;TX-01&quot;,&quot;service&quot;:&quot;MRI lumbar spine&quot;,&quot;status&quot;:&quot;PENDED&quot;,&quot;receivedAt&quot;:&quot;2026-10-01&quot;,&quot;ageBusinessDays&quot;:2,&quot;overLimit&quot;:false,&quot;ageLabel&quot;:&quot;2 bd&quot;},{&quot;id&quot;:&quot;PA-10244&quot;,&quot;tenantId&quot;:&quot;TX-01&quot;,&quot;service&quot;:&quot;Physical therapy x12&quot;,&quot;status&quot;:&quot;IN_REVIEW&quot;,&quot;receivedAt&quot;:&quot;2026-10-06&quot;,&quot;ageBusinessDays&quot;:0,&quot;overLimit&quot;:false,&quot;ageLabel&quot;:&quot;0 bd&quot;},{&quot;id&quot;:&quot;PA-10263&quot;,&quot;tenantId&quot;:&quot;TX-01&quot;,&quot;service&quot;:&quot;CT abdomen&quot;,&quot;status&quot;:&quot;PENDED&quot;,&quot;receivedAt&quot;:&quot;2026-10-09&quot;,&quot;ageBusinessDays&quot;:0,&quot;overLimit&quot;:false,&quot;ageLabel&quot;:&quot;0 bd&quot;}]
+
+$ curl -i &quot;http://localhost:8093/requests/pending?asOf=%2B999999999-12-31&quot;
+HTTP/1.1 400 
+Content-Type: application/problem+json
+
+{&quot;detail&quot;:&quot;asOf is after today; the latest allowed asOf is 2026-11-05&quot;,&quot;instance&quot;:&quot;/requests/pending&quot;,&quot;status&quot;:400,&quot;title&quot;:&quot;Bad Request&quot;}</pre></div></div><div class="plain"><div><b>In plain words.</b> Asked for 5 October, before two of the requests arrived, the API used to refuse the whole list with a 400 (step 8's checks). Now it answers, and those two rows are 0 days old. That is the same code path as a row received after today with no <code>asOf</code>, which the new test pins with a fixed clock. The far-future date is still a 400, and 7/4/1 still holds.</div></div><div class="note">The agent said the 3.6 record “isn't in this workspace”: an adopted run's files are in <code>$ADOPTED_RUN_DIR</code> (<code>~/.archon/workspaces/_folder/aidlc-workspace/artifacts/runs/&lt;id&gt;/</code>), not in the workspace, so it worked from the message alone. Put the decision in the message, as here.</div><div class="open"><div class="tabs" role="tablist"><button class="tab" role="tab" aria-selected="true" data-pane="fx-1">the fix</button><button class="tab" role="tab" aria-selected="false" data-pane="fx-2">the whole branch</button></div><div class="pane is-on" id="fx-1"><div class="code code--wrap"><div class="code__bar"><span class="path">priorauth-api: commit a0f6fa4</span><span>real</span></div><textarea class="src" data-lang="diff">commit a0f6fa43befebe09fda4ecd120f7a9570d9ecbc6
+Author: you &lt;you@example.com&gt;
+Date:   Thu Nov 5 12:44:55 2026 +0530
+
+    A row received after asOf is age 0, never a 400
+    
+    Per Meena&#x27;s decision on 3.6, a pending row whose receivedAt is after the
+    as-of date (e.g. received &quot;tomorrow&quot; through clock skew) must not fail the
+    whole list. Drop the 400 for an asOf before a row&#x27;s receivedAt (assumption
+    A3); such a row now ages 0 and is not over the limit. The 400 for an asOf
+    after today and for a malformed asOf stays.
+---
+ .../java/com/acmehealth/priorauth/api/BusinessDayCalendar.java  |  2 +-
+ .../com/acmehealth/priorauth/api/PendingRequestsController.java | 13 ++------
+ .../com/acmehealth/priorauth/api/BusinessDayCalendarTest.java   |  5 +++
+ .../acmehealth/priorauth/api/PendingRequestsControllerTest.java | 20 ++++++++++--
+ .../priorauth/api/PendingRequestsReceivedTomorrowTest.java      | 49 +++++++++++++++++++++++++++++
+ 5 files changed, 74 insertions(+), 15 deletions(-)
+
+diff --git a/src/main/java/com/acmehealth/priorauth/api/BusinessDayCalendar.java b/src/main/java/com/acmehealth/priorauth/api/BusinessDayCalendar.java
+index 3371b86..3be1525 100644
+--- a/src/main/java/com/acmehealth/priorauth/api/BusinessDayCalendar.java
++++ b/src/main/java/com/acmehealth/priorauth/api/BusinessDayCalendar.java
+@@ -32,7 +32,7 @@ public class BusinessDayCalendar {
+         this.mapper = mapper;
+     }
+ 
+-    /** Business days after {@code from} up to and including {@code to}; {@code from} itself is day 0. */
++    /** Business days after {@code from} up to and including {@code to}; {@code from} itself is day 0, and so is a {@code from} after {@code to}. */
+     public int businessDaysAfter(String tenantId, LocalDate from, LocalDate to) {
+         Set&lt;LocalDate&gt; holidays = holidays(tenantId);
+         int days = 0;
+diff --git a/src/main/java/com/acmehealth/priorauth/api/PendingRequestsController.java b/src/main/java/com/acmehealth/priorauth/api/PendingRequestsController.java
+index c1f303b..9f04ca6 100644
+--- a/src/main/java/com/acmehealth/priorauth/api/PendingRequestsController.java
++++ b/src/main/java/com/acmehealth/priorauth/api/PendingRequestsController.java
+@@ -1,6 +1,5 @@
+ package com.acmehealth.priorauth.api;
+ 
+-import com.acmehealth.priorauth.model.PriorAuthRequest;
+ import com.acmehealth.priorauth.store.RequestStore;
+ import org.springframework.beans.factory.annotation.Value;
+ import org.springframework.format.annotation.DateTimeFormat;
+@@ -13,7 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
+ 
+ import java.time.Clock;
+ import java.time.LocalDate;
+-import java.util.Comparator;
+ import java.util.List;
+ 
+ /** GET /requests/pending: the list the reviewer screen shows, oldest first, with each row&#x27;s business-day age. */
+@@ -35,7 +33,7 @@ public class PendingRequestsController {
+ 
+     /**
+      * {@code asOf} pins the date ages are counted to; without it (or empty), today in the server&#x27;s time zone.
+-     * It must lie between the newest row&#x27;s receivedAt and today.
++     * It must not be after today. A row received after that date is age 0; it never fails the call.
+      */
+     @GetMapping(&quot;/requests/pending&quot;)
+     public List&lt;PendingRequestResponse&gt; pending(
+@@ -45,14 +43,7 @@ public class PendingRequestsController {
+         if (date.isAfter(today)) {
+             throw new BadAsOfException(&quot;asOf is after today; the latest allowed asOf is &quot; + today);
+         }
+-        List&lt;PriorAuthRequest&gt; pending = store.pending();
+-        pending.stream().map(PriorAuthRequest::receivedAt).max(Comparator.naturalOrder())
+-                .filter(date::isBefore)
+-                .ifPresent(newest -&gt; {
+-                    throw new BadAsOfException(
+-                            &quot;asOf is before a request&#x27;s receivedAt; the earliest allowed asOf is &quot; + newest);
+-                });
+-        return pending.stream()
++        return store.pending().stream()
+                 .map(r -&gt; PendingRequestResponse.from(r,
+                         calendar.businessDaysAfter(r.tenantId(), r.receivedAt(), date), thresholdDays))
+                 .toList();
+diff --git a/src/test/java/com/acmehealth/priorauth/api/BusinessDayCalendarTest.java b/src/test/java/com/acmehealth/priorauth/api/BusinessDayCalendarTest.java
+index e389e9a..ba5da36 100644
+--- a/src/test/java/com/acmehealth/priorauth/api/BusinessDayCalendarTest.java
++++ b/src/test/java/com/acmehealth/priorauth/api/BusinessDayCalendarTest.java
+@@ -21,6 +21,11 @@ class BusinessDayCalendarTest {
+         assertThat(age(&quot;TX-01&quot;, &quot;2026-10-13&quot;, &quot;2026-10-13&quot;)).isZero();
+     }
+ 
++    @Test
++    void receivedAfterTheAsOfDateIsDayZero() {
++        assertThat(age(&quot;TX-01&quot;, &quot;2026-10-14&quot;, &quot;2026-10-13&quot;)).isZero();
++    }
++
+     @Test
+     void weekendsDoNotCount() {
+         // Fri 16 Oct -&gt; Mon 19 Oct
+diff --git a/src/test/java/com/acmehealth/priorauth/api/PendingRequestsControllerTest.java b/src/test/java/com/acmehealth/priorauth/api/PendingRequestsControllerTest.java
+index 53e4fe5..8d49cfa 100644
+--- a/src/test/java/com/acmehealth/priorauth/api/PendingRequestsControllerTest.java
++++ b/src/test/java/com/acmehealth/priorauth/api/PendingRequestsControllerTest.java
+@@ -77,10 +77,24 @@ class PendingRequestsControllerTest {
+     }
+ 
+     @Test
+-    void asOfBeforeAReceivedDateIsACallerError() throws Exception {
++    void asOfTodayGivesTheReportAges() throws Exception {
++        mvc.perform(get(&quot;/requests/pending&quot;).param(&quot;asOf&quot;, &quot;2026-10-13&quot;))
++                .andExpect(status().isOk())
++                .andExpect(jsonPath(&quot;$[0].ageBusinessDays&quot;).value(7))
++                .andExpect(jsonPath(&quot;$[1].ageBusinessDays&quot;).value(4))
++                .andExpect(jsonPath(&quot;$[2].ageBusinessDays&quot;).value(1));
++    }
++
++    /** Meena&#x27;s decision on 3.6: a row received after asOf is age 0, never a failed call. */
++    @Test
++    void rowReceivedAfterAsOfIsAgeZero() throws Exception {
+         mvc.perform(get(&quot;/requests/pending&quot;).param(&quot;asOf&quot;, &quot;2026-10-08&quot;))
+-                .andExpect(status().isBadRequest())
+-                .andExpect(jsonPath(&quot;$.detail&quot;).value(containsString(&quot;2026-10-09&quot;)));
++                .andExpect(status().isOk())
++                .andExpect(jsonPath(&quot;$.length()&quot;).value(3))
++                .andExpect(jsonPath(&quot;$[2].id&quot;).value(&quot;PA-10263&quot;))
++                .andExpect(jsonPath(&quot;$[2].ageBusinessDays&quot;).value(0))
++                .andExpect(jsonPath(&quot;$[2].overLimit&quot;).value(false))
++                .andExpect(jsonPath(&quot;$[2].ageLabel&quot;).value(&quot;0 bd&quot;));
+     }
+ 
+     @Test
+diff --git a/src/test/java/com/acmehealth/priorauth/api/PendingRequestsReceivedTomorrowTest.java b/src/test/java/com/acmehealth/priorauth/api/PendingRequestsReceivedTomorrowTest.java
+new file mode 100644
+index 0000000..2ad8466
+--- /dev/null
++++ b/src/test/java/com/acmehealth/priorauth/api/PendingRequestsReceivedTomorrowTest.java
+@@ -0,0 +1,49 @@
++package com.acmehealth.priorauth.api;
++
++import org.junit.jupiter.api.Test;
++import org.springframework.beans.factory.annotation.Autowired;
++import org.springframework.boot.test.context.SpringBootTest;
++import org.springframework.boot.test.context.TestConfiguration;
++import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
++import org.springframework.context.annotation.Bean;
++import org.springframework.context.annotation.Primary;
++import org.springframework.test.web.servlet.MockMvc;
++
++import java.time.Clock;
++import java.time.Instant;
++import java.time.ZoneId;
++
++import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
++import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
++import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
++
++/** Meena&#x27;s decision on 3.6: a row received tomorrow (clock skew, time zones) must not fail the call. */
++@SpringBootTest
++@AutoConfigureMockMvc
++class PendingRequestsReceivedTomorrowTest {
++
++    /** &quot;Today&quot; is Thu 8 Oct 2026, so the sample&#x27;s PA-10263 (received Fri 9 Oct) arrived tomorrow. */
++    @TestConfiguration
++    static class FixedClock {
++        @Bean
++        @Primary
++        Clock fixedClock() {
++            return Clock.fixed(Instant.parse(&quot;2026-10-08T17:00:00Z&quot;), ZoneId.of(&quot;America/Chicago&quot;));
++        }
++    }
++
++    @Autowired
++    private MockMvc mvc;
++
++    @Test
++    void rowReceivedTomorrowIsAgeZeroWithoutAsOf() throws Exception {
++        mvc.perform(get(&quot;/requests/pending&quot;))
++                .andExpect(status().isOk())
++                .andExpect(jsonPath(&quot;$.length()&quot;).value(3))
++                .andExpect(jsonPath(&quot;$[2].id&quot;).value(&quot;PA-10263&quot;))
++                .andExpect(jsonPath(&quot;$[2].receivedAt&quot;).value(&quot;2026-10-09&quot;))
++                .andExpect(jsonPath(&quot;$[2].ageBusinessDays&quot;).value(0))
++                .andExpect(jsonPath(&quot;$[2].overLimit&quot;).value(false))
++                .andExpect(jsonPath(&quot;$[2].ageLabel&quot;).value(&quot;0 bd&quot;));
++    }
++}
+</textarea></div></div><div class="pane" id="fx-2"><div class="code code--wrap"><div class="code__bar"><span class="path">priorauth-api: main..request-age/pending-list-age (10 files, +388 −8)</span><span>real · 3 commits</span></div><textarea class="src" data-lang="diff">diff --git a/src/main/java/com/acmehealth/priorauth/PriorAuthApiApplication.java b/src/main/java/com/acmehealth/priorauth/PriorAuthApiApplication.java
 index 068d79f..964d9e7 100644
 --- a/src/main/java/com/acmehealth/priorauth/PriorAuthApiApplication.java
 +++ b/src/main/java/com/acmehealth/priorauth/PriorAuthApiApplication.java
@@ -953,7 +1173,7 @@ index 068d79f..964d9e7 100644
      }
 diff --git a/src/main/java/com/acmehealth/priorauth/api/BusinessDayCalendar.java b/src/main/java/com/acmehealth/priorauth/api/BusinessDayCalendar.java
 new file mode 100644
-index 0000000..3371b86
+index 0000000..3be1525
 --- /dev/null
 +++ b/src/main/java/com/acmehealth/priorauth/api/BusinessDayCalendar.java
 @@ -0,0 +1,66 @@
@@ -991,7 +1211,7 @@ index 0000000..3371b86
 +        this.mapper = mapper;
 +    }
 +
-+    /** Business days after {@code from} up to and including {@code to}; {@code from} itself is day 0. */
++    /** Business days after {@code from} up to and including {@code to}; {@code from} itself is day 0, and so is a {@code from} after {@code to}. */
 +    public int businessDaysAfter(String tenantId, LocalDate from, LocalDate to) {
 +        Set&lt;LocalDate&gt; holidays = holidays(tenantId);
 +        int days = 0;
@@ -1048,13 +1268,12 @@ index 349d10c..b6dd96b 100644
      }
  }
 diff --git a/src/main/java/com/acmehealth/priorauth/api/PendingRequestsController.java b/src/main/java/com/acmehealth/priorauth/api/PendingRequestsController.java
-index cdeae56..c1f303b 100644
+index cdeae56..9f04ca6 100644
 --- a/src/main/java/com/acmehealth/priorauth/api/PendingRequestsController.java
 +++ b/src/main/java/com/acmehealth/priorauth/api/PendingRequestsController.java
-@@ -1,23 +1,71 @@
+@@ -1,23 +1,62 @@
  package com.acmehealth.priorauth.api;
  
-+import com.acmehealth.priorauth.model.PriorAuthRequest;
  import com.acmehealth.priorauth.store.RequestStore;
 +import org.springframework.beans.factory.annotation.Value;
 +import org.springframework.format.annotation.DateTimeFormat;
@@ -1067,7 +1286,6 @@ index cdeae56..c1f303b 100644
  
 +import java.time.Clock;
 +import java.time.LocalDate;
-+import java.util.Comparator;
  import java.util.List;
  
 -/** GET /requests/pending: the list the reviewer screen shows, oldest first. */
@@ -1091,7 +1309,7 @@ index cdeae56..c1f303b 100644
  
 +    /**
 +     * {@code asOf} pins the date ages are counted to; without it (or empty), today in the server&#x27;s time zone.
-+     * It must lie between the newest row&#x27;s receivedAt and today.
++     * It must not be after today. A row received after that date is age 0; it never fails the call.
 +     */
      @GetMapping(&quot;/requests/pending&quot;)
 -    public List&lt;PendingRequestResponse&gt; pending() {
@@ -1103,14 +1321,7 @@ index cdeae56..c1f303b 100644
 +        if (date.isAfter(today)) {
 +            throw new BadAsOfException(&quot;asOf is after today; the latest allowed asOf is &quot; + today);
 +        }
-+        List&lt;PriorAuthRequest&gt; pending = store.pending();
-+        pending.stream().map(PriorAuthRequest::receivedAt).max(Comparator.naturalOrder())
-+                .filter(date::isBefore)
-+                .ifPresent(newest -&gt; {
-+                    throw new BadAsOfException(
-+                            &quot;asOf is before a request&#x27;s receivedAt; the earliest allowed asOf is &quot; + newest);
-+                });
-+        return pending.stream()
++        return store.pending().stream()
 +                .map(r -&gt; PendingRequestResponse.from(r,
 +                        calendar.businessDaysAfter(r.tenantId(), r.receivedAt(), date), thresholdDays))
 +                .toList();
@@ -1160,10 +1371,10 @@ index 0000000..c596f14
 +]
 diff --git a/src/test/java/com/acmehealth/priorauth/api/BusinessDayCalendarTest.java b/src/test/java/com/acmehealth/priorauth/api/BusinessDayCalendarTest.java
 new file mode 100644
-index 0000000..e389e9a
+index 0000000..ba5da36
 --- /dev/null
 +++ b/src/test/java/com/acmehealth/priorauth/api/BusinessDayCalendarTest.java
-@@ -0,0 +1,55 @@
+@@ -0,0 +1,60 @@
 +package com.acmehealth.priorauth.api;
 +
 +import org.junit.jupiter.api.Test;
@@ -1185,6 +1396,11 @@ index 0000000..e389e9a
 +    @Test
 +    void receivedOnTheAsOfDateIsDayZero() {
 +        assertThat(age(&quot;TX-01&quot;, &quot;2026-10-13&quot;, &quot;2026-10-13&quot;)).isZero();
++    }
++
++    @Test
++    void receivedAfterTheAsOfDateIsDayZero() {
++        assertThat(age(&quot;TX-01&quot;, &quot;2026-10-14&quot;, &quot;2026-10-13&quot;)).isZero();
 +    }
 +
 +    @Test
@@ -1260,7 +1476,7 @@ index 0000000..3a94326
 +    }
 +}
 diff --git a/src/test/java/com/acmehealth/priorauth/api/PendingRequestsControllerTest.java b/src/test/java/com/acmehealth/priorauth/api/PendingRequestsControllerTest.java
-index ddd6116..53e4fe5 100644
+index ddd6116..8d49cfa 100644
 --- a/src/test/java/com/acmehealth/priorauth/api/PendingRequestsControllerTest.java
 +++ b/src/test/java/com/acmehealth/priorauth/api/PendingRequestsControllerTest.java
 @@ -3,9 +3,17 @@ package com.acmehealth.priorauth.api;
@@ -1299,7 +1515,7 @@ index ddd6116..53e4fe5 100644
      @Autowired
      private MockMvc mvc;
  
-@@ -24,6 +43,73 @@ class PendingRequestsControllerTest {
+@@ -24,6 +43,87 @@ class PendingRequestsControllerTest {
                  .andExpect(status().isOk())
                  .andExpect(jsonPath(&quot;$.length()&quot;).value(3))
                  .andExpect(jsonPath(&quot;$[0].id&quot;).value(&quot;PA-10231&quot;))
@@ -1338,10 +1554,24 @@ index ddd6116..53e4fe5 100644
 +    }
 +
 +    @Test
-+    void asOfBeforeAReceivedDateIsACallerError() throws Exception {
++    void asOfTodayGivesTheReportAges() throws Exception {
++        mvc.perform(get(&quot;/requests/pending&quot;).param(&quot;asOf&quot;, &quot;2026-10-13&quot;))
++                .andExpect(status().isOk())
++                .andExpect(jsonPath(&quot;$[0].ageBusinessDays&quot;).value(7))
++                .andExpect(jsonPath(&quot;$[1].ageBusinessDays&quot;).value(4))
++                .andExpect(jsonPath(&quot;$[2].ageBusinessDays&quot;).value(1));
++    }
++
++    /** Meena&#x27;s decision on 3.6: a row received after asOf is age 0, never a failed call. */
++    @Test
++    void rowReceivedAfterAsOfIsAgeZero() throws Exception {
 +        mvc.perform(get(&quot;/requests/pending&quot;).param(&quot;asOf&quot;, &quot;2026-10-08&quot;))
-+                .andExpect(status().isBadRequest())
-+                .andExpect(jsonPath(&quot;$.detail&quot;).value(containsString(&quot;2026-10-09&quot;)));
++                .andExpect(status().isOk())
++                .andExpect(jsonPath(&quot;$.length()&quot;).value(3))
++                .andExpect(jsonPath(&quot;$[2].id&quot;).value(&quot;PA-10263&quot;))
++                .andExpect(jsonPath(&quot;$[2].ageBusinessDays&quot;).value(0))
++                .andExpect(jsonPath(&quot;$[2].overLimit&quot;).value(false))
++                .andExpect(jsonPath(&quot;$[2].ageLabel&quot;).value(&quot;0 bd&quot;));
 +    }
 +
 +    @Test
@@ -1374,21 +1604,76 @@ index ddd6116..53e4fe5 100644
 +                .andExpect(status().isBadRequest());
      }
  }
+diff --git a/src/test/java/com/acmehealth/priorauth/api/PendingRequestsReceivedTomorrowTest.java b/src/test/java/com/acmehealth/priorauth/api/PendingRequestsReceivedTomorrowTest.java
+new file mode 100644
+index 0000000..2ad8466
+--- /dev/null
++++ b/src/test/java/com/acmehealth/priorauth/api/PendingRequestsReceivedTomorrowTest.java
+@@ -0,0 +1,49 @@
++package com.acmehealth.priorauth.api;
++
++import org.junit.jupiter.api.Test;
++import org.springframework.beans.factory.annotation.Autowired;
++import org.springframework.boot.test.context.SpringBootTest;
++import org.springframework.boot.test.context.TestConfiguration;
++import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
++import org.springframework.context.annotation.Bean;
++import org.springframework.context.annotation.Primary;
++import org.springframework.test.web.servlet.MockMvc;
++
++import java.time.Clock;
++import java.time.Instant;
++import java.time.ZoneId;
++
++import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
++import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
++import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
++
++/** Meena&#x27;s decision on 3.6: a row received tomorrow (clock skew, time zones) must not fail the call. */
++@SpringBootTest
++@AutoConfigureMockMvc
++class PendingRequestsReceivedTomorrowTest {
++
++    /** &quot;Today&quot; is Thu 8 Oct 2026, so the sample&#x27;s PA-10263 (received Fri 9 Oct) arrived tomorrow. */
++    @TestConfiguration
++    static class FixedClock {
++        @Bean
++        @Primary
++        Clock fixedClock() {
++            return Clock.fixed(Instant.parse(&quot;2026-10-08T17:00:00Z&quot;), ZoneId.of(&quot;America/Chicago&quot;));
++        }
++    }
++
++    @Autowired
++    private MockMvc mvc;
++
++    @Test
++    void rowReceivedTomorrowIsAgeZeroWithoutAsOf() throws Exception {
++        mvc.perform(get(&quot;/requests/pending&quot;))
++                .andExpect(status().isOk())
++                .andExpect(jsonPath(&quot;$.length()&quot;).value(3))
++                .andExpect(jsonPath(&quot;$[2].id&quot;).value(&quot;PA-10263&quot;))
++                .andExpect(jsonPath(&quot;$[2].receivedAt&quot;).value(&quot;2026-10-09&quot;))
++                .andExpect(jsonPath(&quot;$[2].ageBusinessDays&quot;).value(0))
++                .andExpect(jsonPath(&quot;$[2].overLimit&quot;).value(false))
++                .andExpect(jsonPath(&quot;$[2].ageLabel&quot;).value(&quot;0 bd&quot;));
++    }
++}
 </textarea></div></div></div>
 </section>
-<section class="step" id="s09" data-step="9" data-phase="The real run" style="--c:var(--review)">
-  <div class="step__head"><span class="step__n">9</span><div><span class="chip">what it showed</span><h2>What the real run showed</h2><p class="step__why">The workflow does what the map says. A person still had to find the worst bug, and one finding had nowhere to go.</p></div><span class="who">read · 3 min</span></div>
-<div class="gwrap"><table><thead><tr><th></th><th>This course's request-to-pr run (4 Nov)</th><th>aidlc-on-archon, express (5 Nov)</th></tr></thead><tbody><tr><td>The process</td><td>request-to-pr: questions, requirements, plan, implement loop, review, push (15 nodes, 4 waits)</td><td>AI-DLC express: 2.1, 2.3, 3.5, 3.6, each an agent and a gate (4 gates reached)</td></tr><tr><td>Questions to the team</td><td>a questions node, answered with <code>archon workflow answer</code></td><td>at the top of the stage's file, answered by rejecting the stage</td></tr><tr><td>Ages as of 13 Oct</td><td>7 OVER 5 / 4 / 1</td><td>7 OVER 5 / 4 / 1</td></tr><tr><td>Far-future <code>asOf</code></td><td>a 500, found by Kiran's jar check</td><td>no answer at all (a day-by-day loop), found by the same check</td></tr><tr><td>Sending the change back</td><td>reject cancelled the run; <code>archon-implement --adopt</code> fixed it in a second run</td><td>reject redid 3.5 in the same run, on the same branch</td></tr><tr><td>Tests at the end</td><td>21</td><td>19</td></tr><tr><td>Found beyond the jar check</td><td>nothing more: the review said READY</td><td>3.6 read the code: a row dated after today blocks the whole list (not fixed)</td></tr><tr><td>Reported cost</td><td>$4.36 (run + fix)</td><td>$2.95</td></tr></tbody></table></div><ul>
+<section class="step" id="s10" data-step="10" data-phase="The real run" style="--c:var(--review)">
+  <div class="step__head"><span class="step__n">10</span><div><span class="chip">what it showed</span><h2>What the real run showed</h2><p class="step__why">The workflow does what the map says. A person still had to find the worst bug, and one finding had to leave the workflow to be fixed.</p></div><span class="who">read · 3 min</span></div>
+<div class="gwrap"><table><thead><tr><th></th><th>This course's request-to-pr run (4 Nov)</th><th>aidlc-on-archon, express (5 Nov)</th></tr></thead><tbody><tr><td>The process</td><td>request-to-pr: questions, requirements, plan, implement loop, review, push (15 nodes, 4 waits)</td><td>AI-DLC express: 2.1, 2.3, 3.5, 3.6, each an agent and a gate (4 gates reached)</td></tr><tr><td>Questions to the team</td><td>a questions node, answered with <code>archon workflow answer</code></td><td>at the top of the stage's file, answered by rejecting the stage</td></tr><tr><td>Ages as of 13 Oct</td><td>7 OVER 5 / 4 / 1</td><td>7 OVER 5 / 4 / 1</td></tr><tr><td>Far-future <code>asOf</code></td><td>a 500, found by Kiran's jar check</td><td>no answer at all (a day-by-day loop), found by the same check</td></tr><tr><td>Sending the change back</td><td>reject cancelled the run; <code>archon-implement --adopt</code> fixed it in a second run</td><td>reject redid 3.5 in the same run; 3.6's finding went to a second run, <code>archon-implement --adopt</code></td></tr><tr><td>Tests at the end</td><td>21</td><td>19, then 22 after the fix</td></tr><tr><td>Found beyond the jar check</td><td>nothing more: the review said READY</td><td>3.6 read the code: a row dated after today blocks the whole list; fixed in a follow-up run</td></tr><tr><td>Reported cost</td><td>$4.36 (run + fix)</td><td>$3.67 ($2.95 run + $0.72 fix)</td></tr></tbody></table></div><ul>
 <li><b>The map held.</b> Archon ran exactly the stages the express dry run ran (2.1, 2.3, 3.5, 3.6), skipped the other 26 by their <code>when:</code>, and the phase checks listed what each phase wrote.</li>
 <li><b>Reject works as AI-DLC's gate.</b> Both rejects redid only their own stage, and the redo read what the person typed (<code>$LOOP_PREV</code>): the requirements took the answers, the code took Meena's 400 rule.</li>
 <li><b>Green tests weren't enough.</b> <code>verify.sh</code> passed at 16 tests while one request could hang the server. Kiran's jar check, a person at the gate, caught it, as in the request-to-pr run.</li>
-<li><b>A gate can only send back its own stage.</b> 3.6 found a code defect, but its reject redoes 3.6, which is told not to change code: the workflow has no way from 3.6's gate back to 3.5. The fix is a follow-up run (as <code>archon-implement --adopt</code> did in the request-to-pr run), not done here.</li>
+<li><b>A gate can only send back its own stage.</b> 3.6 found a code defect, but its reject redoes 3.6, which is told not to change code: the workflow has no way from 3.6's gate back to 3.5. The fix went to a follow-up run, <code>archon-implement --adopt</code>, as in the request-to-pr run (step 9).</li>
 <li><b>Approved assumptions matter.</b> The 3.6 defect came from assumption A3, which was approved at 2.3 with “A1–A8 are fine”.</li>
-</ul><div class="plain"><div><b>In plain words.</b> The stages ran in order, a person signed each one off, two were sent back and redone, and the run cost $2.95 in about 20 minutes. The agents wrote good code and good reports, and still missed what a person found by trying the app.</div></div><div class="note">Agent time across the run: about 11 minutes; the rest was waiting at gates. Costs are what Archon reports (API-price equivalents); the run used a claude.ai plan. Run id <code>152af46d5da132b8c79dcb76acaac528</code>. Captured by <code>tools/capture_aidlc_run.py</code> into <code>tools/data/aidlc/run/</code>.</div>
+</ul><div class="plain"><div><b>In plain words.</b> The stages ran in order, a person signed each one off, two were sent back and redone, and the run cost $2.95 in about 20 minutes; fixing 3.6's finding took one more run and $0.72. The agents wrote good code and good reports, and still missed what a person found by trying the app.</div></div><div class="note">Agent time across the run: about 11 minutes; the rest was waiting at gates. Costs are what Archon reports (API-price equivalents); the run used a claude.ai plan. Run id <code>152af46d5da132b8c79dcb76acaac528</code>. Captured by <code>tools/capture_aidlc_run.py</code> into <code>tools/data/aidlc/run/</code>.</div>
 </section>
-<div class="phase" style="--c:var(--ship)"><i></i>Try it<span>steps 10–11 · in your workspace, and the files</span></div>
-<section class="step" id="s10" data-step="10" data-phase="Try it" style="--c:var(--ship)">
-  <div class="step__head"><span class="step__n">10</span><div><span class="chip">your workspace</span><h2>Run it in your workspace</h2><p class="step__why">Copy one folder into the workspace from the setup page, check it, then run it for real.</p></div><span class="who">about 5 minutes, then a real run</span></div>
+<div class="phase" style="--c:var(--ship)"><i></i>Try it<span>steps 11–12 · in your workspace, and the files</span></div>
+<section class="step" id="s11" data-step="11" data-phase="Try it" style="--c:var(--ship)">
+  <div class="step__head"><span class="step__n">11</span><div><span class="chip">your workspace</span><h2>Run it in your workspace</h2><p class="step__why">Copy one folder into the workspace from the setup page, check it, then run it for real.</p></div><span class="who">about 5 minutes, then a real run</span></div>
 <div class="io"><div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">PowerShell</span><span class="os-mac">Terminal</span></span></div><pre class="os-win">cd C:\work\archon-java\java-workspace
 Copy-Item -Recurse <course>\tools\data\aidlc\files\.archon\workflows\aidlc .archon\workflows\
 archon validate workflows aidlc-on-archon
@@ -1402,8 +1687,8 @@ archon workflow attention
 archon workflow approve <run-id> "OK"
 archon workflow reject <run-id> "Name the fields ageBusinessDays and overLimit"</pre><button class="copy" type="button">copy</button></div></div><div class="note">Without stubs, a dry run stops at the first gate. A real express run asks at four gates (2.1, 2.3, 3.5, 3.6; step 8 needed six answers), each answered with <code>approve</code> or <code>reject</code> plus what to change; Code Generation makes the branch and commits in <code>priorauth-api/</code> as the workspace's <code>CLAUDE.md</code> says. The workflow names <code>&lt;course&gt;</code> for wherever you cloned this course.</div>
 </section>
-<section class="step" id="s11" data-step="11" data-phase="Try it" style="--c:var(--ship)">
-  <div class="step__head"><span class="step__n">11</span><div><span class="chip">the files</span><h2>The files</h2><p class="step__why">The workflow is generated from AI-DLC's stage table by <code>tools/make_aidlc_workflow.py</code>: 968 lines, 98 nodes (37 at the top level, 61 inside the loops).</p></div><span class="who">reference</span></div>
+<section class="step" id="s12" data-step="12" data-phase="Try it" style="--c:var(--ship)">
+  <div class="step__head"><span class="step__n">12</span><div><span class="chip">the files</span><h2>The files</h2><p class="step__why">The workflow is generated from AI-DLC's stage table by <code>tools/make_aidlc_workflow.py</code>: 968 lines, 98 nodes (37 at the top level, 61 inside the loops).</p></div><span class="who">reference</span></div>
 <div class="open"><div class="tabs" role="tablist"><button class="tab" role="tab" aria-selected="true" data-pane="wf-1">aidlc-on-archon.yaml</button><button class="tab" role="tab" aria-selected="false" data-pane="wf-2">state-init.ts</button><button class="tab" role="tab" aria-selected="false" data-pane="wf-3">stubs.yaml</button></div><div class="pane is-on" id="wf-1"><div class="code code--wrap"><div class="code__bar"><span class="path">.archon/workflows/aidlc/aidlc-on-archon/aidlc-on-archon.yaml</span><span>generated · validated</span></div><textarea class="src" data-lang="yaml"># Generated by tools/make_aidlc_workflow.py from AI-DLC&#x27;s stage table (AI-DLC Workflows 2.11): edit the generator.
 name: aidlc-on-archon
 description: &gt;-
@@ -2489,7 +2774,7 @@ feedback-optimization-gate:
 </section>
 <section class="card" id="real">
   <h2>Where this comes from</h2>
-<p>AI-DLC's 33 stages, their phases, lead and support personas and modes, and the 11 scope lists are AI-DLC Workflows 2.11's own tables (<code>aidlc engine gen stage-table</code> and <code>gen scope-table</code>), copied from the AI-DLC course into <code>tools/data/aidlc/</code>. The personas' short roles and each stage's one-line job are this course's words. The workflow and its script are generated by <code>tools/make_aidlc_workflow.py</code>. Every Archon output on the page is real, from Archon 0.13.2 on Windows (5 Nov 2026), captured by <code>tools/capture_aidlc_map.py</code> in a copy of the course's java workspace. The real express run (steps 8–9; Claude Code on the claude.ai login, 5 Nov 2026) started from the public starter and was captured by <code>tools/capture_aidlc_run.py</code>; the gate answers are the course cast's. Items marked <span class="lbl lbl-doc">documented</span> were not run.</p>
+<p>AI-DLC's 33 stages, their phases, lead and support personas and modes, and the 11 scope lists are AI-DLC Workflows 2.11's own tables (<code>aidlc engine gen stage-table</code> and <code>gen scope-table</code>), copied from the AI-DLC course into <code>tools/data/aidlc/</code>. The personas' short roles and each stage's one-line job are this course's words. The workflow and its script are generated by <code>tools/make_aidlc_workflow.py</code>. Every Archon output on the page is real, from Archon 0.13.2 on Windows (5 Nov 2026), captured by <code>tools/capture_aidlc_map.py</code> in a copy of the course's java workspace. The real express run and its follow-up fix (steps 8–10; Claude Code on the claude.ai login, 5 Nov 2026) started from the public starter and was captured by <code>tools/capture_aidlc_run.py</code>; the gate answers are the course cast's. Items marked <span class="lbl lbl-doc">documented</span> were not run.</p>
 </section>
 
 </main>

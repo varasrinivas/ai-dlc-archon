@@ -1,0 +1,28 @@
+{
+ "id": "2dca943e-e690-46d8-b180-c0c63f5d0f26",
+ "workflow": "archon-implement",
+ "message": "Apply Meena's decision on 3.6 of the adopted run (record/construction/build-and-test.md, decision 1): a pending row whose receivedAt is after the as-of date must never make the call fail. Rows are never refused; only the caller's asOf is checked (after today = 400, as now). A row received after the as-of date gets age 0, not over the limit. Drop the whole-list 400 for an asOf before a row's receivedAt (assumption A3); keep the 400 for a malformed asOf and for an asOf after today. Add tests: a row received tomorrow with no asOf returns 200 with age 0, and the 7/4/1 example as of 2026-10-13 still holds. Work in priorauth-api on its current branch request-age/pending-list-age; commit there, do not push. Tests only through ./scripts/verify.sh from the workspace root.",
+ "start": "2026-11-05T07:13:23.768Z",
+ "end": "2026-11-05T07:15:18.622Z",
+ "events": 66,
+ "nodes": [
+  {
+   "node": "implement-iteration-1",
+   "event": "node_complete",
+   "ts": "2026-11-05T07:15:18.592Z",
+   "ms": null,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "implement",
+   "event": "node_complete",
+   "ts": "2026-11-05T07:15:18.606Z",
+   "ms": 114701,
+   "input": 658361,
+   "output": 8005,
+   "cost": 0.7172621
+  }
+ ]
+}

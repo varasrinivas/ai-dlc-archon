@@ -1,2 +1,3 @@
 6103fdd Request age on the pending list (intent 261013-request-age-api)
 d4a98c9 Reject asOf after today with 400; test empty asOf is today (intent 261013-request-age-api)
+a0f6fa4 A row received after asOf is age 0, never a 400

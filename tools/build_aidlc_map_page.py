@@ -119,7 +119,7 @@ assert all(f in WAITS["wait-4"][1] for f in ("16 tests", "6103fdd", "verify: pas
 assert all(f in WAITS["wait-5"][1] for f in ("19 tests", "d4a98c9", "verify: passed"))
 assert "If any pending row is dated after the server's today, every call returns 400" in WAITS["wait-6"][1]
 COMMITS = GIT["branch-log.txt"].split("\n")[:-1]
-assert [c[:7] for c in COMMITS] == ["6103fdd", "d4a98c9"] and "d9aa178 priorauth-api 1.0.2" in GIT["main.txt"]
+assert [c[:7] for c in COMMITS] == ["6103fdd", "d4a98c9", "a0f6fa4"] and "d9aa178 priorauth-api 1.0.2" in GIT["main.txt"]
 TESTS = re.search(r"(\d+) files? changed, (\d+) insertions\(\+\), (\d+) deletions", GIT["diffstat.txt"]).groups()
 J1, J2 = RS["jar-check"]["stdout"], RS["jar-check-2"]["stdout"]
 AGES = '"ageBusinessDays":7,"overLimit":true,"ageLabel":"7 bd OVER 5"'
@@ -129,12 +129,27 @@ assert "HTTP/1.1" not in J1.split(FAR)[1] and RS["jar-check"]["seconds"] > 300  
 assert J2.count("HTTP/1.1 400") == 2 and "latest allowed asOf is 2026-11-05" in J2.split(FAR.replace("$ curl -i", "$ curl -i"))[1]
 assert "completed after 2 iterations" in RS["approve-code"]["stdout"] and "Workflow completed successfully." in RS["approve-build-and-test"]["stdout"]
 assert "(none: no Operation stage ran in this scope)" in RS["approve-build-and-test"]["stdout"]
-CTRL = GIT["diff.patch"]
-assert "max(Comparator.naturalOrder())" in CTRL and ".filter(date::isBefore)" in CTRL  # the 3.6 finding is in the code as approved
+CTRL, FIXP = GIT["commit-6103fdd.patch"], GIT["commit-a0f6fa4.patch"]
+assert "+        pending.stream().map(PriorAuthRequest::receivedAt).max(Comparator.naturalOrder())" in CTRL  # the 3.6 finding, as written in 3.5
+assert "-        pending.stream().map(PriorAuthRequest::receivedAt).max(Comparator.naturalOrder())" in FIXP and "max(Comparator.naturalOrder())" not in GIT["diff.patch"]
 # The course's request-to-pr run of the same request, for the comparison.
 JNODES = json.loads((ROOT / "archon-hello-world-java" / "java-run" / "nodes.json").read_text(encoding="utf-8"))
 J_COST = sum(n["cost"] or 0 for v in JNODES.values() if v["workflow"] in ("request-to-pr", "archon-implement") for n in v["nodes"] if n["event"] == "node_complete")
 assert f"{J_COST:.2f}" == "4.36", J_COST
+# The follow-up fix of 3.6's finding: archon-implement --adopt <the express run>, outside the workflow.
+FN = json.loads((RUNDIR / "fix-nodes.json").read_text(encoding="utf-8"))
+FIX_COST = sum(n["cost"] or 0 for n in FN["nodes"] if n["event"] == "node_complete")
+FO = RS["fix-run"]["stdout"]
+assert FN["workflow"] == "archon-implement" and f"{FIX_COST:.2f}" == "0.72" and abs(FIX_COST - float(re.search(r"Cost: \$([\d.]+)", FO).group(1))) < 0.01
+assert f"Adopting run {RUN_ID}" in FO and "commit a0f6fa4" in FO and "22 tests run and none failing" in FO and "completed after 1 iteration" in FO
+FIX_SUM = json.loads(next(l for l in FO.splitlines() if l.startswith('{"done":true')))["summary"]
+VF = RS["verify-fix"]["stdout"]
+assert "verify: passed" in VF and sum(int(n) for n in re.findall(r"Tests run: (\d+)", VF)) == 22
+J3 = RS["jar-check-3"]["stdout"]
+EARLY = '$ curl -i "http://localhost:8093/requests/pending?asOf=2026-10-05"'
+assert AGES in J3 and "HTTP/1.1 200" in J3.split(EARLY)[1].split(FAR)[0] and '"ageBusinessDays":0,"overLimit":false,"ageLabel":"0 bd"' in J3
+assert "HTTP/1.1 400" in J2.split(EARLY)[1].split(FAR)[0]  # before the fix the same query was refused
+assert "latest allowed asOf is 2026-11-05" in J3.split(FAR)[1]
 
 
 def dry_lines(label, keep=None):
@@ -442,32 +457,45 @@ S.append(step(8, "The real run", "--review", "a model run", "A real express run,
               + f'<h3 style="margin:22px 0 8px">3.6: a defect found by reading the code</h3>'
               + io(see(x(WAITS["wait-6"][1].split("**Decisions for you")[1].split("\n2.")[0].strip()), "real · 3.6's first decision", "The gate shows"),
                    you(x(reply("approve-build-and-test")), None, "Meena types"), stack=True)
-              + note("Checked: in the controller, with no <code>asOf</code> the date is today, and if the newest row's <code>receivedAt</code> is after it the whole call is a 400. It follows from assumption A3 (“if asOf is earlier than even one row, the whole call is a 400”), which was approved at 2.3. The sample data can't trigger it. It is not fixed: rejecting 3.6 would only redo 3.6, which may not change code (step 9).")
+              + note("Checked: in the controller, with no <code>asOf</code> the date is today, and if the newest row's <code>receivedAt</code> is after it the whole call is a 400. It follows from assumption A3 (“if asOf is earlier than even one row, the whole call is a 400”), which was approved at 2.3. The sample data can't trigger it with no <code>asOf</code>. It could not be fixed inside this run: rejecting 3.6 would only redo 3.6, which may not change code. The fix is step 9.")
               + io(see(x(scrub(RS["approve-build-and-test"]["stdout"]).strip().split("Loop-group node 'build-and-test'")[1].strip().join(["Loop-group node 'build-and-test'", ""])), "real · the end of the run", "Archon returns"))
-              + tabs("rr", [(f"{k.split('/')[-1]}", f"$ARTIFACTS_DIR/record/{k}", "real · written by the run", "markdown", v) for k, v in REC.items() if k != "workspace.md"]
-                     + [("the diff", f"priorauth-api: main..request-age/pending-list-age ({TESTS[0]} files, +{TESTS[1]} −{TESTS[2]})", "real · 2 commits", "diff", GIT["diff.patch"])])))
+              + tabs("rr", [(f"{k.split('/')[-1]}", f"$ARTIFACTS_DIR/record/{k}", "real · written by the run", "markdown", v) for k, v in REC.items() if k != "workspace.md"])))
+
+FIX_MSG = re.match(r"archon workflow run archon-implement --adopt (\w+) (.*)", RS["fix-run"]["cmd"], re.S).groups()
+FIX_OUT = "\n".join(l for l in scrub(FO).splitlines() if l.startswith(("Adopting run", "Folder project", "Loop node", "Workflow finished", "  Status", "  Cost")))
+S.append(step(9, "The real run", "--review", "the follow-up fix", "The follow-up fix, outside the workflow",
+              f"3.6's finding had no way back to 3.5, so it went to a second run: Archon's bundled <code>archon-implement</code>, adopting the express run, as the request-to-pr run fixed its 500. One iteration, ${FIX_COST:.2f}.", f"read · 3 min · {REAL}",
+              io(you(x(f'archon workflow run archon-implement --adopt {FIX_MSG[0]} "{FIX_MSG[1]}"'), None, "from the workspace root, Meena's decision as the message"),
+                 see(x(FIX_OUT + "\n\nThe agent's summary:\n" + FIX_SUM), "real", "Archon returns"), stack=True)
+              + io(you('./scripts/verify.sh > /dev/null 2>&1 && echo "verify: passed"\ngit -C priorauth-api log --oneline -4\ngrep -h "Tests run" priorauth-api/target/surefire-reports/*.txt', None, "Git Bash, Kiran checks"),
+                   see(x(VF.strip()), "real", "Kiran sees"))
+              + io(see(x(J3.strip()), "real · the jar check on a0f6fa4", "Kiran sees"))
+              + plain("Asked for 5 October, before two of the requests arrived, the API used to refuse the whole list with a 400 (step 8's checks). Now it answers, and those two rows are 0 days old. That is the same code path as a row received after today with no <code>asOf</code>, which the new test pins with a fixed clock. The far-future date is still a 400, and 7/4/1 still holds.")
+              + note("The agent said the 3.6 record \u201cisn't in this workspace\u201d: an adopted run's files are in <code>$ADOPTED_RUN_DIR</code> (<code>~/.archon/workspaces/_folder/aidlc-workspace/artifacts/runs/&lt;id&gt;/</code>), not in the workspace, so it worked from the message alone. Put the decision in the message, as here.")
+              + tabs("fx", [("the fix", "priorauth-api: commit a0f6fa4", "real", "diff", GIT["commit-a0f6fa4.patch"]),
+                            ("the whole branch", f"priorauth-api: main..request-age/pending-list-age ({TESTS[0]} files, +{TESTS[1]} −{TESTS[2]})", f"real · {len(COMMITS)} commits", "diff", GIT["diff.patch"])])))
 
 CMP = [
     ["The process", "request-to-pr: questions, requirements, plan, implement loop, review, push (15 nodes, 4 waits)", f"AI-DLC express: 2.1, 2.3, 3.5, 3.6, each an agent and a gate ({len(REAL_GATED)} gates reached)"],
     ["Questions to the team", "a questions node, answered with <code>archon workflow answer</code>", "at the top of the stage's file, answered by rejecting the stage"],
     ["Ages as of 13 Oct", "7 OVER 5 / 4 / 1", "7 OVER 5 / 4 / 1"],
     ["Far-future <code>asOf</code>", "a 500, found by Kiran's jar check", "no answer at all (a day-by-day loop), found by the same check"],
-    ["Sending the change back", "reject cancelled the run; <code>archon-implement --adopt</code> fixed it in a second run", "reject redid 3.5 in the same run, on the same branch"],
-    ["Tests at the end", "21", "19"],
-    ["Found beyond the jar check", "nothing more: the review said READY", "3.6 read the code: a row dated after today blocks the whole list (not fixed)"],
-    ["Reported cost", f"${J_COST:.2f} (run + fix)", f"${COST_RUN:.2f}"],
+    ["Sending the change back", "reject cancelled the run; <code>archon-implement --adopt</code> fixed it in a second run", "reject redid 3.5 in the same run; 3.6's finding went to a second run, <code>archon-implement --adopt</code>"],
+    ["Tests at the end", "21", "19, then 22 after the fix"],
+    ["Found beyond the jar check", "nothing more: the review said READY", "3.6 read the code: a row dated after today blocks the whole list; fixed in a follow-up run"],
+    ["Reported cost", f"${J_COST:.2f} (run + fix)", f"${COST_RUN + FIX_COST:.2f} (${COST_RUN:.2f} run + ${FIX_COST:.2f} fix)"],
 ]
-S.append(step(9, "The real run", "--review", "what it showed", "What the real run showed",
-              "The workflow does what the map says. A person still had to find the worst bug, and one finding had nowhere to go.", "read · 3 min",
+S.append(step(10, "The real run", "--review", "what it showed", "What the real run showed",
+              "The workflow does what the map says. A person still had to find the worst bug, and one finding had to leave the workflow to be fixed.", "read · 3 min",
               table(["", "This course's request-to-pr run (4 Nov)", "aidlc-on-archon, express (5 Nov)"], CMP)
               + f"""<ul>
 <li><b>The map held.</b> Archon ran exactly the stages the express dry run ran (2.1, 2.3, 3.5, 3.6), skipped the other {30 - len(REAL_GATED)} by their <code>when:</code>, and the phase checks listed what each phase wrote.</li>
 <li><b>Reject works as AI-DLC's gate.</b> Both rejects redid only their own stage, and the redo read what the person typed (<code>$LOOP_PREV</code>): the requirements took the answers, the code took Meena's 400 rule.</li>
 <li><b>Green tests weren't enough.</b> <code>verify.sh</code> passed at 16 tests while one request could hang the server. Kiran's jar check, a person at the gate, caught it, as in the request-to-pr run.</li>
-<li><b>A gate can only send back its own stage.</b> 3.6 found a code defect, but its reject redoes 3.6, which is told not to change code: the workflow has no way from 3.6's gate back to 3.5. The fix is a follow-up run (as <code>archon-implement --adopt</code> did in the request-to-pr run), not done here.</li>
+<li><b>A gate can only send back its own stage.</b> 3.6 found a code defect, but its reject redoes 3.6, which is told not to change code: the workflow has no way from 3.6's gate back to 3.5. The fix went to a follow-up run, <code>archon-implement --adopt</code>, as in the request-to-pr run (step 9).</li>
 <li><b>Approved assumptions matter.</b> The 3.6 defect came from assumption A3, which was approved at 2.3 with “A1–A8 are fine”.</li>
 </ul>"""
-              + plain(f"The stages ran in order, a person signed each one off, two were sent back and redone, and the run cost ${COST_RUN:.2f} in about {RUN_MIN} minutes. The agents wrote good code and good reports, and still missed what a person found by trying the app.")
+              + plain(f"The stages ran in order, a person signed each one off, two were sent back and redone, and the run cost ${COST_RUN:.2f} in about {RUN_MIN} minutes; fixing 3.6's finding took one more run and ${FIX_COST:.2f}. The agents wrote good code and good reports, and still missed what a person found by trying the app.")
               + note(f"Agent time across the run: about {AGENT_MIN} minutes; the rest was waiting at gates. Costs are what Archon reports (API-price equivalents); the run used a claude.ai plan. Run id <code>{RUN_ID}</code>. Captured by <code>tools/capture_aidlc_run.py</code> into <code>tools/data/aidlc/run/</code>.")))
 
 TRY_WIN = ("cd C:\\work\\archon-java\\java-workspace\n"
@@ -478,14 +506,14 @@ TRY_MAC = ("cd ~/work/archon-java/java-workspace\n"
            "cp -R <course>/tools/data/aidlc/files/.archon/workflows/aidlc .archon/workflows/\n"
            "archon validate workflows aidlc-on-archon\n"
            "archon workflow run aidlc-on-archon --dry-run --default-stubs --input scope=express \"Implement the request in docs-in/request.md\"")
-S.append(step(10, "Try it", "--ship", "your workspace", "Run it in your workspace",
+S.append(step(11, "Try it", "--ship", "your workspace", "Run it in your workspace",
               "Copy one folder into the workspace from the setup page, check it, then run it for real.", "about 5 minutes, then a real run",
               io(you(TRY_WIN, TRY_MAC, "PowerShell", "Terminal"), see("aidlc-on-archon                          ok\n…\nSimulation outcome: paused", "what to expect · real output above", "Archon returns"))
               + f'<h3 style="margin:20px 0 8px">A real run: the commands of <a href="#s08">step 8</a></h3>'
               + io(you("archon workflow run aidlc-on-archon --folder --detach --input scope=express \"Implement the request in docs-in/request.md\"\narchon workflow attention\narchon workflow approve <run-id> \"OK\"\narchon workflow reject <run-id> \"Name the fields ageBusinessDays and overLimit\"", None, "any shell"))
               + note("Without stubs, a dry run stops at the first gate. A real express run asks at four gates (2.1, 2.3, 3.5, 3.6; step 8 needed six answers), each answered with <code>approve</code> or <code>reject</code> plus what to change; Code Generation makes the branch and commits in <code>priorauth-api/</code> as the workspace's <code>CLAUDE.md</code> says. The workflow names <code>&lt;course&gt;</code> for wherever you cloned this course.")))
 
-S.append(step(11, "Try it", "--ship", "the files", "The files",
+S.append(step(12, "Try it", "--ship", "the files", "The files",
               f"The workflow is generated from AI-DLC's stage table by <code>tools/make_aidlc_workflow.py</code>: {WF_LINES} lines, {N_NODES} nodes ({len(TOP)} at the top level, {len(INNER)} inside the loops).", "reference",
               tabs("wf", [("aidlc-on-archon.yaml", WF_REL, "generated · validated", "yaml", WF),
                           ("state-init.ts", ".archon/workflows/aidlc/aidlc-on-archon/scripts/state-init.ts", "generated", "javascript", STATE_TS),
@@ -496,10 +524,10 @@ S.append(step(11, "Try it", "--ship", "the files", "The files",
 
 STEPS_RAIL = [(1, "Two tools, one lifecycle"), (2, "The translation"), (3, "The 33 stages"), (4, "One stage up close"), (5, "How the scope picks"),
               (6, "Thirteen dry runs"), (7, "Same, and not"),
-              (8, "A real express run"), (9, "What it showed"), (10, "Run it yourself"), (11, "The files")]
+              (8, "A real express run"), (9, "The follow-up fix"), (10, "What it showed"), (11, "Run it yourself"), (12, "The files")]
 PH = {1: ("The idea", "--setup"), 2: ("The idea", "--setup"), 3: ("The map", "--plan"), 4: ("The map", "--plan"), 5: ("The map", "--plan"),
-      6: ("The check", "--build"), 7: ("The check", "--build"), 8: ("The real run", "--review"), 9: ("The real run", "--review"),
-      10: ("Try it", "--ship"), 11: ("Try it", "--ship")}
+      6: ("The check", "--build"), 7: ("The check", "--build"), 8: ("The real run", "--review"), 9: ("The real run", "--review"), 10: ("The real run", "--review"),
+      11: ("Try it", "--ship"), 12: ("Try it", "--ship")}
 assert len(S) == len(STEPS_RAIL)
 
 hero = f'''<section class="hero" id="top">
@@ -512,7 +540,7 @@ hero = f'''<section class="hero" id="top">
       <div><b>11</b>scopes, one input</div>
       <div><b>{len(RUNS)}</b>real dry runs, all matching</div>
       <div><b>{N_NODES}</b>nodes in one workflow file</div>
-      <div><b>${COST_RUN:.2f}</b>one real express run, 2 stages sent back</div>
+      <div><b>${COST_RUN + FIX_COST:.2f}</b>one real express run and its follow-up fix</div>
     </div>
   </div>
   <aside class="slack" aria-label="The short version">
@@ -526,12 +554,12 @@ hero = f'''<section class="hero" id="top">
   </aside>
 </section>
 '''
-real = card("real", "Where this comes from", f"""<p>AI-DLC's 33 stages, their phases, lead and support personas and modes, and the 11 scope lists are AI-DLC Workflows 2.11's own tables (<code>aidlc engine gen stage-table</code> and <code>gen scope-table</code>), copied from the AI-DLC course into <code>tools/data/aidlc/</code>. The personas' short roles and each stage's one-line job are this course's words. The workflow and its script are generated by <code>tools/make_aidlc_workflow.py</code>. Every Archon output on the page is real, from Archon 0.13.2 on Windows (5 Nov 2026), captured by <code>tools/capture_aidlc_map.py</code> in a copy of the course's java workspace. The real express run (steps 8–9; Claude Code on the claude.ai login, 5 Nov 2026) started from the public starter and was captured by <code>tools/capture_aidlc_run.py</code>; the gate answers are the course cast's. Items marked {DOC} were not run.</p>""")
+real = card("real", "Where this comes from", f"""<p>AI-DLC's 33 stages, their phases, lead and support personas and modes, and the 11 scope lists are AI-DLC Workflows 2.11's own tables (<code>aidlc engine gen stage-table</code> and <code>gen scope-table</code>), copied from the AI-DLC course into <code>tools/data/aidlc/</code>. The personas' short roles and each stage's one-line job are this course's words. The workflow and its script are generated by <code>tools/make_aidlc_workflow.py</code>. Every Archon output on the page is real, from Archon 0.13.2 on Windows (5 Nov 2026), captured by <code>tools/capture_aidlc_map.py</code> in a copy of the course's java workspace. The real express run and its follow-up fix (steps 8–10; Claude Code on the claude.ai login, 5 Nov 2026) started from the public starter and was captured by <code>tools/capture_aidlc_run.py</code>; the gate answers are the course cast's. Items marked {DOC} were not run.</p>""")
 main = (hero + phase("--setup", "The idea", "steps 1–2 · what each tool does, and how one maps onto the other") + "".join(S[0:2])
         + phase("--plan", "The map", "steps 3–5 · every stage, one up close, and how the scope picks them") + "".join(S[2:5])
         + phase("--build", "The check", "steps 6–7 · Archon's real dry runs, and the limits") + "".join(S[5:7])
-        + phase("--review", "The real run", "steps 8–9 · one express run with Claude, gate by gate, and what it showed") + "".join(S[7:9])
-        + phase("--ship", "Try it", "steps 10–11 · in your workspace, and the files") + "".join(S[9:11]) + real)
+        + phase("--review", "The real run", "steps 8–10 · one express run with Claude, gate by gate, its follow-up fix, and what it showed") + "".join(S[7:10])
+        + phase("--ship", "Try it", "steps 11–12 · in your workspace, and the files") + "".join(S[10:12]) + real)
 footer = ('<footer class="foot">AI-DLC on Archon · Archon 0.13.2 · AI-DLC Workflows 2.11 · <a href="archon-introduction.html">introduction</a> · '
           '<a href="../ai-dlc-execution/aidlc-introduction.html">the AI-DLC course</a> · <a href="index.html">all course pages</a> · <a href="#top">Back to top</a></footer>\n')
 html_ = page("AI-DLC on Archon", "AWS AI-DLC's 33 stages written as one Archon workflow: each stage an agent node and an approval gate, the scope an input, with an interactive map of which stages run in each scope, checked by Archon's real validate and dry runs.",

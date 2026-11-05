@@ -5,6 +5,7 @@ archon-hello-world-java/java-run/ were not. This maps, in every tracked text fil
   the Windows user folder -> C:\\Users\\you     the run folder D:\\tmp\\archon-java -> C:\\work\\archon-java
   other D:\\tmp folders   -> C:\\work           the hostname -> your-pc, "started by <user>" -> "started by you"
   a Claude scratchpad      -> C:\\work\\scratch   the Claude projects slug -> ...-you-...
+  the git name and email of commits made where no identity was set -> you <you@example.com> (read from git config)
 Backslashes may be escaped any number of times (JSON in JSONL in JSON), so separators are matched as runs.
 Idempotent: run it after every new capture (capture_cli.py, capture_java_run.py, archon_step.py).
 Usage: py -3.12 tools/scrub_captures.py [--check]
@@ -21,6 +22,8 @@ DIRS = ("tools/data/", "archon-hello-world-java/java-run/", "archon-hello-world-
         "archon-hello-world-java/java-workspace/", "archon-hello-world-java/multirepo-workspace/")
 USER = getpass.getuser()
 HOST = socket.gethostname()
+_git = lambda k: subprocess.run(["git", "config", "--global", k], capture_output=True, encoding="utf-8").stdout.strip()  # noqa: E731
+GIT_NAME, GIT_EMAIL = _git("user.name"), _git("user.email")  # commits made where no identity was set carry these
 S = r"(\\+|/)"  # one separator, escaped any number of times (or a forward slash)
 
 RULES = [
@@ -39,9 +42,11 @@ RULES = [
     (re.compile(r"\b[A-Za-z]--tmp-"), lambda m: "C--work-"),
     (re.compile(rf"\bstarted by {re.escape(USER)}\b"), lambda m: "started by you"),
     (re.compile(re.escape(HOST), re.I), lambda m: "your-pc"),
-]
+] + ([(re.compile(re.escape(f"{GIT_NAME} <{GIT_EMAIL}>"), re.I), lambda m: "you <you@example.com>"),
+      (re.compile(re.escape(GIT_EMAIL), re.I), lambda m: "you@example.com")] if GIT_EMAIL else [])
 # What must not survive anywhere in those folders.
-LEAKS = re.compile(rf"Users{S}{re.escape(USER)}\b|D:{S}tmp\b|/d/tmp\b|{re.escape(HOST)}|\\Temp\\+claude\\|started by {re.escape(USER)}\b", re.I)
+LEAKS = re.compile(rf"Users{S}{re.escape(USER)}\b|D:{S}tmp\b|/d/tmp\b|{re.escape(HOST)}|\\Temp\\+claude\\|started by {re.escape(USER)}\b"
+                   + (f"|{re.escape(GIT_EMAIL)}" if GIT_EMAIL else ""), re.I)
 
 
 def tracked():

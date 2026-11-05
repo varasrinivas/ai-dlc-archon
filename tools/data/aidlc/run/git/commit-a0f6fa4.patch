@@ -1,0 +1,179 @@
+commit a0f6fa43befebe09fda4ecd120f7a9570d9ecbc6
+Author: you <you@example.com>
+Date:   Thu Nov 5 12:44:55 2026 +0530
+
+    A row received after asOf is age 0, never a 400
+    
+    Per Meena's decision on 3.6, a pending row whose receivedAt is after the
+    as-of date (e.g. received "tomorrow" through clock skew) must not fail the
+    whole list. Drop the 400 for an asOf before a row's receivedAt (assumption
+    A3); such a row now ages 0 and is not over the limit. The 400 for an asOf
+    after today and for a malformed asOf stays.
+---
+ .../java/com/acmehealth/priorauth/api/BusinessDayCalendar.java  |  2 +-
+ .../com/acmehealth/priorauth/api/PendingRequestsController.java | 13 ++------
+ .../com/acmehealth/priorauth/api/BusinessDayCalendarTest.java   |  5 +++
+ .../acmehealth/priorauth/api/PendingRequestsControllerTest.java | 20 ++++++++++--
+ .../priorauth/api/PendingRequestsReceivedTomorrowTest.java      | 49 +++++++++++++++++++++++++++++
+ 5 files changed, 74 insertions(+), 15 deletions(-)
+
+diff --git a/src/main/java/com/acmehealth/priorauth/api/BusinessDayCalendar.java b/src/main/java/com/acmehealth/priorauth/api/BusinessDayCalendar.java
+index 3371b86..3be1525 100644
+--- a/src/main/java/com/acmehealth/priorauth/api/BusinessDayCalendar.java
++++ b/src/main/java/com/acmehealth/priorauth/api/BusinessDayCalendar.java
+@@ -32,7 +32,7 @@ public class BusinessDayCalendar {
+         this.mapper = mapper;
+     }
+ 
+-    /** Business days after {@code from} up to and including {@code to}; {@code from} itself is day 0. */
++    /** Business days after {@code from} up to and including {@code to}; {@code from} itself is day 0, and so is a {@code from} after {@code to}. */
+     public int businessDaysAfter(String tenantId, LocalDate from, LocalDate to) {
+         Set<LocalDate> holidays = holidays(tenantId);
+         int days = 0;
+diff --git a/src/main/java/com/acmehealth/priorauth/api/PendingRequestsController.java b/src/main/java/com/acmehealth/priorauth/api/PendingRequestsController.java
+index c1f303b..9f04ca6 100644
+--- a/src/main/java/com/acmehealth/priorauth/api/PendingRequestsController.java
++++ b/src/main/java/com/acmehealth/priorauth/api/PendingRequestsController.java
+@@ -1,6 +1,5 @@
+ package com.acmehealth.priorauth.api;
+ 
+-import com.acmehealth.priorauth.model.PriorAuthRequest;
+ import com.acmehealth.priorauth.store.RequestStore;
+ import org.springframework.beans.factory.annotation.Value;
+ import org.springframework.format.annotation.DateTimeFormat;
+@@ -13,7 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
+ 
+ import java.time.Clock;
+ import java.time.LocalDate;
+-import java.util.Comparator;
+ import java.util.List;
+ 
+ /** GET /requests/pending: the list the reviewer screen shows, oldest first, with each row's business-day age. */
+@@ -35,7 +33,7 @@ public class PendingRequestsController {
+ 
+     /**
+      * {@code asOf} pins the date ages are counted to; without it (or empty), today in the server's time zone.
+-     * It must lie between the newest row's receivedAt and today.
++     * It must not be after today. A row received after that date is age 0; it never fails the call.
+      */
+     @GetMapping("/requests/pending")
+     public List<PendingRequestResponse> pending(
+@@ -45,14 +43,7 @@ public class PendingRequestsController {
+         if (date.isAfter(today)) {
+             throw new BadAsOfException("asOf is after today; the latest allowed asOf is " + today);
+         }
+-        List<PriorAuthRequest> pending = store.pending();
+-        pending.stream().map(PriorAuthRequest::receivedAt).max(Comparator.naturalOrder())
+-                .filter(date::isBefore)
+-                .ifPresent(newest -> {
+-                    throw new BadAsOfException(
+-                            "asOf is before a request's receivedAt; the earliest allowed asOf is " + newest);
+-                });
+-        return pending.stream()
++        return store.pending().stream()
+                 .map(r -> PendingRequestResponse.from(r,
+                         calendar.businessDaysAfter(r.tenantId(), r.receivedAt(), date), thresholdDays))
+                 .toList();
+diff --git a/src/test/java/com/acmehealth/priorauth/api/BusinessDayCalendarTest.java b/src/test/java/com/acmehealth/priorauth/api/BusinessDayCalendarTest.java
+index e389e9a..ba5da36 100644
+--- a/src/test/java/com/acmehealth/priorauth/api/BusinessDayCalendarTest.java
++++ b/src/test/java/com/acmehealth/priorauth/api/BusinessDayCalendarTest.java
+@@ -21,6 +21,11 @@ class BusinessDayCalendarTest {
+         assertThat(age("TX-01", "2026-10-13", "2026-10-13")).isZero();
+     }
+ 
++    @Test
++    void receivedAfterTheAsOfDateIsDayZero() {
++        assertThat(age("TX-01", "2026-10-14", "2026-10-13")).isZero();
++    }
++
+     @Test
+     void weekendsDoNotCount() {
+         // Fri 16 Oct -> Mon 19 Oct
+diff --git a/src/test/java/com/acmehealth/priorauth/api/PendingRequestsControllerTest.java b/src/test/java/com/acmehealth/priorauth/api/PendingRequestsControllerTest.java
+index 53e4fe5..8d49cfa 100644
+--- a/src/test/java/com/acmehealth/priorauth/api/PendingRequestsControllerTest.java
++++ b/src/test/java/com/acmehealth/priorauth/api/PendingRequestsControllerTest.java
+@@ -77,10 +77,24 @@ class PendingRequestsControllerTest {
+     }
+ 
+     @Test
+-    void asOfBeforeAReceivedDateIsACallerError() throws Exception {
++    void asOfTodayGivesTheReportAges() throws Exception {
++        mvc.perform(get("/requests/pending").param("asOf", "2026-10-13"))
++                .andExpect(status().isOk())
++                .andExpect(jsonPath("$[0].ageBusinessDays").value(7))
++                .andExpect(jsonPath("$[1].ageBusinessDays").value(4))
++                .andExpect(jsonPath("$[2].ageBusinessDays").value(1));
++    }
++
++    /** Meena's decision on 3.6: a row received after asOf is age 0, never a failed call. */
++    @Test
++    void rowReceivedAfterAsOfIsAgeZero() throws Exception {
+         mvc.perform(get("/requests/pending").param("asOf", "2026-10-08"))
+-                .andExpect(status().isBadRequest())
+-                .andExpect(jsonPath("$.detail").value(containsString("2026-10-09")));
++                .andExpect(status().isOk())
++                .andExpect(jsonPath("$.length()").value(3))
++                .andExpect(jsonPath("$[2].id").value("PA-10263"))
++                .andExpect(jsonPath("$[2].ageBusinessDays").value(0))
++                .andExpect(jsonPath("$[2].overLimit").value(false))
++                .andExpect(jsonPath("$[2].ageLabel").value("0 bd"));
+     }
+ 
+     @Test
+diff --git a/src/test/java/com/acmehealth/priorauth/api/PendingRequestsReceivedTomorrowTest.java b/src/test/java/com/acmehealth/priorauth/api/PendingRequestsReceivedTomorrowTest.java
+new file mode 100644
+index 0000000..2ad8466
+--- /dev/null
++++ b/src/test/java/com/acmehealth/priorauth/api/PendingRequestsReceivedTomorrowTest.java
+@@ -0,0 +1,49 @@
++package com.acmehealth.priorauth.api;
++
++import org.junit.jupiter.api.Test;
++import org.springframework.beans.factory.annotation.Autowired;
++import org.springframework.boot.test.context.SpringBootTest;
++import org.springframework.boot.test.context.TestConfiguration;
++import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
++import org.springframework.context.annotation.Bean;
++import org.springframework.context.annotation.Primary;
++import org.springframework.test.web.servlet.MockMvc;
++
++import java.time.Clock;
++import java.time.Instant;
++import java.time.ZoneId;
++
++import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
++import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
++import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
++
++/** Meena's decision on 3.6: a row received tomorrow (clock skew, time zones) must not fail the call. */
++@SpringBootTest
++@AutoConfigureMockMvc
++class PendingRequestsReceivedTomorrowTest {
++
++    /** "Today" is Thu 8 Oct 2026, so the sample's PA-10263 (received Fri 9 Oct) arrived tomorrow. */
++    @TestConfiguration
++    static class FixedClock {
++        @Bean
++        @Primary
++        Clock fixedClock() {
++            return Clock.fixed(Instant.parse("2026-10-08T17:00:00Z"), ZoneId.of("America/Chicago"));
++        }
++    }
++
++    @Autowired
++    private MockMvc mvc;
++
++    @Test
++    void rowReceivedTomorrowIsAgeZeroWithoutAsOf() throws Exception {
++        mvc.perform(get("/requests/pending"))
++                .andExpect(status().isOk())
++                .andExpect(jsonPath("$.length()").value(3))
++                .andExpect(jsonPath("$[2].id").value("PA-10263"))
++                .andExpect(jsonPath("$[2].receivedAt").value("2026-10-09"))
++                .andExpect(jsonPath("$[2].ageBusinessDays").value(0))
++                .andExpect(jsonPath("$[2].overLimit").value(false))
++                .andExpect(jsonPath("$[2].ageLabel").value("0 bd"));
++    }
++}

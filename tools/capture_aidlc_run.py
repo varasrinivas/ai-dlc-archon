@@ -5,9 +5,10 @@ D:\\tmp\\archon-aidlc\\aidlc-workspace, priorauth-api was replaced by a fresh cl
 no tags; the course's java-workspace copy already has the feature merged), then every command went through
 `py -3.12 tools/archon_step.py tools/data/aidlc/run-steps.json <label> <workspace> -- ...`. Labels: run wait-1
 approve-reverse-engineering wait-2 reject-requirements wait-3 approve-requirements wait-4 jar-check reject-code wait-5
-jar-check-2 approve-code wait-6 approve-build-and-test get.
+jar-check-2 approve-code wait-6 approve-build-and-test get, then the follow-up fix of 3.6's finding: fix-run
+(`archon workflow run archon-implement --adopt <run> ...`) verify-fix jar-check-3.
 
-Writes run/steps.json, run/log.jsonl (the transcript), run/nodes.json (per node: event, duration, tokens, cost),
+Writes run/steps.json, run/log.jsonl (the transcript), run/nodes.json (per node: event, duration, tokens, cost), run/fix-log.jsonl and run/fix-nodes.json (the fix run),
 run/record/ (what the stages wrote to $ARTIFACTS_DIR/record), run/git/ (priorauth-api: log, diffstat, diff, per commit).
 
 Usage: py -3.12 tools/capture_aidlc_run.py; then py -3.12 tools/scrub_captures.py
@@ -24,6 +25,7 @@ from capture_java_run import clean_steps, node_table  # noqa: E402
 from pagekit import scrub  # noqa: E402
 
 RUN_ID = "152af46d5da132b8c79dcb76acaac528"
+FIX_ID = "2dca943e-e690-46d8-b180-c0c63f5d0f26"  # archon-implement --adopt RUN_ID
 WS = Path(r"D:\tmp\archon-aidlc\aidlc-workspace")
 REPO = WS / "priorauth-api"
 PROJ = Path.home() / ".archon" / "workspaces" / "_folder" / "aidlc-workspace"
@@ -32,7 +34,7 @@ BRANCH = "request-age/pending-list-age"
 
 
 def git(*args):
-    return subprocess.run(["git", "-C", str(REPO), *args], capture_output=True, encoding="utf-8", errors="replace", check=True).stdout
+    return scrub(subprocess.run(["git", "-C", str(REPO), *args], capture_output=True, encoding="utf-8", errors="replace", check=True).stdout)
 
 
 def main():
@@ -43,13 +45,14 @@ def main():
     steps = clean_steps(DATA / "run-steps.json", OUT / "steps.json")
     print("steps:", [s["label"] for s in steps])
 
-    text = scrub((PROJ / "logs" / f"{RUN_ID}.jsonl").read_text(encoding="utf-8"))
-    (OUT / "log.jsonl").write_text(text, encoding="utf-8")
-    rows = [json.loads(line) for line in text.splitlines() if line.strip()]
-    start = next(r for r in rows if r.get("type") == "workflow_start")
-    nodes = {"workflow": start["workflow_name"], "message": start.get("content"), "start": start["ts"],
-             "end": rows[-1].get("ts"), "events": len(rows), "nodes": node_table(rows)}
-    (OUT / "nodes.json").write_text(json.dumps(nodes, indent=1, ensure_ascii=False), encoding="utf-8")
+    for rid, name in ((RUN_ID, ""), (FIX_ID, "fix-")):
+        text = scrub((PROJ / "logs" / f"{rid}.jsonl").read_text(encoding="utf-8"))
+        (OUT / f"{name}log.jsonl").write_text(text, encoding="utf-8")
+        rows = [json.loads(line) for line in text.splitlines() if line.strip()]
+        start = next(r for r in rows if r.get("type") == "workflow_start")
+        nodes = {"id": rid, "workflow": start["workflow_name"], "message": start.get("content"), "start": start["ts"],
+                 "end": rows[-1].get("ts"), "events": len(rows), "nodes": node_table(rows)}
+        (OUT / f"{name}nodes.json").write_text(json.dumps(nodes, indent=1, ensure_ascii=False), encoding="utf-8")
 
     rec = PROJ / "artifacts" / "runs" / RUN_ID / "record"
     for f in rec.rglob("*"):

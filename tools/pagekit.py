@@ -219,12 +219,24 @@ ARROW_DEF = '<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerW
 
 # ---------- privacy: no local paths on a page ----------
 _U, _H = getpass.getuser(), socket.gethostname()  # this machine's user and hostname, read here, never written down
+
+
+def _git_identity():
+    """This machine's git name and email (commits made where no identity was set carry them), read, never written down."""
+    import subprocess
+    get = lambda k: subprocess.run(["git", "config", "--global", k], capture_output=True, encoding="utf-8").stdout.strip()  # noqa: E731
+    return get("user.name"), get("user.email")
+
+
+_GN, _GE = _git_identity()
 LEAKS = ["C:\\Users\\" + _U, "C:/Users/" + _U, "C:\\\\Users\\\\" + _U, r"D:\tmp", "D:/tmp", r"D:\\tmp", "/d/tmp", "@gmail.com",
-         r"\AppData\Local\Temp", "Users-" + _U, _H, "/c/Users/" + _U]
+         r"\AppData\Local\Temp", "Users-" + _U, _H, "/c/Users/" + _U] + ([_GE] if _GE else [])
 
 
 def scrub(text):
-    """Map this machine's paths to the ones the pages show."""
+    """Map this machine's paths, and its git identity, to the ones the pages show."""
+    if _GE:
+        text = text.replace(f"{_GN} <{_GE}>", "you <you@example.com>").replace(_GE, "you@example.com")
     for a, b in [("C:\\\\Users\\\\" + _U, r"C:\\Users\\you"), (r"D:\\tmp\\archon-java", r"C:\\work\\archon-java"),
                  (r"D:\\Program Files\\Git", r"C:\\Program Files\\Git"), ("Users-" + _U + "-", "Users-you-"),
                  (_H, "your-pc"), ("/c/Users/" + _U, "/c/Users/you"),
