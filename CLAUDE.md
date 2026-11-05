@@ -15,9 +15,10 @@ An Archon course (coleam00/Archon 0.13.2, the YAML workflow engine for AI coding
 | `archon-workspace-setup.html` | `tools/build_setup_page.py` | `install.txt`, `cli.json`, `home-config.yaml`, `inventory.json`, `java-run/setup-steps.json`, `tools/data/setup/`, `img/webui-*.png` |
 | `archon-hello-world-java/archon-hello-world-java-run.html` (20 steps, every setup command included) | `tools/build_run_page.py` | `archon-hello-world-java/java-run/` and `java-workspace/` |
 | `archon-hello-world-java/archon-two-repos-run.html` (one bug across two repos, 16 steps, every setup command included) | `tools/build_multirepo_page.py` | `archon-hello-world-java/multirepo-run/`, `tools/data/multirepo/files/`, `setup_multirepo_run.py`'s pom constants; checks step 16 against `../ai-dlc-execution/aidlc-hello-world-java/graphify-multirepo-run/` when that sibling is checked out |
+| `archon-end-to-end-guide.html` (both real runs as one runbook, 28 steps: machine, one request one repo, one bug two repos) | `tools/build_guide_page.py` | both runs' `setup-steps.json` and `steps.json` (commands mapped to `$JRUN`/`$MRUN`/`$RUN`, messages quoted for bash), `setup_multirepo_run.py`'s constants (the split as shell), `tools/data/setup/prereq-steps.json` (tool versions, 5 Nov), `install.txt`, `cli.json`; every Check box is asserted. `--emit java` / `--emit multirepo` prints Part B's / C's setup as one bash script: run it with `COURSE`, `JRUN`, `MRUN` set in a scratch folder and compare `git rev-parse <tag>^{tree}` with the course's remotes (done 5 Nov 2026: all four trees match) |
 | `archon-aidlc-on-archon.html` (AWS AI-DLC's 33 stages as one Archon workflow; interactive stage map with a scope switch) | `tools/build_aidlc_map_page.py` | `tools/data/aidlc/` (AI-DLC 2.11's stage and scope tables, the generated workflow, `steps.json` from Archon's validate and 13 dry runs, `run/` from the real express run) |
 
-Edit the generators, never the HTML. Each generator asserts the numbers it prints (bundled workflow count, node and wait counts, test counts, costs, the review verdict, the curl output), and `pagekit.write()` fails if a local path (your user folder, `D:\tmp`, the hostname, the Claude projects slug; `pagekit` reads the user and hostname from the machine, so neither is written in the repo) leaks onto a page. Rebuild all: `for p in intro concepts setup run; do py -3.12 tools/build_${p}_page.py; done; py -3.12 tools/build_onepage.py; py -3.12 tools/build_concept_map.py; py -3.12 tools/build_multirepo_page.py; py -3.12 tools/build_aidlc_map_page.py`. The sheet's text has no room to spare: after changing it, check in a browser that no `.tile` overflows (`scrollHeight > clientHeight`).
+Edit the generators, never the HTML. Each generator asserts the numbers it prints (bundled workflow count, node and wait counts, test counts, costs, the review verdict, the curl output), and `pagekit.write()` fails if a local path (your user folder, `D:\tmp`, the hostname, the Claude projects slug; `pagekit` reads the user and hostname from the machine, so neither is written in the repo) leaks onto a page. Rebuild all: `for p in intro concepts setup run; do py -3.12 tools/build_${p}_page.py; done; py -3.12 tools/build_onepage.py; py -3.12 tools/build_concept_map.py; py -3.12 tools/build_multirepo_page.py; py -3.12 tools/build_aidlc_map_page.py; py -3.12 tools/build_guide_page.py`. The sheet's text has no room to spare: after changing it, check in a browser that no `.tile` overflows (`scrollHeight > clientHeight`).
 
 ## Shared pieces
 
@@ -84,7 +85,7 @@ Re-run steps 1–5 above in an empty `D:\tmp` (a full run takes about 30 minutes
 
 GitHub: `varasrinivas/ai-dlc-archon` (**public** since 4 Nov 2026; history squashed to one commit at that point), branch `main`. The raw captures are scrubbed (`tools/scrub_captures.py`); run `py -3.12 tools/scrub_captures.py --check` before every push.
 
-The course is deployed to two sites, same files to both: `index.html`, the six pages, the cheat sheet, `archon-concepts-map.svg` and `img/*.png` (the pages link nothing else locally, and the run pages' `../../ai-dlc-execution/...` links resolve on both sites as-is, so no link rewriting).
+The course is deployed to two sites, same files to both: `index.html`, the seven pages, the cheat sheet, `archon-concepts-map.svg` and `img/*.png` (the pages link nothing else locally, and the run pages' `../../ai-dlc-execution/...` links resolve on both sites as-is, so no link rewriting).
 
 | Site | Bucket path | CloudFront | Hub card |
 |---|---|---|---|
@@ -95,7 +96,7 @@ Redeploy after a rebuild (Git Bash, from this folder):
 
 ```bash
 for B in s3://agenticai.varasrinivas.com/courses/archon s3://learnings.varasrinivas.com/archon; do
-  for f in index.html archon-introduction.html archon-concepts-explained.html archon-concepts-onepage.html archon-workspace-setup.html archon-aidlc-on-archon.html archon-hello-world-java/archon-hello-world-java-run.html archon-hello-world-java/archon-two-repos-run.html; do
+  for f in index.html archon-introduction.html archon-concepts-explained.html archon-concepts-onepage.html archon-workspace-setup.html archon-aidlc-on-archon.html archon-end-to-end-guide.html archon-hello-world-java/archon-hello-world-java-run.html archon-hello-world-java/archon-two-repos-run.html; do
     aws s3 cp "$f" "$B/$f" --content-type "text/html; charset=utf-8" --cache-control "public, max-age=300"; done
   aws s3 cp archon-concepts-map.svg "$B/archon-concepts-map.svg" --content-type image/svg+xml --cache-control "public, max-age=300"
   for f in img/*.png; do aws s3 cp "$f" "$B/$f" --content-type image/png --cache-control "public, max-age=86400"; done

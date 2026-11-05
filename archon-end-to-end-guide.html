@@ -1,0 +1,1257 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Archon End to End</title>
+<meta name="description" content="Every command of the course&#x27;s two real Archon 0.13.2 runs, from installing the tools to the merge: one request in one repo, one bug across two repos, with the real output after each step.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@600;700;800&family=Red+Hat+Text:wght@400;500;600&family=Red+Hat+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script>document.documentElement.classList.add('js');</script>
+<style>
+:root{
+  --bg:#F3F6F9; --bg-2:#E8EDF3; --panel:#FFFFFF; --ink:#141C25; --ink-2:#48566A; --ink-3:#7A8797; --line:#D9E1EA; --line-2:#B9C5D3;
+  --you:#1D4ED8; --you-soft:#E9EFFD; --you-ink:#15317E;
+  --setup:#5B6B7F; --plan:#0E7490; --build:#C2410C; --review:#6D28D9; --ship:#15803D; --gate:#D97706; --gate-soft:#FEF3C7; --gate-ink:#4A2E04; --ok:#15803D; --new:#15803D; --bad:#B91C1C;
+  --console:#0B1220; --console-ink:#E6EDF5; --c-muted:#8A9BB0; --c-str:#9FE1B0; --c-num:#F8C77A; --c-kw:#8CC4FF; --c-anno:#F0A6D2; --c-add:#10351F; --c-del:#4A1A1A; --c-prompt:#B5F5C8; --c-status:#7DD3FC;
+  --radius:14px; --shadow:0 1px 0 rgba(20,28,37,.04),0 14px 34px -24px rgba(20,28,37,.45);
+  --font-display:"Red Hat Display","Segoe UI",system-ui,sans-serif; --font-text:"Red Hat Text","Segoe UI",system-ui,sans-serif; --font-mono:"Red Hat Mono",ui-monospace,Consolas,Menlo,monospace;
+}
+[data-theme="dark"]{
+  --bg:#0F141A; --bg-2:#161D26; --panel:#171F29; --ink:#E7EDF3; --ink-2:#B1BDCA; --ink-3:#7E8B98; --line:#273240; --line-2:#3A4858;
+  --you:#8AB4FF; --you-soft:#15223D; --you-ink:#C9DAFF;
+  --setup:#9AA8B8; --plan:#38BDF8; --build:#FB923C; --review:#A78BFA; --ship:#4ADE80; --gate:#FBBF24; --gate-soft:#3A2A0A; --gate-ink:#FDE9B3; --ok:#4ADE80; --new:#4ADE80;
+  --console:#070C14; --shadow:0 1px 0 rgba(0,0,0,.4),0 14px 34px -24px rgba(0,0,0,.9);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 var(--font-text);-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-family:var(--font-display);line-height:1.15;margin:0 0 .4em;letter-spacing:-.01em}
+h1{font-size:clamp(1.9rem,4vw,2.9rem);font-weight:800}
+h2{font-size:1.45rem;font-weight:700}
+h3{font-size:1.12rem;font-weight:700}
+p{margin:0 0 .9em}
+a{color:inherit}
+code{font-family:var(--font-mono);font-size:.86em;background:rgba(120,140,170,.16);padding:.1em .38em;border-radius:6px;overflow-wrap:anywhere}
+pre{margin:0;font-family:var(--font-mono)}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--you);outline-offset:2px}
+.sr{position:absolute;left:-9999px}
+
+/* header */
+.top{position:sticky;top:0;z-index:40;background:color-mix(in srgb,var(--panel) 92%,transparent);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top__in{max-width:1240px;margin:0 auto;padding:10px 20px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:center}
+.brand{font-family:var(--font-display);font-weight:800;font-size:1.02rem;line-height:1.15}
+.brand small{display:block;font:500 .74rem/1.2 var(--font-text);color:var(--ink-3)}
+.prog{display:flex;align-items:center;gap:10px;min-width:0;overflow:hidden;font-size:.86rem;color:var(--ink-2)}
+.prog b{color:var(--ink);white-space:nowrap}
+.prog .bar{flex:1 1 0;height:8px;border-radius:99px;background:var(--bg-2);overflow:hidden;min-width:0}
+.prog .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--plan),var(--build),var(--review),var(--ship));transition:width .3s}
+.prog .ph{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.btn{border:1.5px solid var(--line-2);background:var(--panel);border-radius:10px;padding:7px 12px;font-weight:600;font-size:.86rem;cursor:pointer}
+.btn:hover{border-color:var(--ink-3)}
+@media (max-width:640px){.prog .ph{display:none}.brand small{display:none}.top__in{gap:8px;padding:8px 14px;grid-template-columns:minmax(0,auto) minmax(0,1fr) auto}.brand{min-width:0;overflow-wrap:anywhere}}
+
+/* shell */
+.shell{max-width:1240px;margin:0 auto;padding:0 20px 90px;display:grid;grid-template-columns:250px minmax(0,1fr);gap:28px;align-items:start}
+.rail{position:sticky;top:66px;max-height:calc(100vh - 80px);overflow:auto;padding:14px 0 20px}
+.rail h4{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin:14px 0 6px 10px}
+.rail h4:first-child{margin-top:0}
+.rl{display:grid;grid-template-columns:26px minmax(0,1fr);gap:8px;align-items:center;padding:6px 10px;border-radius:10px;text-decoration:none;color:var(--ink-2);font-size:.86rem;line-height:1.25}
+.rl b{display:inline-grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--bg-2);color:var(--ink-2);font:600 .74rem var(--font-mono);border:2px solid transparent}
+.rl:hover{background:var(--bg-2)}
+.rl.is-on{background:var(--panel);color:var(--ink);box-shadow:var(--shadow)}
+.rl.is-on b{border-color:var(--c);color:var(--c)}
+.rl.is-done b{background:var(--c);color:#fff;border-color:var(--c)}
+@media (max-width:900px){
+  .shell{grid-template-columns:minmax(0,1fr);gap:0}
+  .rail{position:sticky;top:58px;z-index:30;max-height:none;overflow-x:auto;overflow-y:hidden;display:flex;gap:6px;padding:8px 0;background:var(--bg);border-bottom:1px solid var(--line);margin:0 -20px 8px;padding-left:20px;padding-right:20px;scrollbar-width:thin}
+  .rail h4{display:none}
+  .rl{flex:0 0 auto;grid-template-columns:22px auto;padding:5px 9px;border:1px solid var(--line);background:var(--panel);white-space:nowrap}
+  .rl span{max-width:150px;overflow:hidden;text-overflow:ellipsis}
+}
+
+/* hero */
+.hero{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:28px;align-items:start;padding:40px 0 24px}
+.lead{font-size:1.1rem;color:var(--ink-2);max-width:62ch}
+.facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 18px;margin:18px 0 22px}
+.facts div{font-size:.86rem;color:var(--ink-2)}
+.facts b{display:block;font-family:var(--font-display);font-size:1.5rem;color:var(--ink);line-height:1.1}
+.slack{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.slack__bar{display:flex;justify-content:space-between;padding:9px 16px;background:var(--bg-2);font:500 .78rem var(--font-mono);color:var(--ink-2)}
+.slack__body{padding:16px 18px}
+.slack__who{display:flex;gap:10px;align-items:center;margin-bottom:10px}
+.slack__who i{width:38px;height:38px;border-radius:9px;background:var(--plan);color:#fff;display:grid;place-items:center;font:700 .9rem var(--font-display);font-style:normal}
+.slack__who b{display:block;line-height:1.2}.slack__who small{color:var(--ink-3)}
+.slack__body p{font-size:1rem}
+.legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin:0 0 30px}
+.legend>div{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:.86rem;color:var(--ink-2);display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;align-items:start}.legend>div>div{min-width:0}
+.legend b{display:block;color:var(--ink);font-size:.9rem}
+.legend svg{width:26px;height:26px;flex:none}
+@media (max-width:900px){.hero{grid-template-columns:minmax(0,1fr);padding-top:22px}.facts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* cards and steps */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px 24px;margin:0 0 18px}
+.phase{display:flex;align-items:center;gap:10px;margin:40px 0 14px;padding-top:18px;border-top:2px solid var(--line);color:var(--ink);font-family:var(--font-display);font-weight:800;font-size:1.3rem}
+.phase i{width:14px;height:14px;border-radius:50%;background:var(--c);flex:none}
+.phase span{font:500 .92rem var(--font-text);color:var(--ink-3)}
+.step{background:var(--panel);border:1px solid var(--line);border-top:5px solid var(--c);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px 24px;margin:0 0 20px;scroll-margin-top:84px}
+.step__head{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:14px;align-items:start;margin-bottom:10px}
+.step__n{display:inline-grid;place-items:center;width:42px;height:42px;border-radius:12px;background:var(--c);color:#fff;font:800 1.15rem var(--font-display)}
+.chip{display:inline-block;font:600 .72rem/1.3 var(--font-mono);letter-spacing:.02em;padding:4px 9px;border-radius:99px;border:1.5px solid var(--c);color:var(--c);margin:0 6px 8px 0;overflow-wrap:anywhere}
+.chip--ours{border-color:var(--ink-3);color:var(--ink-3);border-style:dashed}
+.step h2{font-size:1.32rem;margin:0 0 .25em}
+.step__why{color:var(--ink-2);font-size:.98rem;margin:0}
+.who{font:500 .78rem/1.3 var(--font-mono);color:var(--ink-3);text-align:right;white-space:nowrap}
+@media (max-width:640px){.step__head{grid-template-columns:auto minmax(0,1fr)}.who{grid-column:1/-1;text-align:left}.step{padding:18px 16px}.card{padding:18px 16px}}
+
+.io{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:14px;margin:14px 0 0;align-items:start}
+@media (max-width:820px){.io{grid-template-columns:minmax(0,1fr)}}
+.io--stack{grid-template-columns:minmax(0,1fr)}.io--stack .you{max-width:760px}.io--stack .claude pre{max-height:none}
+.box{border-radius:12px;overflow:hidden;border:1px solid var(--line);min-width:0}
+.box__bar{display:flex;align-items:center;gap:8px;padding:8px 12px;font:600 .76rem var(--font-mono);letter-spacing:.02em}
+.box__bar svg{width:16px;height:16px;flex:none}
+.box__bar .tag{margin-left:auto;font-weight:500;opacity:.8}
+.box pre{padding:12px 14px;font-size:.84rem;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere;overflow:auto;max-height:560px}
+.you{background:var(--you-soft);border-color:color-mix(in srgb,var(--you) 40%,transparent)}
+.you .box__bar{background:color-mix(in srgb,var(--you) 14%,transparent);color:var(--you-ink)}
+.you pre{color:var(--you-ink);font-weight:500}
+.you pre .k{color:var(--ink-3);font-weight:400}
+.you pre .c{color:var(--ink-3);font-weight:400;font-style:italic}
+.you .copy{margin:0 12px 10px;border:1.5px solid color-mix(in srgb,var(--you) 50%,transparent);background:var(--panel);border-radius:8px;padding:4px 10px;font:600 .76rem var(--font-mono);cursor:pointer}
+.you .copy:hover{background:var(--you);color:#fff}
+.you .none{padding:12px 14px;font-size:.9rem;color:var(--ink-2)}
+.claude{background:var(--console);border-color:#1F2B3D}
+.claude .box__bar{background:#121C2C;color:#C7D4E3}
+.claude pre{color:var(--console-ink)}
+.claude .s{color:var(--c-status)}.claude .q{color:var(--c-prompt)}.claude .m{color:var(--c-muted)}.claude b{color:#fff;font-weight:600}.claude .ok{color:#86EFAC}.claude .w{color:#FCD34D}
+.disk{margin-top:12px;background:var(--bg-2);border-color:var(--line)}
+.disk .box__bar{background:color-mix(in srgb,var(--setup) 18%,transparent);color:var(--ink-2)}
+.disk pre{color:var(--ink-2);font-size:.76rem;max-height:none;white-space:pre}
+.disk .n{color:var(--new);font-weight:600}.disk .m{color:var(--ink-3)}.disk b{color:var(--ink);font-weight:600}.disk .d{color:var(--ink-3);text-decoration:line-through}
+.disk .ex{color:var(--ink-3)}
+@media (max-width:640px){.disk .box__bar::after{content:"swipe sideways for the notes";margin-left:auto;font-weight:500;opacity:.7}}
+.open{margin-top:12px}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 8px}
+.tab{border:1.5px solid var(--line-2);background:var(--panel);border-radius:99px;padding:5px 11px;font:500 .76rem var(--font-mono);cursor:pointer;color:var(--ink-2);max-width:100%;overflow-wrap:anywhere}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.pane{display:none}.pane.is-on{display:block}
+.code{border-radius:12px;overflow:hidden;border:1px solid var(--line)}
+.code__bar{display:flex;justify-content:space-between;gap:10px;padding:7px 12px;background:var(--bg-2);border-left:5px solid var(--c);font:500 .74rem var(--font-mono);color:var(--ink-2)}
+.code__bar .path{color:var(--ink);font-weight:600;overflow-wrap:anywhere}
+.code pre{background:var(--console);color:var(--console-ink);padding:12px 14px;font-size:.8rem;line-height:1.55;overflow:auto;white-space:pre;margin:0}
+.code--wrap pre{white-space:pre-wrap;overflow-wrap:anywhere}
+.code textarea.src{display:none}
+.tok-c{color:var(--c-muted);font-style:italic}.tok-s{color:var(--c-str)}.tok-n{color:var(--c-num)}.tok-k{color:var(--c-kw)}.tok-a{color:var(--c-anno)}.tok-p{color:var(--c-muted)}.tok-t{color:var(--c-kw)}
+.ln-add{display:block;background:var(--c-add)}.ln-del{display:block;background:var(--c-del)}
+.gate{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:start;background:var(--gate-soft);border:1.5px solid var(--gate);border-radius:12px;padding:12px 14px;margin-top:12px;color:var(--gate-ink)}
+.gate i{width:18px;height:18px;background:var(--gate);transform:rotate(45deg);margin:4px 3px 0;flex:none;border-radius:3px}
+.gate b{display:block;margin-bottom:2px}.gate p{margin:0;font-size:.94rem}.gate .by{font:500 .76rem var(--font-mono);opacity:.85;margin-top:4px}
+.plain{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:start;margin-top:12px;padding:11px 14px;border-radius:12px;background:var(--bg-2);border:1px dashed var(--line-2);font-size:.94rem;color:var(--ink-2)}
+.plain svg{width:24px;height:24px;color:var(--c);flex:none;margin-top:2px}
+.plain b{color:var(--ink)}
+.note{background:var(--bg-2);border-left:4px solid var(--ink-3);border-radius:10px;padding:12px 14px;font-size:.94rem;margin-top:12px}
+.note b{color:var(--ink)}
+.three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:12px}
+.three>div{background:var(--bg-2);border-radius:12px;padding:10px 12px;font-size:.9rem}
+.three b{display:block;font-size:.76rem;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3);margin-bottom:4px}
+@media (max-width:760px){.three{grid-template-columns:minmax(0,1fr)}}
+table{border-collapse:collapse;width:100%;font-size:.9rem;margin:10px 0}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--bg-2);font-weight:600}
+td code{font-size:.82em}td:first-child{white-space:nowrap}
+@media (max-width:640px){table{display:block;overflow-x:auto}}
+.setup{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
+.srow{display:grid;grid-template-columns:34px minmax(0,1fr);gap:12px;align-items:start;background:var(--bg-2);border-radius:12px;padding:12px 14px}
+.srow>b{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--setup);color:#fff;font:700 .9rem var(--font-display)}
+.srow .io{margin-top:8px}
+.srow .box pre{max-height:220px}
+.pills{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.pill{font:500 .74rem var(--font-mono);padding:4px 9px;border-radius:99px;border:1.5px solid var(--line-2);color:var(--ink-3);text-decoration:line-through;background:var(--panel)}
+.pill.on{text-decoration:none;color:var(--c);border-color:var(--c);font-weight:600}
+.os-mac{display:none}
+[data-os="mac"] .os-win{display:none}
+[data-os="mac"] .os-mac{display:revert}
+.top__btns{display:flex;gap:8px}
+@media (max-width:640px){.top__btns{gap:4px}.top__btns .btn{padding:5px 8px;font-size:.74rem}}
+.goal-rule{margin:10px 0 0;padding-left:1.3em}.goal-rule li{margin:4px 0}
+.cal{display:grid;grid-template-columns:repeat(13,minmax(0,1fr));gap:4px;margin:12px 0 4px;font:500 .74rem var(--font-mono);text-align:center}
+.cal div{border:1px solid var(--line);border-radius:8px;padding:6px 2px;background:var(--panel);min-width:0}
+.cal div b{display:block;font:700 .95rem var(--font-display);color:var(--ink)}
+.cal div i{display:block;font-style:normal;color:var(--ink-3)}
+.cal .wk,.cal .hol{background:var(--bg-2);color:var(--ink-3)}.cal .wk b,.cal .hol b{color:var(--ink-3)}
+.cal .hol{border-style:dashed}
+.cal .arr{border-color:var(--plan)}.cal .over{border-color:var(--bad);border-width:2px}.cal .over i{color:var(--bad);font-weight:600}
+@media (max-width:760px){.cal{grid-template-columns:repeat(7,minmax(0,1fr))}}
+.box pre .plus{color:var(--c-str);font-weight:600}
+.cmd{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;background:var(--bg-2);border-radius:10px;padding:10px 12px;margin:8px 0}
+.cmd code[data-copy]{display:block;background:none;padding:0;font-size:.84rem;overflow-wrap:anywhere}
+.cmd small{display:block;color:var(--ink-3);margin-top:3px}
+.cmd .copy{border:1.5px solid var(--line-2);background:var(--panel);border-radius:8px;padding:5px 10px;font:600 .76rem var(--font-mono);cursor:pointer}
+.cmd .copy:hover{background:var(--ink);color:var(--bg)}
+dl.gloss{display:grid;grid-template-columns:minmax(0,1fr);gap:0;margin:0}
+dl.gloss div{display:grid;grid-template-columns:190px minmax(0,1fr);gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:.94rem}
+dl.gloss dt{font-weight:600;color:var(--ink)}dl.gloss dd{margin:0;color:var(--ink-2)}
+@media (max-width:640px){dl.gloss div{grid-template-columns:minmax(0,1fr);gap:2px}}
+.foot{max-width:1240px;margin:0 auto;padding:20px 20px 60px;font-size:.84rem;color:var(--ink-3);border-top:1px solid var(--line)}
+
+figure.dia{margin:14px 0}figure.dia figcaption{font-size:.82rem;color:var(--ink-3);text-align:center;margin-top:4px}
+.gwrap{overflow-x:auto;max-width:100%}.gwrap figure.dia{min-width:760px}.gwrap table{display:table}
+.kv{table-layout:fixed}.kv td:first-child,.kv th:first-child{width:34%}.kv td:first-child code{white-space:normal;overflow-wrap:anywhere}
+.ref-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:12px}
+@media (max-width:760px){.ref-grid{grid-template-columns:minmax(0,1fr)}}
+.ref-grid>div{background:var(--bg-2);border-radius:12px;padding:12px 14px;font-size:.92rem}
+.ref-grid h3{margin:0 0 4px;font:700 1rem var(--font-display)}
+.ref-grid h3 small{font:500 .78rem var(--font-mono);color:var(--ink-3);margin-left:6px}
+.ref-grid p{margin:0 0 6px}.ref-grid ul{margin:0;padding-left:1.1em}.ref-grid li{margin:2px 0}
+.filter{width:100%;padding:9px 12px;border:1.5px solid var(--line-2);border-radius:10px;background:var(--panel);color:var(--ink);font:500 .92rem var(--font-mono);margin:10px 0}
+.flist{max-height:560px;overflow:auto;border:1px solid var(--line);border-radius:10px}.flist table{margin:0}
+.flist td:first-child{font-family:var(--font-mono);font-size:.8rem;white-space:nowrap}.flist td:last-child{font-size:.86rem;color:var(--ink-2)}
+.tag-yes{color:var(--ok);font-weight:600}.tag-no{color:var(--ink-3)}
+.lbl{display:inline-block;font:600 .72rem var(--font-mono);padding:1px 7px;border-radius:999px;vertical-align:2px;margin-left:4px}
+.lbl-real{background:color-mix(in srgb,var(--ok) 16%,transparent);color:var(--ok)}
+.lbl-doc{background:color-mix(in srgb,var(--gate) 18%,transparent);color:var(--gate-ink)}
+[data-theme="dark"] .lbl-doc{color:var(--gate)}
+@media (max-width:680px){.who,.box__bar .tag{white-space:normal;overflow-wrap:anywhere;min-width:0}.box__bar{flex-wrap:wrap}}
+.node{display:inline-block;font:600 .8rem var(--font-mono);padding:1px 8px;border-radius:6px;border:1.5px solid var(--c,var(--line-2));color:var(--ink)}
+</style>
+</head>
+<body>
+<a class="sr" href="#main">Skip to content</a>
+<header class="top"><div class="top__in">
+  <div class="brand">Archon end to end<small>machine · one request · one bug · real output</small></div>
+  <div class="prog" aria-live="polite"><b id="progText">Step 0 of 28</b><div class="bar"><i id="progBar"></i></div><span class="ph" id="progPhase">Start at the top</span></div>
+  <div class="top__btns"><button class="btn" id="osToggle" type="button" title="Show the commands for your computer">Windows</button><button class="btn" id="themeToggle" type="button" aria-pressed="false">Dark mode</button></div>
+</div></header>
+
+<div class="shell">
+<nav class="rail" aria-label="Steps">
+  <h4>Your machine</h4>
+  <a class="rl" href="#s01" data-step="1" style="--c:var(--setup)"><b>1</b><span>What you need</span></a>
+  <a class="rl" href="#s02" data-step="2" style="--c:var(--setup)"><b>2</b><span>Install, doctor</span></a>
+  <a class="rl" href="#s03" data-step="3" style="--c:var(--setup)"><b>3</b><span>The shell</span></a>
+  <a class="rl" href="#s04" data-step="4" style="--c:var(--setup)"><b>4</b><span>The course's files</span></a>
+  <h4>One request, one repo</h4>
+  <a class="rl" href="#s05" data-step="5" style="--c:var(--build)"><b>5</b><span>Code repo's remote</span></a>
+  <a class="rl" href="#s06" data-step="6" style="--c:var(--build)"><b>6</b><span>Workspace repo</span></a>
+  <a class="rl" href="#s07" data-step="7" style="--c:var(--build)"><b>7</b><span>Clones</span></a>
+  <a class="rl" href="#s08" data-step="8" style="--c:var(--build)"><b>8</b><span>Before the run</span></a>
+  <a class="rl" href="#s09" data-step="9" style="--c:var(--build)"><b>9</b><span>Dry run</span></a>
+  <a class="rl" href="#s10" data-step="10" style="--c:var(--build)"><b>10</b><span>Run, wait</span></a>
+  <a class="rl" href="#s11" data-step="11" style="--c:var(--build)"><b>11</b><span>Answer</span></a>
+  <a class="rl" href="#s12" data-step="12" style="--c:var(--build)"><b>12</b><span>Requirements</span></a>
+  <a class="rl" href="#s13" data-step="13" style="--c:var(--build)"><b>13</b><span>Plan, implement</span></a>
+  <a class="rl" href="#s14" data-step="14" style="--c:var(--build)"><b>14</b><span>Jar check: a 500</span></a>
+  <a class="rl" href="#s15" data-step="15" style="--c:var(--build)"><b>15</b><span>Reject: cancelled</span></a>
+  <a class="rl" href="#s16" data-step="16" style="--c:var(--build)"><b>16</b><span>Fix (adopt)</span></a>
+  <a class="rl" href="#s17" data-step="17" style="--c:var(--build)"><b>17</b><span>Push, inspect</span></a>
+  <a class="rl" href="#s18" data-step="18" style="--c:var(--build)"><b>18</b><span>Merge, tidy</span></a>
+  <a class="rl" href="#s19" data-step="19" style="--c:var(--build)"><b>19</b><span>archon-plan</span></a>
+  <h4>One bug, two repos</h4>
+  <a class="rl" href="#s20" data-step="20" style="--c:var(--review)"><b>20</b><span>Split the starter</span></a>
+  <a class="rl" href="#s21" data-step="21" style="--c:var(--review)"><b>21</b><span>Workspace, remotes</span></a>
+  <a class="rl" href="#s22" data-step="22" style="--c:var(--review)"><b>22</b><span>Clones</span></a>
+  <a class="rl" href="#s23" data-step="23" style="--c:var(--review)"><b>23</b><span>Before: the bug</span></a>
+  <a class="rl" href="#s24" data-step="24" style="--c:var(--review)"><b>24</b><span>Dry run</span></a>
+  <a class="rl" href="#s25" data-step="25" style="--c:var(--review)"><b>25</b><span>Run, plan</span></a>
+  <a class="rl" href="#s26" data-step="26" style="--c:var(--review)"><b>26</b><span>Jar, approve, push</span></a>
+  <a class="rl" href="#s27" data-step="27" style="--c:var(--review)"><b>27</b><span>Inspect</span></a>
+  <a class="rl" href="#s28" data-step="28" style="--c:var(--review)"><b>28</b><span>Merge, tidy</span></a>
+  <h4>Reference</h4>
+  <a class="rl" href="#trouble" style="--c:var(--review)"><b>·</b><span>Troubleshooting</span></a>
+  <a class="rl" href="#cost" style="--c:var(--review)"><b>·</b><span>Cost and time</span></a>
+  <a class="rl" href="#again" style="--c:var(--review)"><b>·</b><span>Start over</span></a>
+  <a class="rl" href="#real" style="--c:var(--review)"><b>·</b><span>What is real here</span></a>
+</nav>
+
+<main id="main">
+<section class="hero" id="top">
+  <div>
+    <h1>Archon, end to end: from a bare machine to two merged changes.</h1>
+    <p class="lead">Everything the course's two real runs did, in order, at a keyboard: install and check the tools, set up the shell, then <b>one request in one repo</b> (Ravi's request-age feature through <code>request-to-pr</code>) and <b>one bug across two repos</b> (New Year's Day, through <code>fix-across-repos</code>). Every setup command is here, each followed by what the real run printed. Archon 0.13.2, Claude Code, Windows (Git Bash) and macOS.</p>
+    <div class="facts">
+      <div><b>28</b>steps, every command included</div>
+      <div><b>2</b>real runs, 23 min of commands</div>
+      <div><b>6</b>gates answered by people</div>
+      <div><b>3</b>repos, all with local remotes</div>
+      <div><b>$7.33</b>reported, four runs</div>
+      <div><b>0</b>GitHub accounts needed</div>
+    </div>
+  </div>
+  <aside class="slack" aria-label="The path">
+    <div class="slack__bar"><span>The path</span><span>28 steps</span></div>
+    <div class="slack__body">
+      <p style="margin:0 0 8px"><b>A · Your machine</b> (1–4)<br><span style="color:var(--ink-3)">Tools, Archon, the shell, the course's files. Once.</span></p>
+      <p style="margin:0 0 8px"><b>B · One request, one repo</b> (5–19)<br><span style="color:var(--ink-3)">Remotes, workspace, four gates, a 500 found by hand, a fix, the merge.</span></p>
+      <p style="margin:0"><b>C · One bug, two repos</b> (20–28)<br><span style="color:var(--ink-3)">Split the starter, two gates, a branch per repo, merge in release order.</span></p>
+    </div>
+  </aside>
+</section>
+<div class="phase" style="--c:var(--setup)"><i></i>A · Your machine<span>steps 1–4 · once per machine (step 3 in every terminal)</span></div>
+<section class="step" id="s01" data-step="1" data-phase="Your machine" style="--c:var(--setup)">
+  <div class="step__head"><span class="step__n">1</span><div><span class="chip">once</span><h2>What you need before Archon</h2><p class="step__why">Archon drives Claude Code; the runs build and test a Spring Boot repo. Five tools, each checked by one command.</p></div><span class="who">you · 10 min</span></div>
+<div class="gwrap"><table><thead><tr><th>Tool</th><th>Why</th><th>The course's machine (real)</th></tr></thead><tbody><tr><td>Claude Code, signed in to claude.ai</td><td>every agent node of a workflow is a Claude Code session</td><td><code>2.1.318 (Claude Code)</code></td></tr><tr><td>git (on Windows: Git for Windows, with Git Bash)</td><td>the workspace and code repos; Git Bash runs every <code>bash:</code> node and every command on this page</td><td><code>git version 2.42.0.windows.2</code><br><code>GNU bash, version 5.2.15(1)-release (x86_64-pc-msys)</code></td></tr><tr><td>JDK 21</td><td>priorauth-api is Java 21 (the machine's default java was 11)</td><td><code>openjdk version &quot;21.0.10&quot; 2026-01-20 LTS</code></td></tr><tr><td>Maven 3.9</td><td><code>scripts/verify.sh</code> is <code>mvn -q test</code></td><td><code>Apache Maven 3.9.16 (2bdd9fddda4b155ebf8000e807eb73fd829a51d5)</code></td></tr><tr><td>curl</td><td>the hand checks of the packaged jar</td><td><code>curl 8.2.1</code></td></tr></tbody></table></div><div class="io"><div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">Git Bash</span><span class="os-mac">Terminal</span></span></div><pre class="os-win">claude --version
+git --version
+bash --version | head -1
+java -version
+mvn -v | head -1
+curl --version | head -1</pre><pre class="os-mac">claude --version
+git --version
+bash --version | head -1
+java -version
+mvn -v | head -1
+curl --version | head -1</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real · 5 Nov 2026, Windows 10</span></div><pre>2.1.318 (Claude Code)
+git version 2.42.0.windows.2
+GNU bash, version 5.2.15(1)-release (x86_64-pc-msys)
+openjdk version &quot;21.0.10&quot; 2026-01-20 LTS
+Apache Maven 3.9.16 (2bdd9fddda4b155ebf8000e807eb73fd829a51d5)
+curl 8.2.1</pre></div></div><div class="note">Run <code>claude</code> once and sign in with your claude.ai account before anything else: Archon brings no model and no login of its own. On Windows, open <b>Git Bash</b> for every command on this page except the installer; on macOS, Terminal. The macOS commands are the documented equivalents; the course ran on Windows.</div>
+</section>
+<section class="step" id="s02" data-step="2" data-phase="Your machine" style="--c:var(--setup)">
+  <div class="step__head"><span class="step__n">2</span><div><span class="chip">once</span><h2>Install Archon, then check it</h2><p class="step__why">One installer, then version and doctor: everything is wired before you spend a token.</p></div><span class="who">you · 5 min</span></div>
+<div class="io io--stack"><div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">PowerShell (this one only)</span><span class="os-mac">Terminal</span></span></div><pre class="os-win">irm https://archon.diy/install.ps1 | iex</pre><pre class="os-mac">curl -fsSL https://archon.diy/install | bash</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">The installer returns <span class="tag">real · Archon 0.13.2, Windows, provider claude</span></div><pre>+---------------------------------------+
+  |      Archon CLI Installer             |
+  |      Windows (PowerShell)             |
+  +---------------------------------------+
+
+[INFO]  Detecting architecture...
+[OK]    Architecture: x64
+[INFO]  Version     : latest
+[INFO]  Download URL: https://github.com/coleam00/Archon/releases/latest/download/archon-windows-x64.exe
+[INFO]  Downloading binary...
+[OK]    Downloaded successfully
+[INFO]  Verifying checksum...
+[OK]    Checksum verified
+[INFO]  Creating install directory: C:\Users\you\.archon\bin
+[INFO]  Installing to C:\Users\you\.archon\bin\archon.exe...
+[OK]    Installed to C:\Users\you\.archon\bin\archon.exe
+[OK]    Added C:\Users\you\.archon\bin to your user PATH
+[INFO]  Restart your terminal (or open a new one) for the PATH change to take effect
+
+[INFO]  Verifying installation...
+Archon CLI v0.13.2   Platform: win32-x64   Build: binary   Database: sqlite   Git commit: b8d01782
+[OK]    Installation complete!
+[INFO]  Adding a provider connects Archon to your agent CLI or SDK; it does not install that CLI.
+[INFO]  Adding providers: claude
+Installed coleam00/Archon/plugins/provider-claude from github.com/coleam00/Archon v0.13.2 (commit b8d01782fac602231a95685dabf42cc0edb0f1c1)
+  C:\Users\you\.archon\plugins\archon-provider-claude.exe  sha256 3ee501bc09e33ac5118d2c5e994886f615c21e5719a730f2496cdb45ead716f4
+  This runs code published by coleam00.
+[OK]    Providers installed: claude
+
+  Get started:
+    archon workflow list
+    archon workflow run archon-investigate &quot;Why does the test suite fail?&quot;
+
+  Note: Open a new terminal window so the updated PATH takes effect.</pre></div></div><div class="io"><div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">Git Bash</span><span class="os-mac">Terminal</span></span></div><pre class="os-win">archon version
+archon doctor</pre><pre class="os-mac">archon version
+archon doctor</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real</span></div><pre>Archon CLI v0.13.2
+  Platform: win32-x64
+  Build: binary
+  Database: sqlite
+  Git commit: b8d01782
+…
+✓ claude: Claude binary: C:\Users\you\.local\bin\claude.exe (via autodetect, spawns OK)
+✓ Assistant login: claude: usable
+✓ Database: reachable (sqlite); schema created by 0.13.2, last applied by 0.13.2
+✓ Bundled defaults: 25 workflow(s), 27 command(s) loaded
+All checks passed.</pre></div></div><div class="note">Open a new terminal after the install: it adds <code>~/.archon/bin</code> to your user PATH. Answer <code>claude</code> when it asks for providers. Every line of both outputs is explained on the <a href='archon-workspace-setup.html#s01'>setup page, steps 1–2</a>.</div>
+</section>
+<section class="step" id="s03" data-step="3" data-phase="Your machine" style="--c:var(--setup)">
+  <div class="step__head"><span class="step__n">3</span><div><span class="chip">every terminal</span><h2>Set up the shell the runs use</h2><p class="step__why">Exactly what the course's runner (tools/archon_step.py) set for every command: no API key, telemetry off, JDK 21 first, Git Bash found. Plus three folder names this page uses.</p></div><span class="who">you · 1 min</span></div>
+<div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">Git Bash</span><span class="os-mac">Terminal</span></span></div><pre class="os-win">unset ANTHROPIC_API_KEY                # every run on your claude.ai login, never an API key
+export ARCHON_TELEMETRY_DISABLED=1
+export JAVA_HOME=&quot;/c/Program Files/Eclipse Adoptium/jdk-21.0.10.7-hotspot&quot;   # your JDK 21
+export PATH=&quot;$JAVA_HOME/bin:$PATH&quot;
+# only if Git is not under C:\Program Files\Git (the course&#x27;s was on D:):
+export ARCHON_BASH_PATH=&quot;D:\Program Files\Git\bin\bash.exe&quot;
+export COURSE=C:/work/ai-dlc-archon JRUN=C:/work/archon-java MRUN=C:/work/archon-multirepo</pre><pre class="os-mac">unset ANTHROPIC_API_KEY                # every run on your claude.ai login, never an API key
+export ARCHON_TELEMETRY_DISABLED=1
+export JAVA_HOME=$(/usr/libexec/java_home -v 21)
+export PATH=&quot;$JAVA_HOME/bin:$PATH&quot;
+export COURSE=$HOME/work/ai-dlc-archon JRUN=$HOME/work/archon-java MRUN=$HOME/work/archon-multirepo</pre><button class="copy" type="button">copy</button></div><div class="gwrap"><table class="kv"><thead><tr><th>Line</th><th>Why</th></tr></thead><tbody><tr><td><code>unset ANTHROPIC_API_KEY</code></td><td>if the key is set, Claude Code may use it instead of your claude.ai login; the course ran every Claude call on the login</td></tr><tr><td><code>ARCHON_TELEMETRY_DISABLED=1</code></td><td>Archon sends anonymous usage events by default (<a href='archon-workspace-setup.html#s03'>what is sent</a>)</td></tr><tr><td><code>JAVA_HOME</code>, <code>PATH</code></td><td>Maven and <code>java -jar</code> must find 21, not an older default</td></tr><tr><td><code>ARCHON_BASH_PATH</code></td><td>Windows only, and only if Git is not where Archon looks (step 4 of Troubleshooting below); <code>archon validate</code> does not catch it</td></tr><tr><td><code>COURSE</code>, <code>JRUN</code>, <code>MRUN</code></td><td>the course clone (next step) and one folder per run: every command below uses them, so a new terminal needs this block again</td></tr></tbody></table></div>
+</section>
+<section class="step" id="s04" data-step="4" data-phase="Your machine" style="--c:var(--setup)">
+  <div class="step__head"><span class="step__n">4</span><div><span class="chip">once</span><h2>Get the course's files</h2><p class="step__why">The team's files for both runs (workflows, prompts, CLAUDE.md, verify scripts, the request, the bug report) are in the course repo. Clone it once.</p></div><span class="who">you · 1 min</span></div>
+<div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">Git Bash</span><span class="os-mac">Terminal</span></span></div><pre class="os-win">git clone -q https://github.com/varasrinivas/ai-dlc-archon &quot;$COURSE&quot;
+ls &quot;$COURSE/tools/data/java/files&quot; &quot;$COURSE/tools/data/multirepo/files&quot;</pre><pre class="os-mac">git clone -q https://github.com/varasrinivas/ai-dlc-archon &quot;$COURSE&quot;
+ls &quot;$COURSE/tools/data/java/files&quot; &quot;$COURSE/tools/data/multirepo/files&quot;</pre><button class="copy" type="button">copy</button></div><div class="gwrap"><table class="kv"><thead><tr><th>Folder in the course repo</th><th>Becomes</th></tr></thead><tbody><tr><td><code>tools/data/java/files/</code></td><td>the team workspace of Part B: <code>.archon/workflows/team/request-to-pr/</code>, <code>CLAUDE.md</code>, <code>scripts/verify.*</code>, <code>docs-in/request.md</code>, <code>.gitignore</code>, <code>.gitattributes</code>, <code>.archon/config.yaml</code></td></tr><tr><td><code>tools/data/multirepo/files/</code></td><td>the team workspace of Part C: the same with <code>fix-across-repos</code> and <code>docs-in/bug-report.md</code></td></tr><tr><td><code>archon-hello-world-java/java-workspace/</code>, <code>multirepo-workspace/</code></td><td>what each workspace looks like after its run and merge: compare yours with them</td></tr></tbody></table></div><div class="note">The course repo checks every file out with LF line endings (its <code>.gitattributes</code>), so <code>verify.sh</code> runs under bash even with <code>core.autocrlf=true</code>. To write the files by hand instead, one here-string per file: <a href='archon-workspace-setup.html#s06'>setup page, step 6</a>.</div>
+</section>
+<div class="phase" style="--c:var(--build)"><i></i>B · One request, one repo<span>steps 5–19 · request-to-pr in java-workspace/ · the story: <a href='archon-hello-world-java/archon-hello-world-java-run.html'>run page</a></span></div>
+<section class="step" id="s05" data-step="5" data-phase="One request, one repo" style="--c:var(--build)">
+  <div class="step__head"><span class="step__n">5</span><div><span class="chip">set up</span><h2>A remote for the code repo: the public starter</h2><p class="step__why">A bare repo on your disk stands in for GitHub, so every push in the run is real and you need no GitHub account. Main only, no tags: tag v1.1.0 is the answer key.</p></div><span class="who">Meena · 1 min</span></div>
+<div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">Git Bash</span><span class="os-mac">Terminal</span></span></div><pre class="os-win">mkdir -p &quot;$JRUN/remotes&quot; &quot;$JRUN/build/java-workspace&quot;
+cd &quot;$JRUN/remotes&quot;
+git clone -q --bare --single-branch --no-tags https://github.com/varasrinivas/aidlc-priorauth-api priorauth-api.git
+cd &quot;$JRUN/remotes/priorauth-api.git&quot;
+git log --oneline -3 &amp;&amp; git tag | wc -l</pre><pre class="os-mac">mkdir -p &quot;$JRUN/remotes&quot; &quot;$JRUN/build/java-workspace&quot;
+cd &quot;$JRUN/remotes&quot;
+git clone -q --bare --single-branch --no-tags https://github.com/varasrinivas/aidlc-priorauth-api priorauth-api.git
+cd &quot;$JRUN/remotes/priorauth-api.git&quot;
+git log --oneline -3 &amp;&amp; git tag | wc -l</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real · 0.2 s</span></div><pre>d9aa178 priorauth-api 1.0.2: pending list for the reviewer screen</pre></div><div class="note">On a real team this is your GitHub repo: skip the bare clone and clone from GitHub in step 7. <code>git tag | wc -l</code> printing <code>0</code> means the agent cannot find the finished answer in the repo.</div>
+</section>
+<section class="step" id="s06" data-step="6" data-phase="One request, one repo" style="--c:var(--build)">
+  <div class="step__head"><span class="step__n">6</span><div><span class="chip">set up</span><h2>The team's workspace: a git repo of its own, pushed</h2><p class="step__why">The workspace holds what people wrote for Archon. Copy the team's files, commit them, and push them to a second bare remote.</p></div><span class="who">Meena · 2 min</span></div>
+<div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">Git Bash</span><span class="os-mac">Terminal</span></span></div><pre class="os-win">cp -R &quot;$COURSE/tools/data/java/files/.&quot; &quot;$JRUN/build/java-workspace/&quot;
+cd &quot;$JRUN/build/java-workspace&quot;
+git init -q -b main &amp;&amp; git add -A &amp;&amp; git update-index --chmod=+x scripts/verify.sh &amp;&amp; git -c user.name=&#x27;Meena Iyer&#x27; -c user.email=meena@acme-health.example commit -q -m &#x27;The java workspace: CLAUDE.md, verify scripts, the request-to-pr workflow, the request&#x27; &amp;&amp; git ls-files
+cd &quot;$JRUN/remotes&quot;
+git init -q --bare -b main &quot;$JRUN/remotes/java-workspace.git&quot;
+cd &quot;$JRUN/build/java-workspace&quot;
+git remote add origin &quot;$JRUN/remotes/java-workspace.git&quot; &amp;&amp; git push -q -u origin main 2&gt;&amp;1 &amp;&amp; git log --oneline
+cd &quot;$JRUN&quot;
+rm -rf build</pre><pre class="os-mac">cp -R &quot;$COURSE/tools/data/java/files/.&quot; &quot;$JRUN/build/java-workspace/&quot;
+cd &quot;$JRUN/build/java-workspace&quot;
+git init -q -b main &amp;&amp; git add -A &amp;&amp; git update-index --chmod=+x scripts/verify.sh &amp;&amp; git -c user.name=&#x27;Meena Iyer&#x27; -c user.email=meena@acme-health.example commit -q -m &#x27;The java workspace: CLAUDE.md, verify scripts, the request-to-pr workflow, the request&#x27; &amp;&amp; git ls-files
+cd &quot;$JRUN/remotes&quot;
+git init -q --bare -b main &quot;$JRUN/remotes/java-workspace.git&quot;
+cd &quot;$JRUN/build/java-workspace&quot;
+git remote add origin &quot;$JRUN/remotes/java-workspace.git&quot; &amp;&amp; git push -q -u origin main 2&gt;&amp;1 &amp;&amp; git log --oneline
+cd &quot;$JRUN&quot;
+rm -rf build</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real · 0.6 s</span></div><pre>.archon/workflows/team/request-to-pr/request-to-pr.yaml
+docs-in/request.md
+scripts/verify.sh
+29dbd25 The java workspace: CLAUDE.md, verify scripts, the request-to-pr workflow, the request</pre></div><div class="note"><code>git update-index --chmod=+x</code> marks <code>verify.sh</code> executable for every clone (Windows git does not see file modes). Git's <code>LF will be replaced by CRLF</code> warnings are harmless. The files, one by one: <a href='archon-workspace-setup.html#s06'>setup page, step 6</a>.</div>
+</section>
+<section class="step" id="s07" data-step="7" data-phase="One request, one repo" style="--c:var(--build)">
+  <div class="step__head"><span class="step__n">7</span><div><span class="chip">set up</span><h2>Kiran's machine: the workspace, then the code repo inside it</h2><p class="step__why">Two clones, one folder: the workspace first, priorauth-api inside it. The workspace's .gitignore leaves the code repo out.</p></div><span class="who">Kiran · 1 min</span></div>
+<div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">Git Bash</span><span class="os-mac">Terminal</span></span></div><pre class="os-win">cd &quot;$JRUN&quot;
+git clone -q &quot;$JRUN/remotes/java-workspace.git&quot; java-workspace
+cd &quot;$JRUN/java-workspace&quot;
+git clone -q &quot;$JRUN/remotes/priorauth-api.git&quot; priorauth-api
+for d in . priorauth-api; do git -C $d config user.name &#x27;Kiran Rao&#x27;; git -C $d config user.email kiran@acme-health.example; done; git status --short --ignored
+ls -a; echo &#x27;== priorauth-api&#x27;; git -C priorauth-api log --oneline --decorate -3; grep -m2 -n &#x27;&lt;version&gt;&#x27; priorauth-api/pom.xml</pre><pre class="os-mac">cd &quot;$JRUN&quot;
+git clone -q &quot;$JRUN/remotes/java-workspace.git&quot; java-workspace
+cd &quot;$JRUN/java-workspace&quot;
+git clone -q &quot;$JRUN/remotes/priorauth-api.git&quot; priorauth-api
+for d in . priorauth-api; do git -C $d config user.name &#x27;Kiran Rao&#x27;; git -C $d config user.email kiran@acme-health.example; done; git status --short --ignored
+ls -a; echo &#x27;== priorauth-api&#x27;; git -C priorauth-api log --oneline --decorate -3; grep -m2 -n &#x27;&lt;version&gt;&#x27; priorauth-api/pom.xml</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real · 0.3 s</span></div><pre>!! priorauth-api/</pre></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real</span></div><pre>d9aa178 (HEAD -&gt; main, origin/main, origin/HEAD) priorauth-api 1.0.2: pending list for the reviewer screen
+17:  &lt;version&gt;1.0.2&lt;/version&gt;</pre></div><div class="note"><code>!! priorauth-api/</code>: the workspace's git ignores the code repo, which keeps its own git and remote. The local identity is the one the agent's commits carry; set yours.</div>
+</section>
+<section class="step" id="s08" data-step="8" data-phase="One request, one repo" style="--c:var(--build)">
+  <div class="step__head"><span class="step__n">8</span><div><span class="chip">before</span><h2>Before the run: valid, green, and no age yet</h2><p class="step__why">The workflow validates, verify.sh passes on v1.0.2 (3 tests), and the pending list has no age field.</p></div><span class="who">Kiran · 2 min</span></div>
+<div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">Git Bash</span><span class="os-mac">Terminal</span></span></div><pre class="os-win">cd &quot;$JRUN/java-workspace&quot;
+archon validate workflows request-to-pr
+./scripts/verify.sh &amp;&amp; echo &#x27;verify: passed&#x27;; grep -h &#x27;Tests run&#x27; priorauth-api/target/surefire-reports/*.txt
+(
+set -u
+cd priorauth-api
+mvn -q -DskipTests package
+java -jar target/priorauth-api-1.0.2.jar --server.port=8092 &gt; ../../app-before.log 2&gt;&amp;1 &amp;
+pid=$!
+for i in $(seq 90); do curl -s -o /dev/null localhost:8092/requests/pending &amp;&amp; break; sleep 1; done
+echo &#x27;$ curl &quot;http://localhost:8092/requests/pending?asOf=2026-10-13&quot;&#x27;
+curl -s &#x27;localhost:8092/requests/pending?asOf=2026-10-13&#x27;; echo
+kill $pid
+)</pre><pre class="os-mac">cd &quot;$JRUN/java-workspace&quot;
+archon validate workflows request-to-pr
+./scripts/verify.sh &amp;&amp; echo &#x27;verify: passed&#x27;; grep -h &#x27;Tests run&#x27; priorauth-api/target/surefire-reports/*.txt
+(
+set -u
+cd priorauth-api
+mvn -q -DskipTests package
+java -jar target/priorauth-api-1.0.2.jar --server.port=8092 &gt; ../../app-before.log 2&gt;&amp;1 &amp;
+pid=$!
+for i in $(seq 90); do curl -s -o /dev/null localhost:8092/requests/pending &amp;&amp; break; sleep 1; done
+echo &#x27;$ curl &quot;http://localhost:8092/requests/pending?asOf=2026-10-13&quot;&#x27;
+curl -s &#x27;localhost:8092/requests/pending?asOf=2026-10-13&#x27;; echo
+kill $pid
+)</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real · 4 s</span></div><pre>  request-to-pr                            ok
+Results: 1 valid, 0 with errors</pre></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real · verify.sh</span></div><pre>verify: passed</pre></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real · the API at v1.0.2</span></div><pre>$ curl &quot;http://localhost:8092/requests/pending?asOf=2026-10-13&quot;
+[{&quot;id&quot;:&quot;PA-10231&quot;,&quot;tenantId&quot;:&quot;TX-01&quot;,&quot;service&quot;:&quot;MRI lumbar spine&quot;,&quot;status&quot;:&quot;PENDED&quot;,&quot;receivedAt&quot;:&quot;2026-10-01&quot;},{&quot;id&quot;:&quot;PA-10244&quot;,&quot;tenantId&quot;:&quot;TX-01&quot;,&quot;se …</pre></div><div class="note"><code>verify.sh</code> takes a minute or two the first time: Maven downloads its dependencies. The API check builds the jar, starts it on port 8092, calls it once and stops it.</div>
+</section>
+<section class="step" id="s09" data-step="9" data-phase="One request, one repo" style="--c:var(--build)">
+  <div class="step__head"><span class="step__n">9</span><div><span class="chip">free</span><h2>Dry-run the workflow</h2><p class="step__why">No model call, no run recorded: the graph walks to its first wait with every agent node stubbed.</p></div><span class="who">Kiran · 1 min</span></div>
+<div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">Git Bash</span><span class="os-mac">Terminal</span></span></div><pre class="os-win">cd &quot;$JRUN/java-workspace&quot;
+archon workflow run request-to-pr --dry-run --default-stubs &#x27;Implement docs-in/request.md&#x27;</pre><pre class="os-mac">cd &quot;$JRUN/java-workspace&quot;
+archon workflow run request-to-pr --dry-run --default-stubs &#x27;Implement docs-in/request.md&#x27;</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real · 1.3 s</span></div><pre>STUBBED   scan (command)
+PAUSED    answer (wait) — durable wait
+Simulation outcome: paused</pre></div><div class="note">No <code>--folder</code> here: Archon refuses <code>--dry-run</code> with <code>--folder</code> (Part C, step 24, shows the error).</div>
+</section>
+<section class="step" id="s10" data-step="10" data-phase="One request, one repo" style="--c:var(--build)">
+  <div class="step__head"><span class="step__n">10</span><div><span class="chip">the run</span><h2>Start the run, then wait for its questions</h2><p class="step__why"><code>--folder</code> registers the workspace as a folder project and runs in place; <code>--detach</code> returns at once; <code>wait</code> blocks until the run needs a person.</p></div><span class="who">Kiran · 2 min</span></div>
+<div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">Git Bash</span><span class="os-mac">Terminal</span></span></div><pre class="os-win">cd &quot;$JRUN/java-workspace&quot;
+out=$(archon workflow run request-to-pr --folder --detach &#x27;Implement the request in docs-in/request.md&#x27;)
+echo &quot;$out&quot;
+RUN=$(echo &quot;$out&quot; | sed -n &#x27;s/^Run id: //p&#x27; | tr -d &#x27;\r&#x27;)
+echo &quot;RUN=$RUN&quot;
+w=$(archon workflow wait $RUN --json)
+echo &quot;$w&quot;
+OCC=$(echo &quot;$w&quot; | sed -n &#x27;s/.*&quot;occurrence&quot;: *&quot;\([^&quot;]*\)&quot;.*/\1/p&#x27; | tr -d &#x27;\r&#x27;)</pre><pre class="os-mac">cd &quot;$JRUN/java-workspace&quot;
+out=$(archon workflow run request-to-pr --folder --detach &#x27;Implement the request in docs-in/request.md&#x27;)
+echo &quot;$out&quot;
+RUN=$(echo &quot;$out&quot; | sed -n &#x27;s/^Run id: //p&#x27; | tr -d &#x27;\r&#x27;)
+echo &quot;RUN=$RUN&quot;
+w=$(archon workflow wait $RUN --json)
+echo &quot;$w&quot;
+OCC=$(echo &quot;$w&quot; | sed -n &#x27;s/.*&quot;occurrence&quot;: *&quot;\([^&quot;]*\)&quot;.*/\1/p&#x27; | tr -d &#x27;\r&#x27;)</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real · 5.6 s</span></div><pre>Registered folder project &quot;java-workspace&quot; (C:\work\archon-java\java-workspace)
+Started &#x27;request-to-pr&#x27; in the background.
+Run id: d9d9f6523154ac4773648b9a08d84989</pre></div><div class="box claude"><div class="box__bar">Check: wait returns <span class="tag">real · waited 94.1 s</span></div><pre>&quot;nodeId&quot;: &quot;answer&quot;,  &quot;form&quot;: &quot;message&quot;,  &quot;occurrence&quot;: &quot;77cdbc2a-eaab-495b-b193-ca452d31c674&quot;
+&quot;message&quot;:
+Answer these before requirements are written (one message, e.g. &quot;1 A: ... 2 B: ...&quot;):
+
+# Questions before requirements: request age on the pending list (API)
+
+…</pre></div><div class="note"><code>RUN</code> is the run id (the course's was <code>d9d9f6523154ac4773648b9a08d84989</code>) and <code>OCC</code> the pause's <code>occurrence</code>: every later command names them, so keep this terminal (or set both again by hand). The scan and the questions took 94.1 s. The seven questions: <a href="archon-hello-world-java/archon-hello-world-java-run.html#s07">run page, step 7</a>.</div>
+</section>
+<section class="step" id="s11" data-step="11" data-phase="One request, one repo" style="--c:var(--build)">
+  <div class="step__head"><span class="step__n">11</span><div><span class="chip">gate 1 · answer</span><h2>Answer the seven questions</h2><p class="step__why">One message answers all seven; the run goes on to write the requirements and pauses again for their approval.</p></div><span class="who">Kiran for Ravi and Meena · 2 min</span></div>
+<div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">Git Bash</span><span class="os-mac">Terminal</span></span></div><pre class="os-win">cd &quot;$JRUN/java-workspace&quot;
+archon workflow answer $RUN --occurrence $OCC --text &quot;1 X: the 2026 TX-01 holidays are 2026-01-01, 2026-01-19, 2026-02-16, 2026-05-25, 2026-07-03, 2026-09-07, 2026-10-12, 2026-11-11, 2026-11-26, 2026-11-27, 2026-12-25 (so yes, Mon 10-12 is one), as one JSON file per tenant in the API resources for now; a shared calendar service is separate work. 2 A: the received day is day 0, same as the report. 3 A. 4 A: over means more than 5; the threshold is 5, from configuration. 5 X: the server&#x27;s zone; callers can pass asOf to pin the date. 6 A for now. 7 C: leave it at 1.0.2; Meena sets the version at release. The API returns a flag and never refuses or alerts. (Ravi, Meena)&quot;
+archon workflow wait $RUN --json</pre><pre class="os-mac">cd &quot;$JRUN/java-workspace&quot;
+archon workflow answer $RUN --occurrence $OCC --text &quot;1 X: the 2026 TX-01 holidays are 2026-01-01, 2026-01-19, 2026-02-16, 2026-05-25, 2026-07-03, 2026-09-07, 2026-10-12, 2026-11-11, 2026-11-26, 2026-11-27, 2026-12-25 (so yes, Mon 10-12 is one), as one JSON file per tenant in the API resources for now; a shared calendar service is separate work. 2 A: the received day is day 0, same as the report. 3 A. 4 A: over means more than 5; the threshold is 5, from configuration. 5 X: the server&#x27;s zone; callers can pass asOf to pin the date. 6 A for now. 7 C: leave it at 1.0.2; Meena sets the version at release. The API returns a flag and never refuses or alerts. (Ravi, Meena)&quot;
+archon workflow wait $RUN --json</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real · 73.7 s</span></div><pre>Folder project — running in place (no worktree isolation).
+Workflow paused — waiting for approval.
+[write-requirements] Completed (1m6s)</pre></div><div class="note"><code>answer</code>, <code>approve</code> and <code>reject</code> resume the run <b>in your terminal</b> and return only at the next pause: this one took 73.7 s. Use your own answers if you like; these are the course's, so your run can be compared with its pages (<a href="archon-hello-world-java/archon-hello-world-java-run.html#s08">step 8</a>).</div>
+</section>
+<section class="step" id="s12" data-step="12" data-phase="One request, one repo" style="--c:var(--build)">
+  <div class="step__head"><span class="step__n">12</span><div><span class="chip">gate 2 · requirements</span><h2>Reject the requirements once, then approve them</h2><p class="step__why">A reject at this gate sends its text back to the writer: the loop writes revision 2 with the screen team's names.</p></div><span class="who">Meena · 3 min</span></div>
+<div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">Git Bash</span><span class="os-mac">Terminal</span></span></div><pre class="os-win">cd &quot;$JRUN/java-workspace&quot;
+archon workflow reject $RUN &#x27;The screen team already named the fields: ageBusinessDays (integer), overLimit (boolean) and ageLabel (text such as &quot;7 bd OVER 5&quot;). Config key priorauth.aging.threshold-days. Holiday files at data/holidays-&lt;tenant&gt;-2026.json. An as-of date before the received date is a caller error, not age 0. (Meena)&#x27;
+archon workflow wait $RUN --json
+archon workflow approve $RUN &#x27;Approved - Ravi Menon and Meena Iyer. The 4 bd label (A-02) is confirmed with the screen team; A-03 and A-05 are fine.&#x27;
+archon workflow wait $RUN --json</pre><pre class="os-mac">cd &quot;$JRUN/java-workspace&quot;
+archon workflow reject $RUN &#x27;The screen team already named the fields: ageBusinessDays (integer), overLimit (boolean) and ageLabel (text such as &quot;7 bd OVER 5&quot;). Config key priorauth.aging.threshold-days. Holiday files at data/holidays-&lt;tenant&gt;-2026.json. An as-of date before the received date is a caller error, not age 0. (Meena)&#x27;
+archon workflow wait $RUN --json
+archon workflow approve $RUN &#x27;Approved - Ravi Menon and Meena Iyer. The 4 bd label (A-02) is confirmed with the screen team; A-03 and A-05 are fine.&#x27;
+archon workflow wait $RUN --json</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real · 56.4 s</span></div><pre>Workflow paused — waiting for approval.</pre></div><div class="box claude"><div class="box__bar">Check: wait returns <span class="tag">real · waited 0.4 s</span></div><pre>&quot;nodeId&quot;: &quot;approve-plan&quot;,  &quot;form&quot;: &quot;approval&quot;,  &quot;occurrence&quot;: &quot;3ef93e27-534b-48d5-bf1a-7e7c706c29d7&quot;
+&quot;message&quot;:
+Approve the code plan before any code is written.
+
+Wrote plan.md for adding business-day age to GET /requests/pending in priorauth-api, on branch request-age/pending-age from main. Planning only: nothing was built or tested. Changes: (1) new holiday file data/holidays-TX-01-2026.json with the 11 dates; (2) priorauth.aging.threshold-days: 5 in application.yml; (3) new class aging/RequestAging, which loads every holidays-&lt;tenant&gt;-&lt;yyyy&gt;.json at startup, stops startup on a malformed file or a missing/negative threshold, counts business days after the received date up to and including asOf, sets overLimit when age &gt; threshold, and builds the label (&quot;&lt;age&gt; bd&quot; / &quot;&lt;age&gt; bd OVER &lt;threshold&gt;&quot;); (4) a Clock bean in PriorAuthApiApplication using the server&#x27;s default time zone; (5) three fields appended to PendingRequestResponse (ageBusinessDays, overLimit, ageLabel); (6) controller takes an optional asOf (default today from the Clock), returns 400 for an invalid date (Spring&#x27;s default handling) or for an asOf earlier than any returned row&#x27;s receivedAt, and never filters or reorders by age; (7) one README line. Order: branch, resources/config, RequestAging with its tests, Clock bean, controller tests with response/controller changes, README, verify.sh, one commit, no push. pom.xml unchanged (no new dependency, version stays 1.0.2); PriorAuthRequest, RequestStore and RequestStoreTest not touched. Open questions: Q1, the missing-calendar warning is logged the first time a tenant&#x27;s row comes up, not at startup, because the aging class can&#x27;t know the tenants at startup; Q2, the 400 message is in the HTTP status reason, not the body, unless server.error.include-message (a global setting) is approved. Assumptions A-01 to A-03 are built as written and still need confirming. Risks: only 2026 holidays exist, &quot;today&quot; depends on the server&#x27;s time zone, and the holiday list now lives both here and in the nightly report, so the two can drift apart.
+…</pre></div><div class="note">Inside a <code>loop_group</code> a reject means "again, with this"; at the final gate (step 15) it means stop. Revision 1 and 2 side by side: <a href="archon-hello-world-java/archon-hello-world-java-run.html#s09">steps 9–10</a>.</div>
+</section>
+<section class="step" id="s13" data-step="13" data-phase="One request, one repo" style="--c:var(--build)">
+  <div class="step__head"><span class="step__n">13</span><div><span class="chip">gate 3 · plan</span><h2>Approve the plan; implement, checks and review run</h2><p class="step__why">The longest command of the run (286 s): the implement loop runs until verify.sh passes, a bash node checks the branch, a second agent reviews.</p></div><span class="who">Meena · 5 min</span></div>
+<div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">Git Bash</span><span class="os-mac">Terminal</span></span></div><pre class="os-win">cd &quot;$JRUN/java-workspace&quot;
+archon workflow approve $RUN &#x27;Approved - Meena Iyer. Keep the README as is; we update it at release. Q1 and Q2 as proposed.&#x27;
+archon workflow wait $RUN --json</pre><pre class="os-mac">cd &quot;$JRUN/java-workspace&quot;
+archon workflow approve $RUN &#x27;Approved - Meena Iyer. Keep the README as is; we update it at release. Q1 and Q2 as proposed.&#x27;
+archon workflow wait $RUN --json</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real · 286 s</span></div><pre>The change is in and the verify script passes: `./scripts/verify.sh` exited 0 with 19 tests passing and none failing or skipped. The commit is **`a3972b42ef31bf68500d39389b0d5f8caf9724d1`**.
+Loop node &#x27;implement&#x27; completed after 1 iteration
+verify: passed
+[review] Completed (1m55s)</pre></div><div class="box claude"><div class="box__bar">Check: wait returns <span class="tag">real · waited 0.4 s</span></div><pre>&quot;nodeId&quot;: &quot;approve-change&quot;,  &quot;form&quot;: &quot;approval&quot;,  &quot;occurrence&quot;: &quot;27098d37-8f88-4c6b-8089-88c4d4a3cc5f&quot;
+&quot;message&quot;:
+Review verdict: READY
+…</pre></div><div class="note">The agent made branch <code>request-age/pending-age</code> in priorauth-api and committed there; Archon made no branch or worktree. The review's verdict and the diff: <a href="archon-hello-world-java/archon-hello-world-java-run.html#s12">step 12</a>.</div>
+</section>
+<section class="step" id="s14" data-step="14" data-phase="One request, one repo" style="--c:var(--build)">
+  <div class="step__head"><span class="step__n">14</span><div><span class="chip">by hand</span><h2>Check the packaged jar by hand</h2><p class="step__why">Tests passed and the review said READY. Run the real jar on three dates before the last approval.</p></div><span class="who">Kiran · 1 min</span></div>
+<div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">Git Bash</span><span class="os-mac">Terminal</span></span></div><pre class="os-win">cd &quot;$JRUN/java-workspace&quot;
+(
+set -u
+git -C priorauth-api branch --show-current
+cd priorauth-api
+mvn -q -DskipTests package 2&gt;/dev/null
+ls target/*.jar
+java -jar target/priorauth-api-1.0.2.jar --server.port=8093 &gt; ../../app-after.log 2&gt;&amp;1 &amp;
+pid=$!
+for i in $(seq 90); do curl -s -o /dev/null localhost:8093/requests/pending &amp;&amp; break; sleep 1; done
+for q in &quot;asOf=2026-10-13&quot; &quot;asOf=2026-10-05&quot; &quot;asOf=%2B999999999-12-31&quot;; do
+  echo &quot;$ curl -i \&quot;http://localhost:8093/requests/pending?$q\&quot;&quot;
+  curl -s -i &quot;localhost:8093/requests/pending?$q&quot; | grep -v -i -E &quot;^(date|keep-alive|connection|transfer-encoding|vary):&quot;; echo
+done
+kill $pid
+)</pre><pre class="os-mac">cd &quot;$JRUN/java-workspace&quot;
+(
+set -u
+git -C priorauth-api branch --show-current
+cd priorauth-api
+mvn -q -DskipTests package 2&gt;/dev/null
+ls target/*.jar
+java -jar target/priorauth-api-1.0.2.jar --server.port=8093 &gt; ../../app-after.log 2&gt;&amp;1 &amp;
+pid=$!
+for i in $(seq 90); do curl -s -o /dev/null localhost:8093/requests/pending &amp;&amp; break; sleep 1; done
+for q in &quot;asOf=2026-10-13&quot; &quot;asOf=2026-10-05&quot; &quot;asOf=%2B999999999-12-31&quot;; do
+  echo &quot;$ curl -i \&quot;http://localhost:8093/requests/pending?$q\&quot;&quot;
+  curl -s -i &quot;localhost:8093/requests/pending?$q&quot; | grep -v -i -E &quot;^(date|keep-alive|connection|transfer-encoding|vary):&quot;; echo
+done
+kill $pid
+)</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real · 10 s</span></div><pre>$ curl -i &quot;http://localhost:8093/requests/pending?asOf=2026-10-13&quot;
+HTTP/1.1 200 
+[{&quot;id&quot;:&quot;PA-10231&quot;,&quot;tenantId&quot;:&quot;TX-01&quot;,&quot;service&quot;:&quot;MRI lumbar spine&quot;,&quot;status&quot;:&quot;PENDED&quot;,&quot;receivedAt&quot;:&quot;2026-10-01&quot;,&quot;ageBusine …
+$ curl -i &quot;http://localhost:8093/requests/pending?asOf=2026-10-05&quot;
+HTTP/1.1 400 
+$ curl -i &quot;http://localhost:8093/requests/pending?asOf=%2B999999999-12-31&quot;
+HTTP/1.1 500 </pre></div><div class="note">7 OVER 5 / 4 / 1 as Ravi expects, an as-of before a received date is 400, but <code>asOf=+999999999-12-31</code> is a <b>500</b>. That is the reason for the next two steps (<a href="archon-hello-world-java/archon-hello-world-java-run.html#s13">step 13</a>).</div>
+</section>
+<section class="step" id="s15" data-step="15" data-phase="One request, one repo" style="--c:var(--build)">
+  <div class="step__head"><span class="step__n">15</span><div><span class="chip">gate 4 · change</span><h2>Reject the change: the run is cancelled</h2><p class="step__why">At the last gate a reject runs <code>stop-change</code>. The CLI's message about resuming is misleading: the run is over, and the rejection is recorded.</p></div><span class="who">Meena · 1 min</span></div>
+<div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">Git Bash</span><span class="os-mac">Terminal</span></span></div><pre class="os-win">cd &quot;$JRUN/java-workspace&quot;
+archon workflow reject $RUN &quot;Not pushing yet - Meena Iyer. Kiran&#x27;s jar check: asOf=+999999999-12-31 returns 500. An asOf after today is a caller error: 400 under FR11, with a test. The empty asOf stays today, as the review noted; add a test for it.&quot;</pre><pre class="os-mac">cd &quot;$JRUN/java-workspace&quot;
+archon workflow reject $RUN &quot;Not pushing yet - Meena Iyer. Kiran&#x27;s jar check: asOf=+999999999-12-31 returns 500. An asOf after today is a caller error: 400 under FR11, with a test. The empty asOf stays today, as the review noted; add a test for it.&quot;</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real · 7.2 s</span></div><pre>❌ **Workflow cancelled** (node `stop-change`): The change was rejected at review.
+    Cost: $3.732674
+Error: Rejected but failed to resume workflow &#x27;request-to-pr&#x27;: Workflow failed: Workflow did not complete successfully
+The rejection was recorded. Run &#x27;bun run cli workflow resume d9d9f6523154ac4773648b9a08d84989&#x27; to retry.</pre></div><div class="note">Don't run the suggested <code>bun run cli workflow resume</code>: it is the source checkout's command, and there is nothing to resume. The fix is a new run that adopts this one.</div>
+</section>
+<section class="step" id="s16" data-step="16" data-phase="One request, one repo" style="--c:var(--build)">
+  <div class="step__head"><span class="step__n">16</span><div><span class="chip">the fix</span><h2>Fix it with <code>archon-implement</code>, adopting the run</h2><p class="step__why">The bundled <code>archon-implement</code>, with Meena's decision as the message, on the same branch. Then verify and the jar again.</p></div><span class="who">Kiran · 3 min</span></div>
+<div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">Git Bash</span><span class="os-mac">Terminal</span></span></div><pre class="os-win">cd &quot;$JRUN/java-workspace&quot;
+archon workflow run archon-implement --adopt $RUN &quot;Apply Meena&#x27;s decision from the adopted run: an asOf after today is a caller error, 400 under FR11, with a test (asOf=+999999999-12-31 returns 500 today). The empty asOf stays today; add a test for it. Work in priorauth-api on its current branch request-age/pending-age; commit there, do not push. Tests only through ./scripts/verify.sh from the workspace root.&quot;
+./scripts/verify.sh &gt; /dev/null 2&gt;&amp;1 &amp;&amp; echo &quot;verify: passed&quot;; grep -h &quot;Tests run&quot; priorauth-api/target/surefire-reports/*.txt
+(
+set -u
+cd priorauth-api
+mvn -q -DskipTests package 2&gt;/dev/null
+java -jar target/priorauth-api-1.0.2.jar --server.port=8093 &gt; ../../app-after.log 2&gt;&amp;1 &amp;
+pid=$!
+for i in $(seq 90); do curl -s -o /dev/null localhost:8093/requests/pending &amp;&amp; break; sleep 1; done
+for q in &quot;asOf=2026-10-13&quot; &quot;asOf=2026-10-05&quot; &quot;asOf=%2B999999999-12-31&quot;; do
+  echo &quot;$ curl -i \&quot;http://localhost:8093/requests/pending?$q\&quot;&quot;
+  curl -s -i &quot;localhost:8093/requests/pending?$q&quot; | grep -v -i -E &quot;^(date|keep-alive|connection|transfer-encoding|vary):&quot;; echo
+done
+kill $pid
+)</pre><pre class="os-mac">cd &quot;$JRUN/java-workspace&quot;
+archon workflow run archon-implement --adopt $RUN &quot;Apply Meena&#x27;s decision from the adopted run: an asOf after today is a caller error, 400 under FR11, with a test (asOf=+999999999-12-31 returns 500 today). The empty asOf stays today; add a test for it. Work in priorauth-api on its current branch request-age/pending-age; commit there, do not push. Tests only through ./scripts/verify.sh from the workspace root.&quot;
+./scripts/verify.sh &gt; /dev/null 2&gt;&amp;1 &amp;&amp; echo &quot;verify: passed&quot;; grep -h &quot;Tests run&quot; priorauth-api/target/surefire-reports/*.txt
+(
+set -u
+cd priorauth-api
+mvn -q -DskipTests package 2&gt;/dev/null
+java -jar target/priorauth-api-1.0.2.jar --server.port=8093 &gt; ../../app-after.log 2&gt;&amp;1 &amp;
+pid=$!
+for i in $(seq 90); do curl -s -o /dev/null localhost:8093/requests/pending &amp;&amp; break; sleep 1; done
+for q in &quot;asOf=2026-10-13&quot; &quot;asOf=2026-10-05&quot; &quot;asOf=%2B999999999-12-31&quot;; do
+  echo &quot;$ curl -i \&quot;http://localhost:8093/requests/pending?$q\&quot;&quot;
+  curl -s -i &quot;localhost:8093/requests/pending?$q&quot; | grep -v -i -E &quot;^(date|keep-alive|connection|transfer-encoding|vary):&quot;; echo
+done
+kill $pid
+)</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real · 141.6 s</span></div><pre>Adopting run d9d9f6523154ac4773648b9a08d84989 — folder projects run in place; adoption carries provenance and $ADOPTED_RUN_DIR access only.
+Loop node &#x27;implement&#x27; completed after 1 iteration
+    Cost: $0.6296632</pre></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real · 21 tests</span></div><pre>verify: passed
+Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.822 s -- in com.acmehealth.priorauth.aging.RequestAgingTest
+Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.585 s -- in com.acmehealth.priorauth.api.PendingRequestsControllerTest
+Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.030 s -- in com.acmehealth.priorauth.store.RequestStoreTest</pre></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real · both bad dates now 400</span></div><pre>$ curl -i &quot;http://localhost:8093/requests/pending?asOf=2026-10-13&quot;
+HTTP/1.1 200 
+$ curl -i &quot;http://localhost:8093/requests/pending?asOf=2026-10-05&quot;
+HTTP/1.1 400 
+$ curl -i &quot;http://localhost:8093/requests/pending?asOf=%2B999999999-12-31&quot;
+HTTP/1.1 400 </pre></div><div class="note">Write the decision into the message: an adopted run can read the old run's files through <code>$ADOPTED_RUN_DIR</code>, but it does not inherit the reject text. Commit <code>4ea9e9d</code>: <a href="archon-hello-world-java/archon-hello-world-java-run.html#s15">step 15</a>.</div>
+</section>
+<section class="step" id="s17" data-step="17" data-phase="One request, one repo" style="--c:var(--build)">
+  <div class="step__head"><span class="step__n">17</span><div><span class="chip">ship</span><h2>Push by hand, and look at what the run left</h2><p class="step__why">The run was cancelled before its push node, so Kiran pushes. Then the read-only commands: runs, the run, its artifacts and log, the project, doctor.</p></div><span class="who">Kiran · 2 min</span></div>
+<div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">Git Bash</span><span class="os-mac">Terminal</span></span></div><pre class="os-win">cd &quot;$JRUN/java-workspace&quot;
+git -C priorauth-api push -u origin request-age/pending-age 2&gt;&amp;1
+archon workflow runs
+archon workflow get $RUN
+archon workflow artifacts $RUN
+archon workflow logs $RUN --format text
+archon project list
+archon isolation list
+archon doctor
+git -C priorauth-api ls-remote --heads origin; echo &quot;== workspace&quot;; git status --short; git log --oneline -1</pre><pre class="os-mac">cd &quot;$JRUN/java-workspace&quot;
+git -C priorauth-api push -u origin request-age/pending-age 2&gt;&amp;1
+archon workflow runs
+archon workflow get $RUN
+archon workflow artifacts $RUN
+archon workflow logs $RUN --format text
+archon project list
+archon isolation list
+archon doctor
+git -C priorauth-api ls-remote --heads origin; echo &quot;== workspace&quot;; git status --short; git log --oneline -1</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real · 5.4 s</span></div><pre> * [new branch]      request-age/pending-age -&gt; request-age/pending-age</pre></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real · workflow get</span></div><pre>  Status: cancelled
+    Cost: $3.732674
+    Worktree: C:\work\archon-java\java-workspace (live)
+    Adopted by: 0d14ca47-f987-4952-a4d0-d5762506f97a</pre></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real · isolation list</span></div><pre>No codebases registered.</pre></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real · doctor</span></div><pre>✓ Folder project: &quot;java-workspace&quot; (runs in place) — 1 contained repo(s): priorauth-api</pre></div><div class="note">"Worktree … (live)" is the workspace itself: a folder project has no worktree. Open the PR from <code>request-age/pending-age</code> now (the course had no <code>gh</code> login, so step 18 merges by hand). Every output: <a href="archon-hello-world-java/archon-hello-world-java-run.html#s16">steps 16–17</a>.</div>
+</section>
+<section class="step" id="s18" data-step="18" data-phase="One request, one repo" style="--c:var(--build)">
+  <div class="step__head"><span class="step__n">18</span><div><span class="chip">after</span><h2>Merge, then tidy up by hand</h2><p class="step__why">Meena's merge stands in for the PR merge. archon complete finds nothing to clean in a folder project; verify on main; Kiran deletes his branch.</p></div><span class="who">Meena, Kiran · 2 min</span></div>
+<div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">Git Bash</span><span class="os-mac">Terminal</span></span></div><pre class="os-win">cd &quot;$JRUN&quot;
+(
+set -e
+git clone -q remotes/priorauth-api.git meena-priorauth-api
+cd meena-priorauth-api
+git -c user.name=&quot;Meena Iyer&quot; -c user.email=meena@acme-health.example merge -q --no-ff origin/request-age/pending-age -m &quot;Merge request-age/pending-age: request age on the pending list&quot;
+git push -q origin main
+git log --oneline --graph -5
+cd .. &amp;&amp; rm -rf meena-priorauth-api
+)
+cd &quot;$JRUN/java-workspace&quot;
+archon complete request-age/pending-age
+(
+set -e
+git -C priorauth-api switch -q main &amp;&amp; git -C priorauth-api pull -q --ff-only &amp;&amp; echo &quot;priorauth-api: $(git -C priorauth-api log --oneline -1)&quot;
+./scripts/verify.sh &gt; /dev/null 2&gt;&amp;1 &amp;&amp; echo &quot;verify on main: passed&quot;
+grep -h &quot;Tests run&quot; priorauth-api/target/surefire-reports/*.txt
+git status --short &amp;&amp; echo &quot;workspace clean&quot;
+)
+git -C priorauth-api branch -d request-age/pending-age; git -C priorauth-api branch --list</pre><pre class="os-mac">cd &quot;$JRUN&quot;
+(
+set -e
+git clone -q remotes/priorauth-api.git meena-priorauth-api
+cd meena-priorauth-api
+git -c user.name=&quot;Meena Iyer&quot; -c user.email=meena@acme-health.example merge -q --no-ff origin/request-age/pending-age -m &quot;Merge request-age/pending-age: request age on the pending list&quot;
+git push -q origin main
+git log --oneline --graph -5
+cd .. &amp;&amp; rm -rf meena-priorauth-api
+)
+cd &quot;$JRUN/java-workspace&quot;
+archon complete request-age/pending-age
+(
+set -e
+git -C priorauth-api switch -q main &amp;&amp; git -C priorauth-api pull -q --ff-only &amp;&amp; echo &quot;priorauth-api: $(git -C priorauth-api log --oneline -1)&quot;
+./scripts/verify.sh &gt; /dev/null 2&gt;&amp;1 &amp;&amp; echo &quot;verify on main: passed&quot;
+grep -h &quot;Tests run&quot; priorauth-api/target/surefire-reports/*.txt
+git status --short &amp;&amp; echo &quot;workspace clean&quot;
+)
+git -C priorauth-api branch -d request-age/pending-age; git -C priorauth-api branch --list</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real · git log --graph</span></div><pre>*   4ca6b6a Merge request-age/pending-age: request age on the pending list
+| * 4ea9e9d Pending list: asOf after today is a 400
+| * a3972b4 Pending list: business-day age, over-limit flag and label (asOf)</pre></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real · archon complete</span></div><pre>  Not found: request-age/pending-age (no active isolation environment)</pre></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real</span></div><pre>verify on main: passed
+workspace clean</pre></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real</span></div><pre>Deleted branch request-age/pending-age (was 4ea9e9d).</pre></div>
+</section>
+<section class="step" id="s19" data-step="19" data-phase="One request, one repo" style="--c:var(--build)">
+  <div class="step__head"><span class="step__n">19</span><div><span class="chip">optional</span><h2>The same request through the bundled archon-plan</h2><p class="step__why">On main after the merge, Archon's own planner finds the request already met and stops without a pause.</p></div><span class="who">Kiran · 3 min</span></div>
+<div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">Git Bash</span><span class="os-mac">Terminal</span></span></div><pre class="os-win">cd &quot;$JRUN/java-workspace&quot;
+archon workflow run archon-plan --folder &#x27;Plan the request in docs-in/request.md&#x27;</pre><pre class="os-mac">cd &quot;$JRUN/java-workspace&quot;
+archon workflow run archon-plan --folder &#x27;Plan the request in docs-in/request.md&#x27;</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real · 137.3 s</span></div><pre>Loop-group node &#x27;cycle&#x27; completed after 1 iteration
+  Status: completed
+    Cost: $0.8256715</pre></div><div class="note">Its summary names the merge commit (<code>4ca6b6a</code>) and plans no change. A plan before the change, and how it compares: <a href="archon-hello-world-java/archon-hello-world-java-run.html#s19">step 19</a>.</div>
+</section>
+<div class="phase" style="--c:var(--review)"><i></i>C · One bug, two repos<span>steps 20–28 · fix-across-repos in priorauth-workspace/ · the story: <a href='archon-hello-world-java/archon-two-repos-run.html'>two-repo page</a></span></div>
+<section class="step" id="s20" data-step="20" data-phase="One bug, two repos" style="--c:var(--review)">
+  <div class="step__head"><span class="step__n">20</span><div><span class="chip">set up</span><h2>Split the starter: a library and an API</h2><p class="step__why">The course's bug spans two repos, so the starter at v1.1.0 is split: the aging package becomes priorauth-aging 1.0.0, and priorauth-api 1.2.0 depends on it.</p></div><span class="who">Meena · 2 min</span></div>
+<div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">Git Bash</span><span class="os-mac">Terminal</span></span></div><pre class="os-win">mkdir -p &quot;$MRUN/remotes&quot; &quot;$MRUN/build&quot;
+cd &quot;$MRUN/build&quot;
+git clone -q https://github.com/varasrinivas/aidlc-priorauth-api priorauth-api
+cd &quot;$MRUN/build/priorauth-api&quot;
+git switch -q -C main v1.1.0 &amp;&amp; git remote remove origin &amp;&amp; git tag | xargs git tag -d &gt;/dev/null &amp;&amp; git log --oneline -1
+git ls-files src/main/java/com/acmehealth/priorauth/aging/ src/test/java/com/acmehealth/priorauth/aging/ &#x27;src/main/resources/data/holidays-*&#x27; | while read -r f; do
+  mkdir -p &quot;../priorauth-aging/${f%/*}&quot; &amp;&amp; cp &quot;$f&quot; &quot;../priorauth-aging/$f&quot;
+done
+cp .gitignore ../priorauth-aging/
+cat &gt; ../priorauth-aging/pom.xml &lt;&lt;&#x27;EOF&#x27;
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot;
+         xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+         xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&gt;
+  &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+
+  &lt;!-- The same parent as priorauth-api, so both repos use the same Spring and Jackson versions. --&gt;
+  &lt;parent&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;
+    &lt;version&gt;4.1.1&lt;/version&gt;
+    &lt;relativePath/&gt;
+  &lt;/parent&gt;
+
+  &lt;groupId&gt;com.acmehealth&lt;/groupId&gt;
+  &lt;artifactId&gt;priorauth-aging&lt;/artifactId&gt;
+  &lt;version&gt;1.0.0&lt;/version&gt;
+  &lt;name&gt;priorauth-aging&lt;/name&gt;
+  &lt;description&gt;Request aging for prior auth: business days, tenant holiday calendars, the age badge. A library; priorauth-api depends on it.&lt;/description&gt;
+
+  &lt;properties&gt;
+    &lt;java.version&gt;21&lt;/java.version&gt;
+  &lt;/properties&gt;
+
+  &lt;dependencies&gt;
+    &lt;!-- Spring core (for @Service and classpath resources) and Jackson (to read the holiday files). --&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+      &lt;artifactId&gt;spring-boot-starter&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;tools.jackson.core&lt;/groupId&gt;
+      &lt;artifactId&gt;jackson-databind&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+    &lt;!-- JUnit 5 and AssertJ for the tests. Test scope: never shipped. --&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+      &lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt;
+      &lt;scope&gt;test&lt;/scope&gt;
+    &lt;/dependency&gt;
+  &lt;/dependencies&gt;
+&lt;/project&gt;
+EOF
+cat &gt; ../priorauth-aging/README.md &lt;&lt;&#x27;EOF&#x27;
+# priorauth-aging
+
+Request aging for the prior-auth reviewer screen, as a library: `BusinessDays` (business days between two dates),
+`HolidayCalendar` (a tenant&#x27;s holidays, from `src/main/resources/data/holidays-&lt;tenant&gt;-&lt;year&gt;.json`) and `AgeBadge`
+(the age and the over-limit flag). `priorauth-api` depends on it (`com.acmehealth:priorauth-aging`).
+
+Build and install it locally before building the API: `mvn -q install`.
+Split out of priorauth-api 1.1.0 (the `aging` package and its tests, unchanged).
+EOF
+cd &quot;$MRUN/build/priorauth-aging&quot;
+git init -q -b main &amp;&amp; git add -A &amp;&amp; git -c user.name=&#x27;Meena Iyer&#x27; -c user.email=meena@acme-health.example commit -q -m &#x27;priorauth-aging 1.0.0: the aging package, split from priorauth-api 1.1.0&#x27; &amp;&amp; git tag v1.0.0 &amp;&amp; git log --oneline
+cd &quot;$MRUN/build/priorauth-api&quot;
+git rm -q src/main/java/com/acmehealth/priorauth/aging/AgeBadge.java src/main/java/com/acmehealth/priorauth/aging/BusinessDays.java src/main/java/com/acmehealth/priorauth/aging/HolidayCalendar.java src/main/resources/data/holidays-TX-01-2026.json src/test/java/com/acmehealth/priorauth/aging/AgeBadgeTest.java src/test/java/com/acmehealth/priorauth/aging/BusinessDaysTest.java
+cat &gt; ../api-dep.xml &lt;&lt;&#x27;EOF&#x27;
+    &lt;!-- Request aging (business days, tenant holidays, the age badge): our library, repo priorauth-aging. --&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;com.acmehealth&lt;/groupId&gt;
+      &lt;artifactId&gt;priorauth-aging&lt;/artifactId&gt;
+      &lt;version&gt;1.0.0&lt;/version&gt;
+    &lt;/dependency&gt;
+EOF
+awk &#x27;index($0, &quot;    &lt;!-- JUnit 5, AssertJ and MockMvc&quot;) == 1 { while ((getline l &lt; &quot;../api-dep.xml&quot;) &gt; 0) print l }
+     { sub(/\r$/, &quot;&quot;); sub(/&lt;version&gt;1\.1\.0&lt;\/version&gt;/, &quot;&lt;version&gt;1.2.0&lt;/version&gt;&quot;); print }&#x27; pom.xml &gt; pom.new
+mv pom.new pom.xml &amp;&amp; rm ../api-dep.xml
+git add pom.xml &amp;&amp; git -c user.name=&#x27;Meena Iyer&#x27; -c user.email=meena@acme-health.example commit -q -m &#x27;Move request aging to the priorauth-aging library (1.0.0); depend on it&#x27; &amp;&amp; git tag v1.2.0 &amp;&amp; git log --oneline -3</pre><pre class="os-mac">mkdir -p &quot;$MRUN/remotes&quot; &quot;$MRUN/build&quot;
+cd &quot;$MRUN/build&quot;
+git clone -q https://github.com/varasrinivas/aidlc-priorauth-api priorauth-api
+cd &quot;$MRUN/build/priorauth-api&quot;
+git switch -q -C main v1.1.0 &amp;&amp; git remote remove origin &amp;&amp; git tag | xargs git tag -d &gt;/dev/null &amp;&amp; git log --oneline -1
+git ls-files src/main/java/com/acmehealth/priorauth/aging/ src/test/java/com/acmehealth/priorauth/aging/ &#x27;src/main/resources/data/holidays-*&#x27; | while read -r f; do
+  mkdir -p &quot;../priorauth-aging/${f%/*}&quot; &amp;&amp; cp &quot;$f&quot; &quot;../priorauth-aging/$f&quot;
+done
+cp .gitignore ../priorauth-aging/
+cat &gt; ../priorauth-aging/pom.xml &lt;&lt;&#x27;EOF&#x27;
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot;
+         xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+         xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&gt;
+  &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+
+  &lt;!-- The same parent as priorauth-api, so both repos use the same Spring and Jackson versions. --&gt;
+  &lt;parent&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;
+    &lt;version&gt;4.1.1&lt;/version&gt;
+    &lt;relativePath/&gt;
+  &lt;/parent&gt;
+
+  &lt;groupId&gt;com.acmehealth&lt;/groupId&gt;
+  &lt;artifactId&gt;priorauth-aging&lt;/artifactId&gt;
+  &lt;version&gt;1.0.0&lt;/version&gt;
+  &lt;name&gt;priorauth-aging&lt;/name&gt;
+  &lt;description&gt;Request aging for prior auth: business days, tenant holiday calendars, the age badge. A library; priorauth-api depends on it.&lt;/description&gt;
+
+  &lt;properties&gt;
+    &lt;java.version&gt;21&lt;/java.version&gt;
+  &lt;/properties&gt;
+
+  &lt;dependencies&gt;
+    &lt;!-- Spring core (for @Service and classpath resources) and Jackson (to read the holiday files). --&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+      &lt;artifactId&gt;spring-boot-starter&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;tools.jackson.core&lt;/groupId&gt;
+      &lt;artifactId&gt;jackson-databind&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+    &lt;!-- JUnit 5 and AssertJ for the tests. Test scope: never shipped. --&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+      &lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt;
+      &lt;scope&gt;test&lt;/scope&gt;
+    &lt;/dependency&gt;
+  &lt;/dependencies&gt;
+&lt;/project&gt;
+EOF
+cat &gt; ../priorauth-aging/README.md &lt;&lt;&#x27;EOF&#x27;
+# priorauth-aging
+
+Request aging for the prior-auth reviewer screen, as a library: `BusinessDays` (business days between two dates),
+`HolidayCalendar` (a tenant&#x27;s holidays, from `src/main/resources/data/holidays-&lt;tenant&gt;-&lt;year&gt;.json`) and `AgeBadge`
+(the age and the over-limit flag). `priorauth-api` depends on it (`com.acmehealth:priorauth-aging`).
+
+Build and install it locally before building the API: `mvn -q install`.
+Split out of priorauth-api 1.1.0 (the `aging` package and its tests, unchanged).
+EOF
+cd &quot;$MRUN/build/priorauth-aging&quot;
+git init -q -b main &amp;&amp; git add -A &amp;&amp; git -c user.name=&#x27;Meena Iyer&#x27; -c user.email=meena@acme-health.example commit -q -m &#x27;priorauth-aging 1.0.0: the aging package, split from priorauth-api 1.1.0&#x27; &amp;&amp; git tag v1.0.0 &amp;&amp; git log --oneline
+cd &quot;$MRUN/build/priorauth-api&quot;
+git rm -q src/main/java/com/acmehealth/priorauth/aging/AgeBadge.java src/main/java/com/acmehealth/priorauth/aging/BusinessDays.java src/main/java/com/acmehealth/priorauth/aging/HolidayCalendar.java src/main/resources/data/holidays-TX-01-2026.json src/test/java/com/acmehealth/priorauth/aging/AgeBadgeTest.java src/test/java/com/acmehealth/priorauth/aging/BusinessDaysTest.java
+cat &gt; ../api-dep.xml &lt;&lt;&#x27;EOF&#x27;
+    &lt;!-- Request aging (business days, tenant holidays, the age badge): our library, repo priorauth-aging. --&gt;
+    &lt;dependency&gt;
+      &lt;groupId&gt;com.acmehealth&lt;/groupId&gt;
+      &lt;artifactId&gt;priorauth-aging&lt;/artifactId&gt;
+      &lt;version&gt;1.0.0&lt;/version&gt;
+    &lt;/dependency&gt;
+EOF
+awk &#x27;index($0, &quot;    &lt;!-- JUnit 5, AssertJ and MockMvc&quot;) == 1 { while ((getline l &lt; &quot;../api-dep.xml&quot;) &gt; 0) print l }
+     { sub(/\r$/, &quot;&quot;); sub(/&lt;version&gt;1\.1\.0&lt;\/version&gt;/, &quot;&lt;version&gt;1.2.0&lt;/version&gt;&quot;); print }&#x27; pom.xml &gt; pom.new
+mv pom.new pom.xml &amp;&amp; rm ../api-dep.xml
+git add pom.xml &amp;&amp; git -c user.name=&#x27;Meena Iyer&#x27; -c user.email=meena@acme-health.example commit -q -m &#x27;Move request aging to the priorauth-aging library (1.0.0); depend on it&#x27; &amp;&amp; git tag v1.2.0 &amp;&amp; git log --oneline -3</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real · 0.4 s</span></div><pre>49fe266 Merge pull request #58 from acme-health/request-age/u1-age-api</pre></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real</span></div><pre>f6153ee priorauth-aging 1.0.0: the aging package, split from priorauth-api 1.1.0</pre></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real</span></div><pre>c2dc5d4 Move request aging to the priorauth-aging library (1.0.0); depend on it</pre></div><div class="note">The copy, the two heredocs and the <code>awk</code> pom edit are what <code>tools/setup_multirepo_run.py</code> did in Python; written as shell they give the same trees as the course's remotes, byte for byte (checked with <code>git rev-parse v1.2.0^{tree}</code>); your commit ids differ, because commits carry their date. The six moved files: <code>AgeBadge.java</code>, <code>BusinessDays.java</code>, <code>HolidayCalendar.java</code>, <code>holidays-TX-01-2026.json</code>, <code>AgeBadgeTest.java</code>, <code>BusinessDaysTest.java</code>.</div>
+</section>
+<section class="step" id="s21" data-step="21" data-phase="One bug, two repos" style="--c:var(--review)">
+  <div class="step__head"><span class="step__n">21</span><div><span class="chip">set up</span><h2>The workspace repo, and three remotes</h2><p class="step__why">The team's files for the two-repo run, committed; a bare remote each for the library, the API and the workspace, pushed with their tags.</p></div><span class="who">Meena · 1 min</span></div>
+<div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">Git Bash</span><span class="os-mac">Terminal</span></span></div><pre class="os-win">mkdir -p &quot;$MRUN/build/priorauth-workspace&quot;
+cp -R &quot;$COURSE/tools/data/multirepo/files/.&quot; &quot;$MRUN/build/priorauth-workspace/&quot;
+cd &quot;$MRUN/build/priorauth-workspace&quot;
+git init -q -b main &amp;&amp; git add -A &amp;&amp; git update-index --chmod=+x scripts/verify.sh &amp;&amp; git -c user.name=&#x27;Meena Iyer&#x27; -c user.email=meena@acme-health.example commit -q -m &#x27;The priorauth workspace: CLAUDE.md, verify scripts, the fix-across-repos workflow&#x27; &amp;&amp; git ls-files
+cd &quot;$MRUN&quot;
+git init -q --bare -b main &quot;$MRUN/remotes/priorauth-aging.git&quot;
+cd &quot;$MRUN/build/priorauth-aging&quot;
+git remote add origin &quot;$MRUN/remotes/priorauth-aging.git&quot; &amp;&amp; git push -q -u origin main --tags 2&gt;&amp;1
+cd &quot;$MRUN&quot;
+git init -q --bare -b main &quot;$MRUN/remotes/priorauth-api.git&quot;
+cd &quot;$MRUN/build/priorauth-api&quot;
+git remote add origin &quot;$MRUN/remotes/priorauth-api.git&quot; &amp;&amp; git push -q -u origin main --tags 2&gt;&amp;1
+cd &quot;$MRUN&quot;
+git init -q --bare -b main &quot;$MRUN/remotes/priorauth-workspace.git&quot;
+cd &quot;$MRUN/build/priorauth-workspace&quot;
+git remote add origin &quot;$MRUN/remotes/priorauth-workspace.git&quot; &amp;&amp; git push -q -u origin main --tags 2&gt;&amp;1
+cd &quot;$MRUN&quot;
+rm -rf build</pre><pre class="os-mac">mkdir -p &quot;$MRUN/build/priorauth-workspace&quot;
+cp -R &quot;$COURSE/tools/data/multirepo/files/.&quot; &quot;$MRUN/build/priorauth-workspace/&quot;
+cd &quot;$MRUN/build/priorauth-workspace&quot;
+git init -q -b main &amp;&amp; git add -A &amp;&amp; git update-index --chmod=+x scripts/verify.sh &amp;&amp; git -c user.name=&#x27;Meena Iyer&#x27; -c user.email=meena@acme-health.example commit -q -m &#x27;The priorauth workspace: CLAUDE.md, verify scripts, the fix-across-repos workflow&#x27; &amp;&amp; git ls-files
+cd &quot;$MRUN&quot;
+git init -q --bare -b main &quot;$MRUN/remotes/priorauth-aging.git&quot;
+cd &quot;$MRUN/build/priorauth-aging&quot;
+git remote add origin &quot;$MRUN/remotes/priorauth-aging.git&quot; &amp;&amp; git push -q -u origin main --tags 2&gt;&amp;1
+cd &quot;$MRUN&quot;
+git init -q --bare -b main &quot;$MRUN/remotes/priorauth-api.git&quot;
+cd &quot;$MRUN/build/priorauth-api&quot;
+git remote add origin &quot;$MRUN/remotes/priorauth-api.git&quot; &amp;&amp; git push -q -u origin main --tags 2&gt;&amp;1
+cd &quot;$MRUN&quot;
+git init -q --bare -b main &quot;$MRUN/remotes/priorauth-workspace.git&quot;
+cd &quot;$MRUN/build/priorauth-workspace&quot;
+git remote add origin &quot;$MRUN/remotes/priorauth-workspace.git&quot; &amp;&amp; git push -q -u origin main --tags 2&gt;&amp;1
+cd &quot;$MRUN&quot;
+rm -rf build</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real · 0.6 s</span></div><pre>.archon/workflows/team/fix-across-repos/fix-across-repos.yaml
+docs-in/bug-report.md
+docs-in/holidays-TX-01-2027.json</pre></div>
+</section>
+<section class="step" id="s22" data-step="22" data-phase="One bug, two repos" style="--c:var(--review)">
+  <div class="step__head"><span class="step__n">22</span><div><span class="chip">set up</span><h2>Kiran's machine: the workspace, then each repo inside it</h2><p class="step__why">Three clones in one folder. CLAUDE.md is the repo map: which repo holds what, the release order, git per repo.</p></div><span class="who">Kiran · 1 min</span></div>
+<div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">Git Bash</span><span class="os-mac">Terminal</span></span></div><pre class="os-win">cd &quot;$MRUN&quot;
+git clone -q &quot;$MRUN/remotes/priorauth-workspace.git&quot; priorauth-workspace
+cd &quot;$MRUN/priorauth-workspace&quot;
+git clone -q &quot;$MRUN/remotes/priorauth-aging.git&quot; priorauth-aging
+git clone -q &quot;$MRUN/remotes/priorauth-api.git&quot; priorauth-api
+for d in . priorauth-aging priorauth-api; do git -C $d config user.name &#x27;Kiran Rao&#x27;; git -C $d config user.email kiran@acme-health.example; done; git status --short --ignored
+ls -a; for d in priorauth-aging priorauth-api; do echo &quot;== $d&quot;; git -C $d log --oneline --decorate; grep -m2 -n &#x27;&lt;version&gt;&#x27; $d/pom.xml; done</pre><pre class="os-mac">cd &quot;$MRUN&quot;
+git clone -q &quot;$MRUN/remotes/priorauth-workspace.git&quot; priorauth-workspace
+cd &quot;$MRUN/priorauth-workspace&quot;
+git clone -q &quot;$MRUN/remotes/priorauth-aging.git&quot; priorauth-aging
+git clone -q &quot;$MRUN/remotes/priorauth-api.git&quot; priorauth-api
+for d in . priorauth-aging priorauth-api; do git -C $d config user.name &#x27;Kiran Rao&#x27;; git -C $d config user.email kiran@acme-health.example; done; git status --short --ignored
+ls -a; for d in priorauth-aging priorauth-api; do echo &quot;== $d&quot;; git -C $d log --oneline --decorate; grep -m2 -n &#x27;&lt;version&gt;&#x27; $d/pom.xml; done</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real · 0.5 s</span></div><pre>!! priorauth-aging/
+!! priorauth-api/</pre></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real</span></div><pre>f6153ee (HEAD -&gt; main, tag: v1.0.0, origin/main, origin/HEAD) priorauth-aging 1.0.0: the aging package, split from priorauth-api 1.1.0
+17:  &lt;version&gt;1.0.0&lt;/version&gt;
+c2dc5d4 (HEAD -&gt; main, tag: v1.2.0, origin/main, origin/HEAD) Move request aging to the priorauth-aging library (1.0.0); depend on it
+17:  &lt;version&gt;1.2.0&lt;/version&gt;</pre></div>
+</section>
+<section class="step" id="s23" data-step="23" data-phase="One bug, two repos" style="--c:var(--review)">
+  <div class="step__head"><span class="step__n">23</span><div><span class="chip">before</span><h2>Before the run: it builds, and the bug shows</h2><p class="step__why">verify.sh installs the library, then tests the API. The jar on 2027-01-05 gives 63/60/57: New Year's Day counted as a working day.</p></div><span class="who">Kiran · 3 min</span></div>
+<div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">Git Bash</span><span class="os-mac">Terminal</span></span></div><pre class="os-win">cd &quot;$MRUN/priorauth-workspace&quot;
+archon validate workflows fix-across-repos
+./scripts/verify.sh &amp;&amp; echo &#x27;verify: passed&#x27;
+(
+set -u
+cd priorauth-api
+mvn -q -DskipTests package
+java -jar target/priorauth-api-1.2.0.jar --server.port=8091 &gt; ../../app-before.log 2&gt;&amp;1 &amp;
+pid=$!
+for i in $(seq 90); do curl -s -o /dev/null localhost:8091/requests/pending &amp;&amp; break; sleep 1; done
+curl -s &#x27;localhost:8091/requests/pending?asOf=2027-01-05&#x27;; echo
+kill $pid
+)</pre><pre class="os-mac">cd &quot;$MRUN/priorauth-workspace&quot;
+archon validate workflows fix-across-repos
+./scripts/verify.sh &amp;&amp; echo &#x27;verify: passed&#x27;
+(
+set -u
+cd priorauth-api
+mvn -q -DskipTests package
+java -jar target/priorauth-api-1.2.0.jar --server.port=8091 &gt; ../../app-before.log 2&gt;&amp;1 &amp;
+pid=$!
+for i in $(seq 90); do curl -s -o /dev/null localhost:8091/requests/pending &amp;&amp; break; sleep 1; done
+curl -s &#x27;localhost:8091/requests/pending?asOf=2027-01-05&#x27;; echo
+kill $pid
+)</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real · 4.1 s</span></div><pre>  fix-across-repos                         ok
+Results: 1 valid, 0 with errors</pre></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real · verify.sh</span></div><pre>verify: passed</pre></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real · the 1.2.0 jar, asOf=2027-01-05</span></div><pre>[{&quot;id&quot;:&quot;PA-10231&quot;,&quot;tenantId&quot;:&quot;TX-01&quot;,&quot;service&quot;:&quot;MRI lumbar spine&quot;,&quot;status&quot;:&quot;PENDED&quot;,&quot;receivedAt&quot;:&quot;2026-10-01&quot;,&quot;ageBusinessDays&quot;:63,&quot;overLimit&quot;:true,&quot;ageLabel&quot;:&quot;63 bd OVER 5&quot;},{&quot;id&quot;:&quot;PA-10244&quot;,&quot;tenantId&quot;:&quot;TX-01&quot;,&quot;service&quot;:&quot;Physical therapy x12&quot;,&quot;status&quot;:&quot;IN_REVIEW&quot;,&quot;receivedAt&quot;:&quot;2026-10-06&quot;,&quot;ageBusinessDays&quot;:60,&quot;overLimit&quot;:true,&quot;ageLabel&quot;:&quot;60 bd OVER 5&quot;},{&quot;id&quot;:&quot;PA-10263&quot;,&quot;tenantId&quot;:&quot;TX-01&quot;,&quot;service …</pre></div><div class="note">Ravi's bug report (<code>docs-in/bug-report.md</code>) says the ages are one too high; the 2027 holiday file he attached is <code>docs-in/holidays-TX-01-2027.json</code>.</div>
+</section>
+<section class="step" id="s24" data-step="24" data-phase="One bug, two repos" style="--c:var(--review)">
+  <div class="step__head"><span class="step__n">24</span><div><span class="chip">free</span><h2>Dry-run it: not with <code>--folder</code></h2><p class="step__why">The first try is refused; a plain dry run works and registers nothing.</p></div><span class="who">Kiran · 1 min</span></div>
+<div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">Git Bash</span><span class="os-mac">Terminal</span></span></div><pre class="os-win">cd &quot;$MRUN/priorauth-workspace&quot;
+archon workflow run fix-across-repos --folder --dry-run --default-stubs &#x27;Fix the bug in docs-in/bug-report.md&#x27;
+archon workflow run fix-across-repos --dry-run --default-stubs &#x27;Fix the bug in docs-in/bug-report.md&#x27;</pre><pre class="os-mac">cd &quot;$MRUN/priorauth-workspace&quot;
+archon workflow run fix-across-repos --folder --dry-run --default-stubs &#x27;Fix the bug in docs-in/bug-report.md&#x27;
+archon workflow run fix-across-repos --dry-run --default-stubs &#x27;Fix the bug in docs-in/bug-report.md&#x27;</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real · 1.3 s</span></div><pre>Error: --dry-run cannot be combined with --folder.</pre></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real</span></div><pre>PAUSED    approve-plan (wait) — durable wait
+Simulation outcome: paused</pre></div>
+</section>
+<section class="step" id="s25" data-step="25" data-phase="One bug, two repos" style="--c:var(--review)">
+  <div class="step__head"><span class="step__n">25</span><div><span class="chip">gate 1 · plan</span><h2>Start the run; approve the plan with a correction</h2><p class="step__why">Scan and plan find the cause in the library. The plan miscounts two ages; Meena approves with the right numbers instead of rejecting (a reject here cancels).</p></div><span class="who">Kiran, Meena · 6 min</span></div>
+<div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">Git Bash</span><span class="os-mac">Terminal</span></span></div><pre class="os-win">cd &quot;$MRUN/priorauth-workspace&quot;
+out=$(archon workflow run fix-across-repos --folder --detach &quot;Fix the bug in docs-in/bug-report.md (Ravi, 17 Oct): New Year&#x27;s Day counted as a working day&quot;)
+echo &quot;$out&quot;
+RUN=$(echo &quot;$out&quot; | sed -n &#x27;s/^Run id: //p&#x27; | tr -d &#x27;\r&#x27;)
+echo &quot;RUN=$RUN&quot;
+archon workflow wait $RUN --json
+archon workflow approve $RUN &quot;Approved - Meena Iyer. One correction: 1 Jan 2027 falls inside all three requests&#x27; periods, so all three drop by one on 2027-01-05: PA-10231 62, PA-10244 59, PA-10263 56 (today 63, 60, 57; Ravi says the others are off too). Leave the missing-2028-file behaviour as it is; I&#x27;ll raise it separately. Kiran checks the packaged jar by hand before we push.&quot;
+archon workflow wait $RUN --json</pre><pre class="os-mac">cd &quot;$MRUN/priorauth-workspace&quot;
+out=$(archon workflow run fix-across-repos --folder --detach &quot;Fix the bug in docs-in/bug-report.md (Ravi, 17 Oct): New Year&#x27;s Day counted as a working day&quot;)
+echo &quot;$out&quot;
+RUN=$(echo &quot;$out&quot; | sed -n &#x27;s/^Run id: //p&#x27; | tr -d &#x27;\r&#x27;)
+echo &quot;RUN=$RUN&quot;
+archon workflow wait $RUN --json
+archon workflow approve $RUN &quot;Approved - Meena Iyer. One correction: 1 Jan 2027 falls inside all three requests&#x27; periods, so all three drop by one on 2027-01-05: PA-10231 62, PA-10244 59, PA-10263 56 (today 63, 60, 57; Ravi says the others are off too). Leave the missing-2028-file behaviour as it is; I&#x27;ll raise it separately. Kiran checks the packaged jar by hand before we push.&quot;
+archon workflow wait $RUN --json</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real · 6.4 s</span></div><pre>Registered folder project &quot;priorauth-workspace&quot; (C:\work\archon-multirepo\priorauth-workspace)
+Run id: 5138e1be8e01d39ed631d192df3bb2c1</pre></div><div class="box claude"><div class="box__bar">Check: wait returns <span class="tag">real · waited 137 s</span></div><pre>&quot;nodeId&quot;: &quot;approve-plan&quot;,  &quot;form&quot;: &quot;approval&quot;,  &quot;occurrence&quot;: &quot;12f141a7-d310-4550-b8a5-db4b76d036b5&quot;
+&quot;message&quot;:
+Approve the plan before any code is written.
+
+I&#x27;ve written `plan.md`; nothing in either repo or the workspace has changed yet. The plan is to fix priorauth-aging, which has the bug, and have priorauth-api move to the fixed version. `HolidayCalendar.forTenant(String)` keeps its signature but will return the holidays from every year&#x27;s file for the tenant, found with the pattern `data/holidays-&lt;tenant&gt;-????.json`. The four-character `????` stops a short tenant id like `TX` from matching another tenant&#x27;s files such as `TX-01`. The plan also adds the TX-01 2027 holiday file from `docs-in`. priorauth-api&#x27;s code doesn&#x27;t change; only its pom is updated and one test is added. Order: priorauth-aging changes and is released first (tag v1.0.1), then priorauth-api (tag v1.2.1). Pushing and opening the PRs is left to the workflow&#x27;s last node. One open question for the team: when a year&#x27;s holiday file is missing, the code still quietly uses no holidays, so this will happen again in January 2028. The plan leaves that alone because nobody asked for it. Not checked: remotes, open PRs, other users of the library outside these two repos, whether the nightly report uses the same holiday list, and whether the holiday files are found when the API runs as a packaged jar (`./scripts/verify.sh` doesn&#x27;t test that).
+…</pre></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real · 222 s</span></div><pre>- **priorauth-aging:** `074d5244f7c9d1768e334b26e6c6e3e895f8c724` (version 1.0.0 → 1.0.1)
+- **priorauth-api:** `8d65a37f113d2a075e8f6ae2acefe355d9ebfac6` (version 1.2.0 → 1.2.1)
+Loop node &#x27;implement&#x27; completed after 1 iteration
+Workflow paused — waiting for approval.</pre></div><div class="note">The course's run id was <code>5138e1be8e01d39ed631d192df3bb2c1</code>. One branch, <code>fix/holidays-across-years</code>, in each repo, made and committed by the agent. Why approve-with-correction and not reject: <a href="archon-hello-world-java/archon-two-repos-run.html#s09">two-repo page, step 9</a>.</div>
+</section>
+<section class="step" id="s26" data-step="26" data-phase="One bug, two repos" style="--c:var(--review)">
+  <div class="step__head"><span class="step__n">26</span><div><span class="chip">gate 2 · change</span><h2>Check the jar by hand, then approve: one branch pushed per repo</h2><p class="step__why">The 1.2.1 jar carries priorauth-aging 1.0.1 and gives 62/59/56 on 2027-01-05, still 7/4/1 on 2026-10-13. Approve, and the push node pushes both branches.</p></div><span class="who">Kiran, Meena · 2 min</span></div>
+<div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">Git Bash</span><span class="os-mac">Terminal</span></span></div><pre class="os-win">cd &quot;$MRUN/priorauth-workspace&quot;
+(
+set -u
+cd priorauth-api
+mvn -q -DskipTests package
+ls target/*.jar
+unzip -l target/priorauth-api-1.2.1.jar | grep -o &quot;BOOT-INF/lib/priorauth-aging[^ ]*&quot;
+java -jar target/priorauth-api-1.2.1.jar --server.port=8092 &gt; ../../app-after.log 2&gt;&amp;1 &amp;
+pid=$!
+for i in $(seq 90); do curl -s -o /dev/null localhost:8092/requests/pending &amp;&amp; break; sleep 1; done
+echo &quot;asOf=2027-01-05:&quot;; curl -s &quot;localhost:8092/requests/pending?asOf=2027-01-05&quot;; echo
+echo &quot;asOf=2026-10-13:&quot;; curl -s &quot;localhost:8092/requests/pending?asOf=2026-10-13&quot;; echo
+kill $pid
+)
+archon workflow approve $RUN &#x27;Approved - Meena Iyer. Kiran ran the 1.2.1 jar: 2027-01-05 gives 62/59/56, 2026-10-13 still 7/4/1. Push both; aging merges first.&#x27;</pre><pre class="os-mac">cd &quot;$MRUN/priorauth-workspace&quot;
+(
+set -u
+cd priorauth-api
+mvn -q -DskipTests package
+ls target/*.jar
+unzip -l target/priorauth-api-1.2.1.jar | grep -o &quot;BOOT-INF/lib/priorauth-aging[^ ]*&quot;
+java -jar target/priorauth-api-1.2.1.jar --server.port=8092 &gt; ../../app-after.log 2&gt;&amp;1 &amp;
+pid=$!
+for i in $(seq 90); do curl -s -o /dev/null localhost:8092/requests/pending &amp;&amp; break; sleep 1; done
+echo &quot;asOf=2027-01-05:&quot;; curl -s &quot;localhost:8092/requests/pending?asOf=2027-01-05&quot;; echo
+echo &quot;asOf=2026-10-13:&quot;; curl -s &quot;localhost:8092/requests/pending?asOf=2026-10-13&quot;; echo
+kill $pid
+)
+archon workflow approve $RUN &#x27;Approved - Meena Iyer. Kiran ran the 1.2.1 jar: 2027-01-05 gives 62/59/56, 2026-10-13 still 7/4/1. Push both; aging merges first.&#x27;</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real · 10 s</span></div><pre>BOOT-INF/lib/priorauth-aging-1.0.1.jar
+asOf=2027-01-05:
+[{&quot;id&quot;:&quot;PA-10231&quot;,&quot;tenantId&quot;:&quot;TX-01&quot;,&quot;service&quot;:&quot;MRI lumbar spine&quot;,&quot;status&quot;:&quot;PENDED&quot;,&quot;receivedAt&quot;:&quot;2026-10-01&quot;,&quot;ageBusinessDays&quot;:62,&quot;overLimit&quot;:true,&quot;ageLabel&quot;:&quot;62 bd OVER 5&quot;},{&quot;id&quot;:&quot;PA-10244&quot;,&quot;tenantId&quot;:&quot;TX-01&quot; …
+asOf=2026-10-13:
+[{&quot;id&quot;:&quot;PA-10231&quot;,&quot;tenantId&quot;:&quot;TX-01&quot;,&quot;service&quot;:&quot;MRI lumbar spine&quot;,&quot;status&quot;:&quot;PENDED&quot;,&quot;receivedAt&quot;:&quot;2026-10-01&quot;,&quot;ageBusinessDays&quot;:7,&quot;overLimit&quot;:true,&quot;ageLabel&quot;:&quot;7 bd OVER 5&quot;},{&quot;id&quot;:&quot;PA-10244&quot;,&quot;tenantId&quot;:&quot;TX-01&quot;,&quot; …</pre></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real</span></div><pre>priorauth-aging: open the PR fix/holidays-across-years -&gt; main
+priorauth-api: open the PR fix/holidays-across-years -&gt; main
+Workflow completed successfully.
+    Cost: $2.1466047</pre></div>
+</section>
+<section class="step" id="s27" data-step="27" data-phase="One bug, two repos" style="--c:var(--review)">
+  <div class="step__head"><span class="step__n">27</span><div><span class="chip">after</span><h2>What a folder project leaves behind</h2><p class="step__why">Archon's view of the finished run, and the two branches on the remotes.</p></div><span class="who">Kiran · 1 min</span></div>
+<div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">Git Bash</span><span class="os-mac">Terminal</span></span></div><pre class="os-win">cd &quot;$MRUN/priorauth-workspace&quot;
+archon workflow get $RUN
+archon workflow artifacts $RUN
+archon workflow logs $RUN --format text
+archon project list
+archon isolation list
+archon doctor
+for r in priorauth-aging priorauth-api; do echo &quot;== $r&quot;; git -C &quot;$r&quot; ls-remote --heads origin; done; echo &quot;== workspace&quot;; git status --short; git log --oneline -1</pre><pre class="os-mac">cd &quot;$MRUN/priorauth-workspace&quot;
+archon workflow get $RUN
+archon workflow artifacts $RUN
+archon workflow logs $RUN --format text
+archon project list
+archon isolation list
+archon doctor
+for r in priorauth-aging priorauth-api; do echo &quot;== $r&quot;; git -C &quot;$r&quot; ls-remote --heads origin; done; echo &quot;== workspace&quot;; git status --short; git log --oneline -1</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real · workflow get</span></div><pre>  Status: completed
+    Worktree: C:\work\archon-multirepo\priorauth-workspace (live)</pre></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real · doctor</span></div><pre>✓ Folder project: &quot;priorauth-workspace&quot; (runs in place) — 2 contained repo(s): priorauth-aging, priorauth-api</pre></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real</span></div><pre>074d5244f7c9d1768e334b26e6c6e3e895f8c724	refs/heads/fix/holidays-across-years</pre></div>
+</section>
+<section class="step" id="s28" data-step="28" data-phase="One bug, two repos" style="--c:var(--review)">
+  <div class="step__head"><span class="step__n">28</span><div><span class="chip">after</span><h2>Merge in release order; tidy up by hand</h2><p class="step__why">The library first (tag v1.0.1), then the API (v1.2.1). verify on main, then delete the branches.</p></div><span class="who">Meena, Kiran · 2 min</span></div>
+<div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">Git Bash</span><span class="os-mac">Terminal</span></span></div><pre class="os-win">mkdir -p &quot;$MRUN/meena&quot;
+cd &quot;$MRUN/meena&quot;
+(
+set -e
+for pair in priorauth-aging:v1.0.1 priorauth-api:v1.2.1; do r=${pair%%:*}; t=${pair##*:}
+  git clone -q ../remotes/$r.git $r
+  git -C $r -c user.name=&quot;Meena Iyer&quot; -c user.email=meena@acme-health.example merge -q --no-ff origin/fix/holidays-across-years -m &quot;Merge fix/holidays-across-years: holidays across years (Ravi, 17 Oct)&quot;
+  git -C $r tag $t &amp;&amp; git -C $r push -q origin main $t
+  echo &quot;== $r&quot;; git -C $r log --oneline --graph -4
+done
+)
+cd &quot;$MRUN/priorauth-workspace&quot;
+archon complete fix/holidays-across-years
+(
+set -e
+for r in priorauth-aging priorauth-api; do git -C $r switch -q main &amp;&amp; git -C $r pull -q --ff-only &amp;&amp; echo &quot;$r: $(git -C $r log --oneline -1) $(git -C $r describe --tags)&quot;; done
+./scripts/verify.sh &gt;/dev/null 2&gt;&amp;1 &amp;&amp; echo &quot;verify on main: passed&quot;
+git status --short; echo &quot;workspace clean&quot;
+)
+for r in priorauth-aging priorauth-api; do git -C $r branch -d fix/holidays-across-years; git -C $r branch --list; done</pre><pre class="os-mac">mkdir -p &quot;$MRUN/meena&quot;
+cd &quot;$MRUN/meena&quot;
+(
+set -e
+for pair in priorauth-aging:v1.0.1 priorauth-api:v1.2.1; do r=${pair%%:*}; t=${pair##*:}
+  git clone -q ../remotes/$r.git $r
+  git -C $r -c user.name=&quot;Meena Iyer&quot; -c user.email=meena@acme-health.example merge -q --no-ff origin/fix/holidays-across-years -m &quot;Merge fix/holidays-across-years: holidays across years (Ravi, 17 Oct)&quot;
+  git -C $r tag $t &amp;&amp; git -C $r push -q origin main $t
+  echo &quot;== $r&quot;; git -C $r log --oneline --graph -4
+done
+)
+cd &quot;$MRUN/priorauth-workspace&quot;
+archon complete fix/holidays-across-years
+(
+set -e
+for r in priorauth-aging priorauth-api; do git -C $r switch -q main &amp;&amp; git -C $r pull -q --ff-only &amp;&amp; echo &quot;$r: $(git -C $r log --oneline -1) $(git -C $r describe --tags)&quot;; done
+./scripts/verify.sh &gt;/dev/null 2&gt;&amp;1 &amp;&amp; echo &quot;verify on main: passed&quot;
+git status --short; echo &quot;workspace clean&quot;
+)
+for r in priorauth-aging priorauth-api; do git -C $r branch -d fix/holidays-across-years; git -C $r branch --list; done</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real</span></div><pre>== priorauth-aging
+*   317874b Merge fix/holidays-across-years: holidays across years (Ravi, 17 Oct)
+== priorauth-api
+*   e7b9a6d Merge fix/holidays-across-years: holidays across years (Ravi, 17 Oct)</pre></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real</span></div><pre>priorauth-aging: 317874b Merge fix/holidays-across-years: holidays across years (Ravi, 17 Oct) v1.0.1
+priorauth-api: e7b9a6d Merge fix/holidays-across-years: holidays across years (Ravi, 17 Oct) v1.2.1
+verify on main: passed
+workspace clean</pre></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real</span></div><pre>Deleted branch fix/holidays-across-years (was 074d524).</pre></div><div class="note">Open both PRs before this on a real team; merge the library's first, because the API's pom names its new version. The same bug through AWS AI-DLC: <a href="archon-hello-world-java/archon-two-repos-run.html#s16">two-repo page, step 16</a>.</div>
+</section>
+<div class="phase" style="--c:var(--ship)"><i></i>Reference<span>troubleshooting, cost, start over</span></div>
+<section class="card" id="trouble">
+  <h2>Troubleshooting</h2>
+<p>Every symptom marked measured happened in the course's runs; the rest are what the setup guards against.</p><div class="gwrap"><table><thead><tr><th>You see</th><th>Why</th><th>Do</th></tr></thead><tbody><tr><td><code>bash executable not found at 'C:\Program Files\Git\bin\bash.exe'</code>, on the first bash node</td><td>Git for Windows is installed somewhere Archon doesn't look; <code>archon validate</code> passes anyway (measured)</td><td><code>export ARCHON_BASH_PATH="&lt;your Git&gt;\bin\bash.exe"</code> (step 3), or set it as a user variable</td></tr><tr><td><code>Error: --dry-run cannot be combined with --folder.</code></td><td>measured, step 24</td><td>dry-run without <code>--folder</code></td></tr><tr><td><code>answer</code> / <code>approve</code> seems to hang</td><td>it resumes the run in your terminal until the next pause (up to 286 s here)</td><td>wait; or follow the transcript path <code>run</code> printed</td></tr><tr><td><code>Rejected but failed to resume … bun run cli workflow resume</code></td><td>a reject at the last gate cancels the run; the message is misleading (measured, step 15)</td><td>start a new run with <code>--adopt $RUN</code> (step 16)</td></tr><tr><td>An adopted run doesn't know what was decided</td><td>it gets the old run's files via <code>$ADOPTED_RUN_DIR</code>, not the reject text</td><td>write the decision into the new run's message</td></tr><tr><td><code>archon complete &lt;branch&gt;</code>: <code>Not found … no active isolation environment</code></td><td>expected: a folder project has no worktree to clean</td><td>delete the branches yourself (steps 18, 28)</td></tr><tr><td><code>mvn</code> fails inside the agent's session with <code>ClassNotFoundException: …Launcher</code></td><td>seen in the two-repo run: Git Bash's <code>mvn</code> broke in the agent's shell; the agent ran <code>verify.cmd</code> and said so</td><td>nothing to do; the checks node ran <code>verify.sh</code> and passed</td></tr><tr><td><code>verify.sh: $'\r': command not found</code></td><td>the script got CRLF endings (<code>core.autocrlf=true</code>)</td><td>keep the team's <code>.gitattributes</code> (<code>*.sh text eol=lf</code>); not hit in the course</td></tr><tr><td><code>release version 21 not supported</code> from Maven</td><td>an older JDK first on PATH</td><td>step 3's <code>JAVA_HOME</code> and <code>PATH</code>; not hit in the course</td></tr><tr><td>the jar check can't start: port in use</td><td>an earlier java is still running on 8091–8093</td><td>stop it, or change <code>--server.port</code></td></tr><tr><td><code>archon project list</code> shows old projects</td><td>there is no <code>project remove</code> in 0.13.2 (the course's list has an older <code>_local/priorauth-api</code>)</td><td>harmless; each run names its project</td></tr></tbody></table></div>
+</section>
+<section class="card" id="cost">
+  <h2>What it cost, how long it took</h2>
+<p>Reported by Archon at the end of each run (API-price equivalents; the course ran on a claude.ai plan, so nothing was billed per token). Time is the sum of the recorded commands, waits included.</p><div class="gwrap"><table><thead><tr><th>Run</th><th>Workflow</th><th>Reported cost</th><th>Commands, in total</th></tr></thead><tbody><tr><td>One request, one repo</td><td><code>request-to-pr</code> (cancelled at the last gate)</td><td>$3.73</td><td>16 min, with the fix and archon-plan</td></tr><tr><td></td><td><code>archon-implement</code> (the fix)</td><td>$0.63</td><td></td></tr><tr><td></td><td><code>archon-plan</code> (optional)</td><td>$0.83</td><td></td></tr><tr><td>One bug, two repos</td><td><code>fix-across-repos</code></td><td>$2.15</td><td>7 min</td></tr></tbody></table></div>
+</section>
+<section class="card" id="again">
+  <h2>Start over</h2>
+<p>Each run's folders can be deleted and rebuilt from step 5 or step 20. Archon keeps the runs under <code>~/.archon/workspaces/_folder/&lt;workspace&gt;/</code> and the project in its database; a new first run from the same path reuses the project.</p><div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">Git Bash</span><span class="os-mac">Terminal</span></span></div><pre class="os-win">rm -rf &quot;$JRUN&quot; &quot;$MRUN&quot;
+archon project list</pre><pre class="os-mac">rm -rf &quot;$JRUN&quot; &quot;$MRUN&quot;
+archon project list</pre><button class="copy" type="button">copy</button></div>
+</section>
+<section class="card" id="real">
+  <h2>What is real here</h2>
+<p>Every command and every Check box is from the course's real runs with Archon 0.13.2 and Claude Code on a claude.ai login, Windows 10, 4 Nov 2026 (the tool versions in step 1: 5 Nov). The commands are the recorded ones with the run folders written as <code>$JRUN</code>/<code>$MRUN</code>, the run id as <code>$RUN</code>, and the recorded multi-line scripts in a subshell; the file copies and the starter split are the course's setup scripts written as shell, and Parts B and C's setup (steps 5–8, 20–23) was re-run from this page in a fresh folder on 5 Nov 2026: same trees as the course's remotes, same checks. Commit ids other than the starter's (<code>d9aa178</code>, <code>49fe266</code>) will differ on your machine. The macOS commands were not run. Your agent will word things differently, and may take another number of passes; the gates are where you decide. The cast (Ravi Menon, Kiran Rao, Meena Iyer) is fictional.</p>
+</section>
+<div class="plain"><div><b>In plain words.</b> A stays done; B and C are independent. Each starts from an empty folder and ends with the change merged and verified on main, so you can run either one alone (after A), or both.</div></div>
+</main>
+</div>
+
+<footer class="foot">Archon end to end · Archon 0.13.2 · <a href="archon-workspace-setup.html">setup, explained</a> · <a href="archon-hello-world-java/archon-hello-world-java-run.html">one request, one repo</a> · <a href="archon-hello-world-java/archon-two-repos-run.html">one bug, two repos</a> · <a href="index.html">all course pages</a> · <a href="#top">Back to top</a></footer>
+<script>
+(function () {
+  'use strict';
+  var root = document.documentElement, toggle = document.getElementById('themeToggle');
+  function applyTheme(t) { if (t === 'dark') root.setAttribute('data-theme', 'dark'); else root.removeAttribute('data-theme'); toggle.textContent = t === 'dark' ? 'Light mode' : 'Dark mode'; toggle.setAttribute('aria-pressed', t === 'dark' ? 'true' : 'false'); }
+  var saved = null; try { saved = localStorage.getItem('arc-theme'); } catch (e) {}
+  applyTheme(saved || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+  toggle.addEventListener('click', function () { var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'; applyTheme(next); try { localStorage.setItem('arc-theme', next); } catch (e) {} });
+
+  var osBtn = document.getElementById('osToggle');
+  function applyOs(o) { if (o === 'mac') root.setAttribute('data-os', 'mac'); else root.removeAttribute('data-os'); osBtn.textContent = o === 'mac' ? 'macOS' : 'Windows'; osBtn.setAttribute('aria-label', 'Commands shown for ' + osBtn.textContent + '; click to switch'); }
+  var savedOs = null; try { savedOs = localStorage.getItem('arc-os'); } catch (e) {}
+  applyOs(savedOs || (/Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent) ? 'mac' : 'win'));
+  osBtn.addEventListener('click', function () { var next = root.getAttribute('data-os') === 'mac' ? 'win' : 'mac'; applyOs(next); try { localStorage.setItem('arc-os', next); } catch (e) {} });
+
+  /* icons on the boxes */
+  var ICON = {
+    you: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="6" width="19" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M8 14h8"/></svg>',
+    claude: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>',
+    disk: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>',
+    plain: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a7 7 0 0 0-4 12.7V17a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-2.3A7 7 0 0 0 12 2z"/><path d="M9 21h6"/></svg>'
+  };
+  ['you', 'claude', 'disk'].forEach(function (k) {
+    document.querySelectorAll('.box.' + k + ' > .box__bar').forEach(function (bar) { if (!bar.querySelector('svg')) bar.insertAdjacentHTML('afterbegin', ICON[k]); });
+  });
+  document.querySelectorAll('.plain').forEach(function (p) { if (!p.querySelector('svg')) p.insertAdjacentHTML('afterbegin', ICON.plain); });
+
+  /* tabs */
+  document.querySelectorAll('.tabs').forEach(function (tabs) {
+    var host = tabs.parentElement, btns = Array.prototype.slice.call(tabs.querySelectorAll('.tab'));
+    btns.forEach(function (b) { b.addEventListener('click', function () {
+      btns.forEach(function (x) { x.setAttribute('aria-selected', x === b ? 'true' : 'false'); });
+      Array.prototype.forEach.call(host.querySelectorAll(':scope > .pane'), function (p) { p.classList.toggle('is-on', p.id === b.getAttribute('data-pane')); });
+    }); });
+  });
+
+  /* copy buttons */
+  function copyText(btn, text) {
+    var done = function () { var old = btn.textContent; btn.textContent = 'copied'; setTimeout(function () { btn.textContent = old; }, 1200); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, done); else done();
+  }
+  document.querySelectorAll('.you .copy').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var pre = Array.prototype.slice.call(btn.parentElement.querySelectorAll('pre')).filter(function (x) { return x.offsetParent !== null; })[0]; if (!pre) return;
+      var clone = pre.cloneNode(true); clone.querySelectorAll('.c').forEach(function (c) { c.remove(); });
+      copyText(btn, clone.textContent.replace(/\n{2,}/g, '\n').trim());
+    });
+  });
+  document.querySelectorAll('.cmd .copy').forEach(function (btn) {
+    btn.addEventListener('click', function () { var c = btn.parentElement.querySelector('code[data-copy]'); if (c) copyText(btn, c.textContent.trim()); });
+  });
+
+  /* syntax highlighting for the embedded files */
+  function esc(s) { return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  var KW = {
+    java: 'package import public private protected static final class record interface enum extends implements new return if else for while do try catch finally throw throws this super void int long boolean double float char byte short var null true false instanceof switch case default break continue',
+    bash: 'cd set exit echo'
+  };
+  function kw(list) { return new RegExp('(?:' + list.trim().split(/\s+/).join('|') + ')(?![\\w$])', 'y'); }
+  function rules(lang) {
+    switch (lang) {
+      case 'java': return [['c', /\/\/.*/y], ['c', /\/\*[\s\S]*?\*\//y], ['s', /"(?:[^"\\\n]|\\.)*"/y], ['a', /@[A-Za-z_][\w.]*/y], ['n', /(?<![\w.])\d+(?:\.\d+)?[LlFfDd]?(?![\w])/y], ['k', kw(KW.java)]];
+      case 'jsonl': case 'json': return [['k', /"(?:[^"\\]|\\.)*"(?=\s*:)/y], ['s', /"(?:[^"\\]|\\.)*"/y], ['n', /(?<![\w.])-?\d+(?:\.\d+)?(?![\w])|\b(?:true|false|null)\b/y]];
+      case 'md': return [['k', /^#{1,6} .*$/my], ['s', /`[^`\n]+`/y], ['a', /\*\*[^*\n]+\*\*/y], ['c', /^\|[-:| ]+\|$/my], ['p', /\|/y]];
+      case 'yaml': return [['c', /#.*/y], ['k', /^[ \t]*[\w.-]+(?=:)/my], ['s', /"(?:[^"\\\n]|\\.)*"|'(?:[^'\n])*'/y], ['n', /(?<![\w.])-?\d+(?:\.\d+)?(?![\w])|\b(?:true|false)\b/y]];
+      case 'bash': return [['c', /#.*/y], ['s', /"(?:[^"\\\n]|\\.)*"/y], ['n', /\$\{[^}]*\}|\$[\w#@?]+|\$\(.*?\)/y], ['k', kw(KW.bash)]];
+      case 'xml': return [['c', /<!--[\s\S]*?-->/y], ['c', /<\?[\s\S]*?\?>/y], ['t', /<\/?[\w:.-]+|\/?>/y], ['s', /"(?:[^"\\\n]|\\.)*"/y]];
+      default: return [];
+    }
+  }
+  function highlight(src, lang) {
+    var R = rules(lang), out = '', i = 0, n = src.length;
+    while (i < n) {
+      var hit = null, cls = '';
+      for (var k = 0; k < R.length; k++) { R[k][1].lastIndex = i; var m = R[k][1].exec(src); if (m && m.index === i && m[0].length) { hit = m[0]; cls = R[k][0]; break; } }
+      if (hit) { out += '<span class="tok-' + cls + '">' + esc(hit) + '</span>'; i += hit.length; }
+      else {
+        var j = i + 1;
+        if (src[i] !== '\n') {
+          while (j < n && !/[\w"'`#@\/\-$*{,\n|<>]/.test(src[j])) j++;
+          if (/\w/.test(src[i])) { j = i; while (j < n && /[\w$]/.test(src[j])) j++; }
+        }
+        out += esc(src.slice(i, j)); i = j;
+      }
+    }
+    return out;
+  }
+  function highlightDiff(src, sub) {
+    return src.split('\n').map(function (line, idx, arr) {
+      var nl = idx < arr.length - 1 ? '\n' : '';
+      if (/^(@@|---|\+\+\+)/.test(line)) return '<span class="tok-c">' + esc(line) + '</span>' + nl;
+      if (line[0] === '+' || line[0] === '-') return '<span class="' + (line[0] === '+' ? 'ln-add' : 'ln-del') + '">' + esc(line[0]) + highlight(line.slice(1), sub) + '</span>';
+      return highlight(line, sub) + nl;
+    }).join('');
+  }
+  document.querySelectorAll('textarea.src').forEach(function (ta) {
+    var lang = ta.getAttribute('data-lang') || '', pre = document.createElement('pre');
+    pre.setAttribute('tabindex', '0');
+    pre.innerHTML = lang === 'diff' ? highlightDiff(ta.value, ta.getAttribute('data-sub') || 'java') : highlight(ta.value, lang);
+    if (/^(json|jsonl|md|yaml|bash|text)$/.test(lang)) ta.parentNode.classList.add('code--wrap');
+    ta.parentNode.insertBefore(pre, ta.nextSibling);
+  });
+
+  /* scroll-spy: rail, progress */
+  var steps = Array.prototype.slice.call(document.querySelectorAll('.step[data-step]'));
+  var links = {}; document.querySelectorAll('.rl').forEach(function (a) { links[a.getAttribute('data-step')] = a; });
+  var progText = document.getElementById('progText'), progBar = document.getElementById('progBar'), progPhase = document.getElementById('progPhase'), TOTAL = steps.length, current = -1;
+  function setCurrent(idx) {
+    if (idx === current) return; current = idx;
+    steps.forEach(function (s, i) {
+      var a = links[s.getAttribute('data-step')]; if (!a) return;
+      a.classList.toggle('is-on', i === idx); a.classList.toggle('is-done', i < idx);
+      if (i === idx) a.setAttribute('aria-current', 'step'); else a.removeAttribute('aria-current');
+    });
+    if (idx < 0) { progText.textContent = 'Step 0 of ' + TOTAL; progBar.style.width = '0'; progPhase.textContent = 'Start at the top'; return; }
+    var s = steps[idx]; progText.textContent = 'Step ' + s.getAttribute('data-step') + ' of ' + TOTAL; progBar.style.width = ((idx + 1) / TOTAL * 100) + '%';
+    var lk = links[s.getAttribute('data-step')]; progPhase.textContent = s.getAttribute('data-phase') + ' · ' + (lk ? lk.querySelector('span').textContent : '');
+    var a = links[s.getAttribute('data-step')]; if (a && window.innerWidth <= 900) { var r = a.getBoundingClientRect(), p = a.parentElement.getBoundingClientRect(); if (r.left < p.left || r.right > p.right) a.scrollIntoView({ block: 'nearest', inline: 'center' }); }
+  }
+  function spy() {
+    var line = 130, idx = -1;
+    for (var i = 0; i < steps.length; i++) { if (steps[i].getBoundingClientRect().top <= line) idx = i; else break; }
+    setCurrent(idx);
+  }
+  var ticking = false;
+  window.addEventListener('scroll', function () { if (!ticking) { ticking = true; requestAnimationFrame(function () { spy(); ticking = false; }); } }, { passive: true });
+  window.addEventListener('resize', spy);
+  spy();
+})();
+</script>
+</body>
+</html>
