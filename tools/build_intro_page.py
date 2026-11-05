@@ -14,7 +14,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 from cli_parse import help_sections, workflow_nodes  # noqa: E402
 from diagrams import node_cycle, workflow_dag  # noqa: E402
-from pagekit import (ARCHON_WORDS, DOC, E, REAL, ROOT, card, disk, gloss, io, multirepo_facts, note, page, phase, plain, rail, see, step, table, tabs,  # noqa: E402
+from pagekit import (ARCHON_WORDS, DOC, E, REAL, ROOT, card, disk, doc_says, gloss, io, multirepo_facts, note, page, phase, plain, rail, see, step, table, tabs,  # noqa: E402
                      write, you)
 
 DATA = ROOT / "tools" / "data"
@@ -202,7 +202,7 @@ S.append(step(9, "Set up", "--plan", "once per machine", "Set up once",
                      "curl -fsSL https://archon.diy/install | bash\narchon provider add claude\narchon doctor", "PowerShell", "Terminal"),
                  see(x(CLI["doctor"]["out"].strip()), f"archon doctor · {VERSION} · real", "Archon returns"))
               + note('The installer verifies the binary\'s checksum, puts it in <code>~/.archon/bin</code> and adds that folder to your user PATH (open a new terminal). It asks which providers to add; <code>archon provider add claude</code> does the same later. Claude Code must already be installed and signed in. Full walk-through: <a href="archon-workspace-setup.html">set up Archon for a repo</a>.')
-              + plain('<b>New to this? Read on through step 10 (the workspace), then go to <a href="archon-workspace-setup.html">the setup page</a>.</b> Steps 11–16 are reference: come back to them when you write your own workflow or meet a command you do not know.')))
+              + plain('<b>New to this? Read on through step 10 (the workspace), then go to <a href="archon-workspace-setup.html">the setup page</a>.</b> Step 11 shows what each node becomes in Claude Code (sessions, skills, subagents, hooks). Steps 12–17 are reference: come back to them when you write your own workflow or meet a command you do not know.')))
 
 WS_TREE = """java-workspace/                      <b>the team's workspace</b>: a git repo of its own, wherever you keep it
                                      the course's: C:\\work\\archon-java\\java-workspace
@@ -313,7 +313,103 @@ S.append(step(10, "The workspace", "--build", "the files", "The workspace, its r
                   ["Fits", "a team that keeps its process outside the code, or a change across repos", "one repo, when you want each run in its own checkout"]], "kv")
               + note("Archon does not give one run a worktree in each of two repos. Workflows can also live outside every repo and workspace: <code>~/.archon/workflows/</code> appear in all your projects (yours, not the team's), and <code>--workflow-source &lt;dir&gt;</code> reads the workflow from one folder and runs it against <code>--cwd</code>. From the Archon " + VERSION + " docs and <code>workflow run --help</code>. Workflow commands need a git repository or a registered folder: outside one, <code>archon workflow list</code> says <code>" + x(CLI["outside-repo"]["out"].strip().splitlines()[0]) + "</code>.")))
 
-FIELDS = [["<code>name</code>, <code>description</code>, <code>nodes</code>", "required. The description is what <code>workflow list</code> shows and what chat reads to pick a workflow: say when to use it and when not"],
+# ---------------- step 11: what an AI node becomes in Claude Code ----------------
+# Documented claims, each tied to Archon 0.13.2's own docs (tools/data/docs/, copied from the release tag).
+doc_says("workflow-language.md",
+         "| `skills` | string[] | unset | Exact Claude-native skill selection (omission/`[]` selects none)",
+         "| `agents` | object | unset | Inline sub-agent definitions keyed by kebab-case ID. Claude only.",
+         "| `hooks` | object | unset | Per-node SDK hook callbacks. Claude only.",
+         "| `mcp` | string \\| `{ path, optional }` | unset | Path to MCP server config JSON file",
+         "| `plugins` | string[] | unset | Exact plugin ids (`name@marketplace`) the node loads; omission/`[]` loads no user-installed plugin.",
+         "Replaces the default `claude_code` prompt on Claude.",
+         "(for Claude: CLAUDE.md, skills, commands, agents)", "unset everywhere = `['project', 'user']`",
+         "`fresh` = new session; `shared` = inherit the ambient prior session in a sequential layer; `resume` = fork the exact completed upstream node's session",
+         "The main agent can spawn them in parallel via the `Task` tool",
+         "Both sources coexist: inline agents and on-disk agents are both available to `Task(subagent_type=...)` at runtime.")
+doc_says("authoring-commands.md", "Sends the entire document as a prompt to the AI", "**Commands are prompts, not code.**",
+         "In multi-step workflows, agents don't share memory.")
+doc_says("skills.md", "Claude workflow nodes use the Agent SDK's native skill selector.",
+         "On Claude, omission and `skills: []` both select no skills.", "| `.claude/skills/` (in cwd) | Project-level |",
+         "| `~/.claude/skills/` | User-level (all projects) |")
+doc_says("hooks.md", "Archon never loads\n`.claude/settings.local.json`.",
+         "| `['project', 'user']` (default) | `<cwd>/.claude/settings.json` and `~/.claude/settings.json` | Project and user hooks |")
+doc_says("skills.md", "Set `assistants.claude.settingSources: ['project']` in `.archon/config.yaml`")
+doc_says("security.md", "Archon runs the Claude Code SDK in `bypassPermissions` mode.")
+
+# Measured: each AI node's Claude session, and the tools its agent called, from the request-to-pr transcript.
+_LOG = next((ROOT / "archon-hello-world-java" / "java-run" / "logs").glob(f"{RID}*.jsonl"))
+SESSIONS, TOOLS = [], {}
+for _ln in _LOG.read_text(encoding="utf-8").splitlines():
+    _d = json.loads(_ln)
+    if _d.get("type") == "node_start" and _d["execution"]["node"]["kind"] in ("agent", "loop"):
+        SESSIONS.append((_d["step"], _d["execution"]["binding"].get("sessionOrigin")))
+    if _d.get("type") == "provider_event" and _d["event"].get("type") == "tool_call":
+        TOOLS[_d["event"]["name"]] = TOOLS.get(_d["event"]["name"], 0) + 1
+assert SESSIONS == [("scan", "fresh"), ("questions", "resumed"), ("write-requirements", "fresh"), ("write-requirements", "resumed"),
+                    ("plan", "fresh"), ("implement", "fresh"), ("review", "fresh")], SESSIONS
+assert "Skill" not in TOOLS and "Task" not in TOOLS and "Agent" not in TOOLS, TOOLS
+assert TOOLS["StructuredOutput"] == 3  # questions, plan, review: the three output_format nodes
+assert re.search(r'"resolved":\{"source":"provider","value":"claude-opus-[\d-]+"', _LOG.read_text(encoding="utf-8"))
+assert not (_WSDIR / ".claude").exists()  # the course's workspace has no skills, agents or hooks of its own
+_TOOLS_TXT = ", ".join(f"{k} {v}" for k, v in sorted(TOOLS.items(), key=lambda kv: -kv[1]))
+assert "command: scan" in WF and "fresh_context: true" in WF and "skills:" not in WF and "agents:" not in WF and "hooks:" not in WF
+
+MAP = [
+    ["<code>prompt:</code>", "a new Claude Code session (headless, the way <code>claude -p</code> runs) whose first message is the prompt, after Archon fills in <code>$USER_MESSAGE</code>, <code>$ARTIFACTS_DIR</code>, <code>$node.output</code>", "<code>questions</code>, <code>write-requirements</code>, <code>plan</code>, <code>review</code>"],
+    ["<code>command: scan</code>", "the same, with the prompt read from <code>commands/scan.md</code>. <b>Not</b> a Claude Code slash command: Archon reads the Markdown file and sends its text; <code>.claude/commands/</code> is a different folder that Archon doesn't use for this", "<code>scan</code>; each <code>implement</code> pass"],
+    ["<code>loop:</code> + <code>fresh_context: true</code>", "one new session per pass; the check (<code>until_bash</code>) is Archon's, not Claude's", "<code>implement</code>: 1 pass"],
+    ["<code>context:</code> <code>fresh</code> / <code>shared</code> / <code>resume</code>", "start a new session, continue the previous node's, or fork a named node's. Otherwise nodes share nothing but the files they write", "<code>questions</code> continued <code>scan</code>'s session"],
+    ["<code>output_format:</code>", "the SDK's structured output: the agent ends by calling a <code>StructuredOutput</code> tool with JSON that fits the schema", "3 calls: questions, plan, review"],
+    ["<code>allowed_tools</code> / <code>denied_tools</code>", "the session's tool list. Archon runs Claude Code with <code>bypassPermissions</code>: no permission prompts, so these lists (and <code>mutates_checkout</code>) are the limits", "not used; <code>mutates_checkout: false</code> on the read-only nodes"],
+    ["<code>skills: [name]</code>", "loads exactly those skills (<code>SKILL.md</code> from <code>.claude/skills/</code> or <code>~/.claude/skills/</code>) into that node's session. Leave it out and the node gets <b>no</b> skills, even ones you have installed", "none"],
+    ["<code>agents:</code>", "subagents defined in the YAML; the node's agent starts them with the <code>Task</code> tool. Subagents in <code>.claude/agents/*.md</code> are available too", "none"],
+    ["<code>hooks:</code>", "Claude Agent SDK hooks (<code>PreToolUse</code> …) with a fixed answer. Your own hooks in <code>.claude/settings.json</code> and <code>~/.claude/settings.json</code> also run", "none"],
+    ["<code>mcp:</code> · <code>plugins:</code>", "MCP servers from a JSON file, and Claude Code plugins, for that node only", "none"],
+    ["<code>model</code>, <code>effort</code>, <code>systemPrompt</code>", "the session's model and reasoning effort. The system prompt is Claude Code's own unless a node replaces it", "Opus, the default"],
+    ["<code>CLAUDE.md</code>, <code>settingSources</code>", "every session reads the project's and your user <code>CLAUDE.md</code>, agents and hooks (<code>settingSources: [project, user]</code>, the default)", "the workspace's <code>CLAUDE.md</code>"],
+    ["<code>bash:</code> · <code>script:</code> · <code>wait:</code> · <code>cancel:</code>", "no Claude at all: Archon runs the command, or waits for a person", "<code>checks</code>, <code>push</code>, the 4 waits"]]
+EXAMPLE = """# An example, not one of the course's workflows: every Claude Code feature, on one node
+- id: review
+  depends_on: [checks]
+  prompt: |
+    Review the change. Use the security-reviewer subagent for anything that touches auth.
+  skills: [code-review]              # .claude/skills/code-review/SKILL.md, loaded for this node only
+  agents:                            # a subagent this node's agent can start with the Task tool
+    security-reviewer:
+      description: Reads a diff for auth and input-validation mistakes
+      prompt: You review diffs for security problems. Report, don't edit.
+      model: sonnet
+      tools: [Read, Grep, Glob]
+  hooks:                             # a fixed SDK hook answer: no shell in this node
+    PreToolUse:
+      - matcher: Bash
+        response:
+          hookSpecificOutput:
+            hookEventName: PreToolUse
+            permissionDecision: deny
+            permissionDecisionReason: The review only reads.
+  mcp: .archon/mcp/github.json       # MCP servers for this node only
+  denied_tools: [Write, Edit]"""
+S_CLAUDE = step(11, "The workspace", "--build", "under the hood", "What Archon hands to Claude Code",
+                "How each part of the YAML turns into Claude Code's own pieces: sessions, prompts, skills, subagents, hooks, MCP.", "read · 4 min",
+                plain("Archon doesn't type into your Claude Code. Its Claude provider uses the <b>Claude Agent SDK</b>, which starts Claude Code as a background process. <b>Each AI node becomes one Claude Code session</b> in the run's folder, with your claude.ai login, and the node's fields decide what that session gets. Everything else (the order, the loops, the checks, the waits) is Archon's and never reaches Claude.")
+                + table(["In the workflow", "What Claude Code gets", "In the course's run"], MAP, "kv")
+                + f'<h3 style="margin:22px 0 8px">What the course\'s run did {REAL}</h3>'
+                + table(["Node (in order)", "Claude Code session"], [[f"<code>{n}</code>" + (" (revision 2, after the rejection)" if i == 3 else ""), o] for i, (n, o) in enumerate(SESSIONS)], "kv")
+                + plain(f"Tools the agents called across those sessions, counted in the transcript: {_TOOLS_TXT}. No <code>Skill</code> and no <code>Task</code> (subagent) call: <code>request-to-pr</code> declares no <code>skills:</code> and no <code>agents:</code>, and the workspace has no <code>.claude/</code> folder. The only Claude Code file the run relied on is <code>CLAUDE.md</code>.")
+                + f'<h3 style="margin:22px 0 8px">Using your own skills, subagents and hooks {DOC}</h3>'
+                + tabs("cc", [("one node, every feature", ".archon/workflows/…/x.yaml", "example · not run", "yaml", EXAMPLE)])
+                + table(["You already have", "In an Archon node"], [
+                    ["a skill in <code>.claude/skills/</code> or <code>~/.claude/skills/</code>", "name it in <code>skills:</code> on each node that needs it; nothing loads it otherwise"],
+                    ["a subagent in <code>.claude/agents/</code> or <code>~/.claude/agents/</code>", "available to every AI node; say in the prompt when to use it (add <code>Task</code> if you set <code>allowed_tools</code>). Or define it inline with <code>agents:</code> so it travels with the workflow"],
+                    ["a slash command in <code>.claude/commands/</code>", "move its text into the workflow's <code>commands/&lt;name&gt;.md</code> and use <code>command: &lt;name&gt;</code>"],
+                    ["hooks in <code>.claude/settings.json</code>", "they run in every AI node (<code>settings.local.json</code> never does); YAML <code>hooks:</code> add fixed ones per node"],
+                    ["MCP servers", "put them in a JSON file and name it with <code>mcp:</code> on the node"]], "kv")
+                + note("Your user-level <code>~/.claude/</code> (its <code>CLAUDE.md</code>, agents and hooks) loads in the team's runs too, so two people can get different sessions from the same workflow. To run only on what the team committed, set <code>settingSources: [project]</code> under <code>assistants.claude</code> in <code>.archon/config.yaml</code>. From the Archon " + VERSION + " docs: workflow language, skills, hooks, authoring commands, security."))
+
+S.append(S_CLAUDE)
+
+FIELDS = [["<code>name</code>,<code>description</code>, <code>nodes</code>", "required. The description is what <code>workflow list</code> shows and what chat reads to pick a workflow: say when to use it and when not"],
           ["<code>provider</code>, <code>model</code>, <code>effort</code>", "defaults for every AI node (a node can override)"],
           ["<code>worktree.enabled</code>", "<code>false</code> = always in the live checkout; <code>true</code> = always a worktree; omit to let the caller choose"],
           ["<code>inputs</code>", "named inputs, passed with <code>--input name=value</code>, read as <code>$INPUTS.name</code>"],
@@ -324,7 +420,7 @@ FIELDS = [["<code>name</code>, <code>description</code>, <code>nodes</code>", "r
           ["node: <code>allowed_tools</code>, <code>denied_tools</code>, <code>context: fresh</code>, <code>retry</code>, <code>idle_timeout</code>", "how the agent runs"],
           ["loop: <code>max_iterations</code> + <code>until_bash</code> / <code>until_field</code> / <code>until</code>", "when a loop is done (at least one; <code>until_bash</code> is the strongest)"],
           ["wait: <code>attention</code>, <code>form</code>, <code>options</code>", "the question and the answer it accepts"]]
-S.append(step(11, "The workspace", "--build", "authoring", "The fields you will use",
+S.append(step(12, "The workspace", "--build", "authoring", "The fields you will use",
               "A short list from the workflow-language reference: enough to read any workflow and write a first one.", "reference",
               table(["Field", "What it does"], FIELDS, "kv")
               + io(you("archon validate workflows request-to-pr\narchon workflow run request-to-pr --dry-run --default-stubs \"Implement the request in docs-in/request.md\"", None, "any shell"),
@@ -335,7 +431,7 @@ cat_rows = []
 for w in BUNDLED:
     use, nf = full_desc(w["name"])
     cat_rows.append([f"<code>{w['name']}</code>", x(w["description"]), x(use) or "—"])
-S.append(step(12, "Doing the work", "--review", "which workflow", "Which workflow for which work",
+S.append(step(13, "Doing the work", "--review", "which workflow", "Which workflow for which work",
               f"Archon {VERSION} ships {len(BUNDLED)} workflows. Most are building blocks of the sdlc factory; a handful are useful on their own.", "reference", f"""
 {table(["If you want to…", "Run", "Changes the repo?"], [
     ["find the cause of a bug, or answer a question about the code", "<code>archon-investigate</code>", "no"],
@@ -353,7 +449,7 @@ S.append(step(12, "Doing the work", "--review", "which workflow", "Which workflo
 approve_txt = STEP["approve-requirements"]["stdout"]
 tail = "\n".join(l for l in approve_txt.splitlines() if l.startswith(("Approve:", "Reject:", "Abandon:", "Workflow paused")))
 assert "archon workflow approve" in tail
-S.append(step(13, "Doing the work", "--review", "at a pause", "What you type at each pause",
+S.append(step(14, "Doing the work", "--review", "at a pause", "What you type at each pause",
               "A wait node stops the run and puts it in the attention queue. The form it declares says what it accepts.", "reference",
               table(["Form", "You answer with", "The next node reads"], [
                   ["<code>message</code> (default)", "<code>archon workflow answer &lt;run&gt; --occurrence &lt;id&gt; --text \"…\"</code> (or <code>approve &lt;run&gt; \"…\"</code>)", "<code>$id.output.text</code>"],
@@ -366,13 +462,13 @@ S.append(step(13, "Doing the work", "--review", "at a pause", "What you type at 
               + plain("<b>Reject is an answer, not a stop.</b> The run carries on with decision <code>reject</code>; the workflow decides what that means. In <code>request-to-pr</code>, a rejected requirements draft is revised (the loop_group), a rejected plan or change goes to a <code>cancel:</code> node.")
               + note("Answering from the CLI continues the run in that terminal until the next pause or the end. Add <code>--json</code> to record the answer and return at once; <code>archon serve</code> or <code>archon workflow wake</code> then continues it.")))
 
-S.append(step(14, "Doing the work", "--review", "starting a run", "Every <code>workflow run</code> flag",
+S.append(step(15, "Doing the work", "--review", "starting a run", "Every <code>workflow run</code> flag",
               "From the real <code>archon workflow run --help</code>. The ones the course uses are first.", "reference",
               table(["Flag", "What it does"], [[f"<code>{x(f)}</code>", x(d)] for f, d in RUN_OPTS], "kv")
               + plain("You only need two flags at first: <code>--folder</code> on your first run in a workspace, and <code>--detach</code> to get your terminal back while it works. The rest is here for when you need it.")
               + note("The course starts its run from the workspace root with <code>archon workflow run request-to-pr --folder --detach \"Implement the request in docs-in/request.md\"</code>: <code>--folder</code> registers the workspace as a folder project the first time, and <code>--detach</code> runs it in the background (so the terminal is free while it works). In a repo project you would name the branch with <code>--branch</code> instead; a folder project rejects it.")))
 
-S.append(step(15, "Doing the work", "--review", "after a run", "After a run, and between runs",
+S.append(step(16, "Doing the work", "--review", "after a run", "After a run, and between runs",
               "Where to look, and how to tidy up.", "reference", table(["Command", "What it shows or does"], [
                   ["<code>archon workflow runs</code> · <code>status</code>", "recent runs of this project; running and paused ones"],
                   ["<code>archon workflow get &lt;run-id&gt;</code>", "one run: status, worktree path, branch, cost, artifacts"],
@@ -384,7 +480,7 @@ S.append(step(15, "Doing the work", "--review", "after a run", "After a run, and
                   ["<code>archon complete &lt;branch&gt;</code>", "remove a branch's worktree and local branch (the remote branch stays). In a folder project it finds nothing: delete your branch with git"],
                   ["<code>archon isolation cleanup [days]</code> · <code>--merged</code>", "remove old (default 7 days) or merged worktrees; keeps anything unpushed or uncommitted"]], "kv")))
 
-S.append(step(16, "Reference", "--ship", "every command", "Every command",
+S.append(step(17, "Reference", "--ship", "every command", "Every command",
               f"All {len(COMMANDS)} entries of the real <code>archon help</code> in {VERSION}, and its global options.", "reference",
               '<div class="flist">' + table(["Command", "What it does"], [[f"<code>{x(c)}</code>", x(d)] for c, d in COMMANDS], "kv") + "</div>"
               + '<p style="margin-top:14px"><b>Options</b> (they apply to the commands named in each line):</p><div class="flist">'
@@ -392,9 +488,9 @@ S.append(step(16, "Reference", "--ship", "every command", "Every command",
 
 STEPS = [(1, "The problem it solves"), (2, "Ten everyday words"), (3, "One request, start to finish"),
          (4, "What Archon is"), (5, "How one node runs"), (6, "A workflow is a graph"), (7, "The people"),
-         (8, "Where you type"), (9, "Set up once"), (10, "The workspace and ~/.archon"), (11, "The fields you will use"),
-         (12, "Which workflow"), (13, "At each pause"), (14, "workflow run flags"), (15, "After a run"), (16, "Every command")]
-PH = {n: ("Start here", "--setup") for n in (1, 2, 3)} | {n: ("Meet Archon", "--setup") for n in (4, 5, 6, 7)} |      {n: ("Set up", "--plan") for n in (8, 9)} | {n: ("The workspace", "--build") for n in (10, 11)} |      {n: ("Doing the work", "--review") for n in (12, 13, 14, 15)} | {16: ("Reference", "--ship")}
+         (8, "Where you type"), (9, "Set up once"), (10, "The workspace and ~/.archon"), (11, "What Claude Code gets"), (12, "The fields you will use"),
+         (13, "Which workflow"), (14, "At each pause"), (15, "workflow run flags"), (16, "After a run"), (17, "Every command")]
+PH = {n: ("Start here", "--setup") for n in (1, 2, 3)} | {n: ("Meet Archon", "--setup") for n in (4, 5, 6, 7)} |      {n: ("Set up", "--plan") for n in (8, 9)} | {n: ("The workspace", "--build") for n in (10, 11, 12)} |      {n: ("Doing the work", "--review") for n in (13, 14, 15, 16)} | {17: ("Reference", "--ship")}
 assert len(S) == len(STEPS)
 
 hero = f'''<section class="hero" id="top">
@@ -427,9 +523,9 @@ words = card("words", "Archon words", gloss(list(ARCHON_WORDS.items())))
 main = (hero + phase("--setup", "Start here", "steps 1–3 · why, ten everyday words, the course's run in plain words") + "".join(S[0:3])
         + phase("--setup", "Meet Archon", "steps 4–7 · the idea, one node, one workflow, the people") + "".join(S[3:7])
         + phase("--plan", "Set up", "steps 8–9 · where you type, once per machine") + "".join(S[7:9])
-        + phase("--build", "The workspace", "steps 10–11 · the files and the fields") + "".join(S[9:11])
-        + phase("--review", "Doing the work", "steps 12–15 · reference: which workflow, each pause, run flags, after a run") + "".join(S[11:15])
-        + phase("--ship", "Reference", "step 16 · every command and option") + S[15] + words + real)
+        + phase("--build", "The workspace", "steps 10–12 · the files, what Claude Code gets, the fields") + "".join(S[9:12])
+        + phase("--review", "Doing the work", "steps 13–16 · reference: which workflow, each pause, run flags, after a run") + "".join(S[12:16])
+        + phase("--ship", "Reference", "step 17 · every command and option") + S[16] + words + real)
 footer = ('<footer class="foot">Archon introduction · Archon ' + VERSION + ' · next: <a href="archon-workspace-setup.html">set up Archon for a repo</a> · '
           '<a href="archon-concepts-explained.html">concepts</a> · <a href="index.html">all course pages</a> · <a href="#top">Back to top</a></footer>\n')
 html_ = page("Archon Introduction", f"Start here for Archon {VERSION}: what it is, where you type, the workspace, its repo and ~/.archon, which bundled workflow fits which work, what you type at each pause, and every command, from real output.",
