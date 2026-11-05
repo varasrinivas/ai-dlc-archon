@@ -360,7 +360,7 @@ main = (hero + phase("--setup", "Set up", "steps 1–7 · the two repos, the wor
         + phase("--ship", "Ship", "steps 12–13 · check by hand, push a branch per repo") + "".join(ST[11:13])
         + phase("--setup", "After", "steps 14–16 · the record, the merges, AI-DLC") + "".join(ST[13:16])
         + yourself + real)
-footer = ('<footer class="foot">Archon, two repos · Archon 0.13.2 · <a href="archon-hello-world-java-run.html">the one-repo run</a> · <a href="../archon-introduction.html#s07">introduction, step 7</a> · '
+footer = ('<footer class="foot">Archon, two repos · Archon 0.13.2 · <a href="archon-hello-world-java-run.html">the one-repo run</a> · <a href="../archon-introduction.html#s10">introduction, step 10</a> · '
           '<a href="../archon-concepts-explained.html#places">concepts</a> · <a href="../index.html">all course pages</a> · <a href="#top">Back to top</a></footer>\n')
 html_ = page("Archon, Two Repos: Every Step", "One bug fixed across two repos with an Archon folder project, step by step: the workspace, the workflow, what you type, what Archon and Claude return, both waits, a branch per repo, and the merges. Real run, real output.",
              "Archon, two repos", "one bug · a folder project · real run", len(STEPS),

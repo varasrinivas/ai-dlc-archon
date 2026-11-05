@@ -16,7 +16,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 from cli_parse import workflow_nodes  # noqa: E402
 from diagrams import workflow_dag  # noqa: E402
-from pagekit import (E, ROOT, card, disk, gate, io, note, page, phase, plain, rail, see, shell_group, step, table, tabs,  # noqa: E402
+from pagekit import (ARCHON_WORDS, E, ROOT, card, disk, gloss, gate, io, note, page, phase, plain, rail, see, shell_group, step, table, tabs,  # noqa: E402
                      three, write, you)
 
 DEST = ROOT / "archon-hello-world-java"
@@ -421,13 +421,8 @@ hero = f'''<section class="hero" id="top">
   </aside>
 </section>
 '''
-glossary = card("glossary", "Ten words", '<dl class="gloss">' + "".join(f"<dt>{a}</dt><dd>{b}</dd>" for a, b in [
-    ("workflow", "the YAML file with the team's process (<code>request-to-pr</code>)"), ("node", "one step of it: an agent prompt, a bash command, a loop or a wait"),
-    ("run", "one execution, with a run id"), ("wait", "a node that pauses the run until someone answers"), ("form", "what a wait accepts: message, approval, select"),
-    ("loop_group", "a few nodes repeated until a check passes; here, until the requirements are approved"), ("until_bash", "the shell check that ends a loop on exit 0"),
-    ("workspace", "the team's folder around the code repo: .archon/, CLAUDE.md, scripts, requests; a git repo of its own"),
-    ("folder project", "a workspace registered with --folder: Archon runs in place, no worktree, the agent does the git"),
-    ("artifacts", "the files a run writes for people and later nodes: scan.md, requirements.md, plan.md…")]) + "</dl>")
+glossary = card("glossary", "Ten words", gloss([(w, ARCHON_WORDS[w]) for w in (
+    "workflow", "node", "run", "wait", "form", "loop_group", "until_bash", "workspace", "folder project", "artifacts")]))
 yourself = card("yourself", "Run it yourself", f"""<ol>
 <li>Install Archon and the Claude provider, and check with <code>archon doctor</code> (<a href="../archon-workspace-setup.html">setup page</a>, steps 1–4).</li>
 <li>Make the workspace as in steps 1–3, or start from the course repo's <code>archon-hello-world-java/java-workspace/</code>: the team's files with priorauth-api inside, as they are after this run. To start where the run started, put priorauth-api back to the starter (<code>git clone --no-tags https://github.com/varasrinivas/aidlc-priorauth-api priorauth-api</code> inside the workspace).</li>

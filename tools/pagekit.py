@@ -147,6 +147,29 @@ def plain(t):
     return f'<div class="plain"><div><b>In plain words.</b> {t}</div></div>'
 
 
+# Archon's own words, defined once for every page that has a glossary (term -> one line).
+ARCHON_WORDS = {
+    "workflow": "the YAML file with the team's process (<code>request-to-pr</code>): which steps, in which order, where to stop for people",
+    "node": "one step of a workflow: an agent prompt, a bash command, a loop or a wait",
+    "run": "one execution of a workflow, with a run id; it keeps a transcript, the files it wrote and what it cost",
+    "wait": "a node that pauses the run until someone answers",
+    "form": "what a wait accepts: message, approval, select",
+    "loop_group": "a few nodes repeated until a check passes; here, until the requirements are approved",
+    "until_bash": "the shell check that ends a loop on exit 0",
+    "artifacts": "the files a run writes for people and later nodes: scan.md, requirements.md, plan.md…",
+    "workspace": "the team's folder around the code repo: .archon/, CLAUDE.md, scripts, requests; a git repo of its own",
+    "folder project": "a workspace registered with --folder: Archon runs in place, no worktree, the agent does the git",
+    "worktree": "a second checkout of a repo in another folder, on its own branch; Archon makes one per run in a repo project",
+    "provider": "the coding agent Archon drives: Claude Code here (Codex and Pi are the others)",
+    "token": "the unit an AI model counts and bills text in, roughly ¾ of a word; agent nodes use them, bash and waits don't",
+}
+
+
+def gloss(pairs):
+    """[(term, definition)] -> a <dl class="gloss"> with one row per term."""
+    return '<dl class="gloss">' + "".join(f"<div><dt>{a}</dt><dd>{b}</dd></div>" for a, b in pairs) + "</dl>"
+
+
 def three(cells):
     return '<div class="three">' + "".join(f"<div><b>{h}</b>{b}</div>" for h, b in cells) + "</div>"
 
@@ -207,7 +230,8 @@ def scrub(text):
                  (_H, "your-pc"), ("/c/Users/" + _U, "/c/Users/you"),
                  ("C:\\Users\\" + _U, r"C:\Users\you"), ("C:/Users/" + _U, "C:/Users/you"), (r"D:\tmp\archon-java", r"C:\work\archon-java"),
                  ("D:/tmp/archon-java", "C:/work/archon-java"), ("/d/tmp/archon-java", "/c/work/archon-java"),
-                 (r"D:\Program Files\Git", r"C:\Program Files\Git")]:
+                 (r"D:\Program Files\Git", r"C:\Program Files\Git"),
+                 (r"D:\\tmp", r"C:\\work"), (r"D:\tmp", r"C:\work"), ("D:/tmp", "C:/work"), ("/d/tmp", "/c/work")]:  # other run folders, as scrub_captures.py maps them
         text = text.replace(a, b)
     return text
 

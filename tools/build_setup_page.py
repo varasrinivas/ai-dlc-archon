@@ -110,7 +110,7 @@ S.append(step(5, "The workspace", "--plan", "ours", "Make the team's workspace, 
               + disk(WS_DISK, "On disk now")
               + note("<code>--no-tags</code> leaves out the <code>v1.1.0</code> tag, the answer key: an agent that scans the repo would otherwise find it. "
                      "The workspace is an Archon <b>folder project</b>: runs start at its root and work in place, and the agent does the git in <code>priorauth-api</code>. A second repo is one more <code>git clone</code> here (the course's <a href='archon-hello-world-java/archon-two-repos-run.html'>two-repo run</a>). "
-                     "The other layout, with <code>.archon/</code> inside the code repo and a worktree per run, is compared in the <a href='archon-introduction.html#s07'>introduction, step 7</a>.")))
+                     "The other layout, with <code>.archon/</code> inside the code repo and a worktree per run, is compared in the <a href='archon-introduction.html#s10'>introduction, step 10</a>.")))
 
 S.append(step(6, "The workspace", "--plan", "ours", "Write the team's files",
               "Ten small files the team owns, at the workspace root: the workflow and its two prompts, Archon's config, the agent's rules, the one check, the .gitignore, the request.", "Kiran · 3 min",
