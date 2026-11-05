@@ -1,0 +1,97 @@
+commit d4a98c9008a71fcbd0bee261285a97318175d0ab
+Author: you <you@example.com>
+Date:   Thu Nov 5 11:22:59 2026 +0530
+
+    Reject asOf after today with 400; test empty asOf is today (intent 261013-request-age-api)
+---
+ .../java/com/acmehealth/priorauth/api/PendingRequestsController.java | 24 ++++++++++++++++--------
+ .../com/acmehealth/priorauth/api/PendingRequestsControllerTest.java  | 24 ++++++++++++++++++++++++
+ 2 files changed, 40 insertions(+), 8 deletions(-)
+
+diff --git a/src/main/java/com/acmehealth/priorauth/api/PendingRequestsController.java b/src/main/java/com/acmehealth/priorauth/api/PendingRequestsController.java
+index e620d6d..c1f303b 100644
+--- a/src/main/java/com/acmehealth/priorauth/api/PendingRequestsController.java
++++ b/src/main/java/com/acmehealth/priorauth/api/PendingRequestsController.java
+@@ -33,16 +33,24 @@ public class PendingRequestsController {
+         this.thresholdDays = thresholdDays;
+     }
+ 
+-    /** {@code asOf} pins the date ages are counted to; without it, today in the server's time zone. */
++    /**
++     * {@code asOf} pins the date ages are counted to; without it (or empty), today in the server's time zone.
++     * It must lie between the newest row's receivedAt and today.
++     */
+     @GetMapping("/requests/pending")
+     public List<PendingRequestResponse> pending(
+             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate asOf) {
+-        LocalDate date = asOf != null ? asOf : LocalDate.now(clock);
++        LocalDate today = LocalDate.now(clock);
++        LocalDate date = asOf != null ? asOf : today;
++        if (date.isAfter(today)) {
++            throw new BadAsOfException("asOf is after today; the latest allowed asOf is " + today);
++        }
+         List<PriorAuthRequest> pending = store.pending();
+         pending.stream().map(PriorAuthRequest::receivedAt).max(Comparator.naturalOrder())
+                 .filter(date::isBefore)
+                 .ifPresent(newest -> {
+-                    throw new AsOfTooEarlyException(newest);
++                    throw new BadAsOfException(
++                            "asOf is before a request's receivedAt; the earliest allowed asOf is " + newest);
+                 });
+         return pending.stream()
+                 .map(r -> PendingRequestResponse.from(r,
+@@ -50,14 +58,14 @@ public class PendingRequestsController {
+                 .toList();
+     }
+ 
+-    @ExceptionHandler(AsOfTooEarlyException.class)
+-    ProblemDetail asOfTooEarly(AsOfTooEarlyException e) {
++    @ExceptionHandler(BadAsOfException.class)
++    ProblemDetail badAsOf(BadAsOfException e) {
+         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
+     }
+ 
+-    static class AsOfTooEarlyException extends RuntimeException {
+-        AsOfTooEarlyException(LocalDate earliestAllowed) {
+-            super("asOf is before a request's receivedAt; the earliest allowed asOf is " + earliestAllowed);
++    static class BadAsOfException extends RuntimeException {
++        BadAsOfException(String message) {
++            super(message);
+         }
+     }
+ }
+diff --git a/src/test/java/com/acmehealth/priorauth/api/PendingRequestsControllerTest.java b/src/test/java/com/acmehealth/priorauth/api/PendingRequestsControllerTest.java
+index f1f4299..53e4fe5 100644
+--- a/src/test/java/com/acmehealth/priorauth/api/PendingRequestsControllerTest.java
++++ b/src/test/java/com/acmehealth/priorauth/api/PendingRequestsControllerTest.java
+@@ -83,6 +83,30 @@ class PendingRequestsControllerTest {
+                 .andExpect(jsonPath("$.detail").value(containsString("2026-10-09")));
+     }
+ 
++    @Test
++    void asOfAfterTodayIsACallerError() throws Exception {
++        mvc.perform(get("/requests/pending").param("asOf", "2026-10-14"))
++                .andExpect(status().isBadRequest())
++                .andExpect(jsonPath("$.detail").value(containsString("2026-10-13")));
++    }
++
++    /** Kiran's jar check: this date used to spin the day-by-day count instead of answering. */
++    @Test
++    void farFutureAsOfIsRejectedNotCounted() throws Exception {
++        mvc.perform(get("/requests/pending").param("asOf", "+999999999-12-31"))
++                .andExpect(status().isBadRequest())
++                .andExpect(jsonPath("$.detail").value(containsString("2026-10-13")));
++    }
++
++    @Test
++    void emptyAsOfMeansToday() throws Exception {
++        mvc.perform(get("/requests/pending").param("asOf", ""))
++                .andExpect(status().isOk())
++                .andExpect(jsonPath("$[0].ageBusinessDays").value(7))
++                .andExpect(jsonPath("$[1].ageBusinessDays").value(4))
++                .andExpect(jsonPath("$[2].ageBusinessDays").value(1));
++    }
++
+     @Test
+     void malformedAsOfIsACallerError() throws Exception {
+         mvc.perform(get("/requests/pending").param("asOf", "13/10/2026"))

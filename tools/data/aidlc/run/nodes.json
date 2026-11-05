@@ -1,0 +1,1161 @@
+{
+ "workflow": "aidlc-on-archon",
+ "message": "Implement the request in docs-in/request.md",
+ "start": "2026-11-05T05:37:29.596Z",
+ "end": "2026-11-05T05:57:52.766Z",
+ "events": 439,
+ "nodes": [
+  {
+   "node": "workspace-scaffold",
+   "event": "node_complete",
+   "ts": "2026-11-05T05:37:29.939Z",
+   "ms": 324,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "workspace-detection",
+   "event": "node_complete",
+   "ts": "2026-11-05T05:38:10.990Z",
+   "ms": 40988,
+   "input": 151694,
+   "output": 2976,
+   "cost": 0.3384274
+  },
+  {
+   "node": "state-init",
+   "event": "node_complete",
+   "ts": "2026-11-05T05:38:11.305Z",
+   "ms": 259,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "intent-capture",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:38:11.312Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "market-research",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:38:11.317Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "feasibility",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:38:11.322Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "scope-definition",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:38:11.326Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "team-formation",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:38:11.333Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "rough-mockups",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:38:11.338Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "approval-handoff",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:38:11.343Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "ideation-check",
+   "event": "node_complete",
+   "ts": "2026-11-05T05:38:11.571Z",
+   "ms": 222,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "reverse-engineering-work",
+   "event": "node_complete",
+   "ts": "2026-11-05T05:39:25.146Z",
+   "ms": 73510,
+   "input": 172666,
+   "output": 5990,
+   "cost": 0.47354569999999996
+  },
+  {
+   "node": "intent-capture",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:39:42.315Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "market-research",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:39:42.320Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "feasibility",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:39:42.324Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "scope-definition",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:39:42.329Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "team-formation",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:39:42.334Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "rough-mockups",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:39:42.339Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "approval-handoff",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:39:42.344Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "reverse-engineering-gate",
+   "event": "node_complete",
+   "ts": "2026-11-05T05:39:42.370Z",
+   "ms": 17164,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "reverse-engineering",
+   "event": "node_complete",
+   "ts": "2026-11-05T05:39:42.480Z",
+   "ms": 121,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "practices-discovery",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:39:42.487Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "requirements-analysis-work",
+   "event": "node_complete",
+   "ts": "2026-11-05T05:40:44.611Z",
+   "ms": 62047,
+   "input": 161948,
+   "output": 5162,
+   "cost": 0.2391579
+  },
+  {
+   "node": "intent-capture",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:41:04.348Z",
+   "ms": 1,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "market-research",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:41:04.354Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "feasibility",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:41:04.357Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "scope-definition",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:41:04.361Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "team-formation",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:41:04.366Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "rough-mockups",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:41:04.370Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "approval-handoff",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:41:04.375Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "practices-discovery",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:41:04.391Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "requirements-analysis-gate",
+   "event": "node_complete",
+   "ts": "2026-11-05T05:41:04.415Z",
+   "ms": 19744,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "requirements-analysis-work",
+   "event": "node_complete",
+   "ts": "2026-11-05T05:41:54.808Z",
+   "ms": 50219,
+   "input": 81987,
+   "output": 4712,
+   "cost": 0.15339660000000002
+  },
+  {
+   "node": "intent-capture",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:42:20.735Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "market-research",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:42:20.742Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "feasibility",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:42:20.747Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "scope-definition",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:42:20.751Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "team-formation",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:42:20.756Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "rough-mockups",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:42:20.760Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "approval-handoff",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:42:20.767Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "practices-discovery",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:42:20.783Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "requirements-analysis-gate",
+   "event": "node_complete",
+   "ts": "2026-11-05T05:42:20.804Z",
+   "ms": 25935,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "requirements-analysis",
+   "event": "node_complete",
+   "ts": "2026-11-05T05:42:20.911Z",
+   "ms": 119,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "user-stories",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:42:20.916Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "refined-mockups",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:42:20.920Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "domain-design",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:42:20.925Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "units-generation",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:42:20.930Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "contract-design",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:42:20.934Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "delivery-planning",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:42:20.939Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "inception-check",
+   "event": "node_complete",
+   "ts": "2026-11-05T05:42:21.306Z",
+   "ms": 359,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "functional-design",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:42:21.314Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "nfr-requirements",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:42:21.322Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "nfr-design",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:42:21.331Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "infrastructure-design",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:42:21.338Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "code-generation-work",
+   "event": "node_complete",
+   "ts": "2026-11-05T05:45:34.438Z",
+   "ms": 193071,
+   "input": 615999,
+   "output": 15960,
+   "cost": 0.7453979000000001
+  },
+  {
+   "node": "code-generation-verify",
+   "event": "node_complete",
+   "ts": "2026-11-05T05:45:44.327Z",
+   "ms": 9880,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "intent-capture",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:52:00.114Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "market-research",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:52:00.120Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "feasibility",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:52:00.124Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "scope-definition",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:52:00.129Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "team-formation",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:52:00.133Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "rough-mockups",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:52:00.139Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "approval-handoff",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:52:00.144Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "practices-discovery",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:52:00.159Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "user-stories",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:52:00.168Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "refined-mockups",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:52:00.173Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "domain-design",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:52:00.177Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "units-generation",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:52:00.182Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "contract-design",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:52:00.187Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "delivery-planning",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:52:00.192Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "functional-design",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:52:00.201Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "nfr-requirements",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:52:00.206Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "nfr-design",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:52:00.210Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "infrastructure-design",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:52:00.215Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "code-generation-gate",
+   "event": "node_complete",
+   "ts": "2026-11-05T05:52:00.234Z",
+   "ms": 375898,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "code-generation-work",
+   "event": "node_complete",
+   "ts": "2026-11-05T05:53:27.930Z",
+   "ms": 87585,
+   "input": 319125,
+   "output": 5974,
+   "cost": 0.3138122
+  },
+  {
+   "node": "code-generation-verify",
+   "event": "node_complete",
+   "ts": "2026-11-05T05:53:37.796Z",
+   "ms": 9858,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "intent-capture",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:54:17.698Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "market-research",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:54:17.703Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "feasibility",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:54:17.708Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "scope-definition",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:54:17.713Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "team-formation",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:54:17.718Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "rough-mockups",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:54:17.723Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "approval-handoff",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:54:17.728Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "practices-discovery",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:54:17.741Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "user-stories",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:54:17.749Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "refined-mockups",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:54:17.754Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "domain-design",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:54:17.761Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "units-generation",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:54:17.765Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "contract-design",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:54:17.770Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "delivery-planning",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:54:17.777Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "functional-design",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:54:17.788Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "nfr-requirements",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:54:17.792Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "nfr-design",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:54:17.799Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "infrastructure-design",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:54:17.803Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "code-generation-gate",
+   "event": "node_complete",
+   "ts": "2026-11-05T05:54:17.822Z",
+   "ms": 40017,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "code-generation",
+   "event": "node_complete",
+   "ts": "2026-11-05T05:54:17.925Z",
+   "ms": 113,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "build-and-test-work",
+   "event": "node_complete",
+   "ts": "2026-11-05T05:57:09.039Z",
+   "ms": 171039,
+   "input": 590968,
+   "output": 11415,
+   "cost": 0.6874600000000001
+  },
+  {
+   "node": "intent-capture",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:57:52.027Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "market-research",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:57:52.032Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "feasibility",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:57:52.037Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "scope-definition",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:57:52.044Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "team-formation",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:57:52.051Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "rough-mockups",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:57:52.056Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "approval-handoff",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:57:52.061Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "practices-discovery",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:57:52.078Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "user-stories",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:57:52.087Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "refined-mockups",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:57:52.091Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "domain-design",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:57:52.096Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "units-generation",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:57:52.101Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "contract-design",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:57:52.107Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "delivery-planning",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:57:52.114Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "functional-design",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:57:52.124Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "nfr-requirements",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:57:52.128Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "nfr-design",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:57:52.133Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "infrastructure-design",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:57:52.138Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "build-and-test-gate",
+   "event": "node_complete",
+   "ts": "2026-11-05T05:57:52.167Z",
+   "ms": 43067,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "build-and-test",
+   "event": "node_complete",
+   "ts": "2026-11-05T05:57:52.261Z",
+   "ms": 110,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "ci-pipeline",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:57:52.265Z",
+   "ms": 1,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "construction-check",
+   "event": "node_complete",
+   "ts": "2026-11-05T05:57:52.498Z",
+   "ms": 227,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "deployment-pipeline",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:57:52.502Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "environment-provisioning",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:57:52.507Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "deployment-execution",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:57:52.512Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "observability-setup",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:57:52.519Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "incident-response",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:57:52.524Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "performance-validation",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:57:52.529Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "feedback-optimization",
+   "event": "node_skipped",
+   "ts": "2026-11-05T05:57:52.533Z",
+   "ms": 0,
+   "input": null,
+   "output": null,
+   "cost": null
+  },
+  {
+   "node": "operation-check",
+   "event": "node_complete",
+   "ts": "2026-11-05T05:57:52.764Z",
+   "ms": 225,
+   "input": null,
+   "output": null,
+   "cost": null
+  }
+ ]
+}
