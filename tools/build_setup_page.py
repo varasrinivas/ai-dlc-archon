@@ -13,7 +13,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from pagekit import (DOC, E, REAL, ROOT, card, disk, io, note, page, phase, plain, rail, scrub, see, step, strip_ansi,  # noqa: E402
+from pagekit import (CLAUDE_MAP, DOC, E, REAL, ROOT, card, claude_facts, disk, io, note, page, phase, plain, rail, scrub, see, step, strip_ansi,  # noqa: E402
                      table, tabs, write, you)
 from team_files import writes  # noqa: E402
 
@@ -125,6 +125,7 @@ S.append(step(6, "The workspace", "--plan", "ours", "Write the team's files",
                   ["<code>.gitignore</code>", "<code>/priorauth-api/</code>: the code repo is not part of the workspace repo"],
                   ["<code>.gitattributes</code>", "keeps <code>verify.sh</code> LF: with <code>core.autocrlf=true</code> bash would get CRLF and fail"],
                   ["<code>docs-in/request.md</code>", "Ravi's request, named in the run message"]], "kv")
+              + note("None of the ten is in a <code>.claude/</code> folder, and the workflow names no <code>skills:</code>, <code>agents:</code> or <code>hooks:</code>: the only Claude Code file here is <code>CLAUDE.md</code>. Where skills, subagents, hooks and slash commands would go, and which nodes would see them: <a href='#claude'>Claude Code in the workspace</a>.")
               + plain("The workflow is the recipe, <code>CLAUDE.md</code> the kitchen rules every cook reads, and <code>verify.sh</code> the thermometer: the dish is done when it says so, not when the cook thinks so. The workspace is the kitchen; the code repo is the pantry, stocked from its own supplier.")))
 
 S.append(step(7, "The workspace", "--plan", "check before spending", "Validate the workflow, then dry-run it",
@@ -186,6 +187,31 @@ ref_home = card("home", "~/.archon, folder by folder", f"<p>Every file under <co
 ref_cfg = card("config", "The two config.yaml files", "<p>Archon reads the project's <code>.archon/config.yaml</code> (here, the workspace's) over your <code>~/.archon/config.yaml</code>. The home one, as the installer wrote it (real):</p>"
                + tabs("cfg", [("~/.archon/config.yaml", "~/.archon/config.yaml", "written by the install · real", "yaml", HOMECFG),
                               ("workspace .archon/config.yaml", ".archon/config.yaml", "the team's · committed in the workspace", "yaml", (FILES / ".archon/config.yaml").read_text(encoding="utf-8"))]))
+# What Claude Code gets from the workspace: the shared mapping (asserted against tools/data/docs/), and where its files go.
+claude_facts()
+WF_TEXT = (FILES / ".archon/workflows/team/request-to-pr/request-to-pr.yaml").read_text(encoding="utf-8")
+assert not re.search(r"^\s*(skills|agents|hooks|mcp|plugins|settingSources):", WF_TEXT, re.M)
+assert not any(p.startswith(".claude/") for p in team_paths) and "CLAUDE.md" in team_paths
+assert "settingSources" not in (FILES / ".archon/config.yaml").read_text(encoding="utf-8")
+assert {"commands/scan.md", "commands/implement.md"} <= {p.split("request-to-pr/", 1)[-1] for p in team_paths}
+DOCTOR = scrub(CLI["doctor"]["out"])
+assert "(via autodetect, spawns OK)" in DOCTOR and "Assistant login: claude: usable" in DOCTOR and "Archon skill: not installed" in DOCTOR
+assert "skill add [path]           Add archon-cli into .claude/skills and .agents/skills" in CLI["help"]["out"]
+CC_PLACES = [
+    ["<code>CLAUDE.md</code> at the workspace root", "every AI node's session (the <code>project</code> setting source)", "yes: step 6's repo map and rules"],
+    ["<code>~/.claude/</code>: your <code>CLAUDE.md</code>, agents, hooks in <code>settings.json</code>", "every AI node's session too (the <code>user</code> setting source, on by default)", "whatever you have; set <code>assistants.claude.settingSources: [project]</code> in <code>.archon/config.yaml</code> to leave it out"],
+    ["<code>.claude/skills/&lt;name&gt;/SKILL.md</code> (or <code>~/.claude/skills/</code>)", "only the nodes that list it: <code>skills: [&lt;name&gt;]</code>. Installed is not enough", "none"],
+    ["<code>.claude/agents/*.md</code>", "every AI node; its agent starts them with the <code>Task</code> tool. Or define them in the node's <code>agents:</code>", "none"],
+    ["<code>.claude/settings.json</code> hooks", "run in every AI node, beside a node's own <code>hooks:</code>", "none"],
+    ["<code>.claude/settings.local.json</code>", "never loaded by Archon", "none"],
+    ["<code>.claude/commands/*.md</code> (slash commands)", "not what <code>command:</code> reads. Archon's commands are the Markdown files next to the workflow, sent as the prompt", "<code>.archon/workflows/team/request-to-pr/commands/scan.md</code>, <code>implement.md</code>"],
+    ["<code>.archon/config.yaml</code>", "<code>assistant: claude</code> picks Claude Code for every AI node; <code>assistants.claude.*</code> sets its defaults (<code>settingSources</code>, model)", "<code>assistant: claude</code> only"]]
+ref_claude = card("claude", "Claude Code in the workspace",
+                  "<p>Archon's Claude provider starts Claude Code (the binary <code>doctor</code> found, step 2) with your claude.ai login: <b>each AI node, and each loop pass, is one Claude Code session</b> working in the workspace, with <code>bypassPermissions</code>. So the workspace is also a Claude Code project. Where its files go, and which nodes see them:</p>"
+                  + table(["Put it in", "Which sessions get it", "In this workspace"], CC_PLACES, "kv")
+                  + "<p style=\"margin-top:14px\"><b>What each workflow field hands the session</b> (the third column is the course's run):</p>"
+                  + table(["In the workflow", "What Claude Code gets", "In the course's run"], [list(r_) for r_ in CLAUDE_MAP], "kv")
+                  + note("The other direction: <code>archon skill add</code> copies an <code>archon-cli</code> skill into <code>.claude/skills/</code> so that <i>your</i> Claude Code, the one you chat with, can start and answer Archon runs. A node gets it only if it lists it under <code>skills:</code>. The course drove Archon from the shell, and <code>doctor</code> says <code>Archon skill: not installed</code>. More on sessions: <a href='archon-introduction.html#s11'>the introduction, step 11</a>."))
 real = card("real", "What is real here", f"<p>Every output on this page is real, from Archon {VERSION} on Windows 10 (3 and 4 Nov 2026): the installer, <code>version</code>, <code>doctor</code>, <code>telemetry status</code>, the Git Bash probe, the workspace and the clone, <code>validate</code>, the dry run, <code>git status</code>, <code>verify.sh</code>, <code>archon serve</code> and the Web UI screenshots. macOS commands are the documented equivalents and were not run. Items marked {DOC} are from the docs. The cast is fictional.</p>")
 
 hero = f'''<section class="hero" id="top">
@@ -214,10 +240,10 @@ hero = f'''<section class="hero" id="top">
 main = (hero + phase("--setup", "Once per machine", "steps 1–4 · install, check, telemetry, Windows") + "".join(S[0:4])
         + phase("--plan", "The workspace", "steps 5–8 · the workspace and the clone, the team's files, check them, commit") + "".join(S[4:8])
         + phase("--build", "First run", "steps 9–10 · the Web UI, and where PRs come from") + "".join(S[8:10])
-        + phase("--review", "Reference", "~/.archon and the config files") + ref_home + ref_cfg + real)
+        + phase("--review", "Reference", "Claude Code in the workspace, ~/.archon and the config files") + ref_claude + ref_home + ref_cfg + real)
 footer = (f'<footer class="foot">Set up Archon · Archon {VERSION} · next: <a href="archon-hello-world-java/archon-hello-world-java-run.html">the hello-world run</a> · '
           '<a href="archon-introduction.html">introduction</a> · <a href="index.html">all course pages</a> · <a href="#top">Back to top</a></footer>\n')
 html_ = page("Set Up Archon for a Repo", f"Install Archon {VERSION}, connect Claude Code, and make a team workspace around the repo: every command and every file, with real output on Windows and the macOS equivalents.",
              "Archon setup", "install · the workspace · real output", len(STEPS),
-             rail(STEPS, PH, [("home", "~/.archon folder by folder"), ("config", "The config.yaml files"), ("real", "What is real here")]), main, footer)
+             rail(STEPS, PH, [("claude", "Claude Code in the workspace"), ("home", "~/.archon folder by folder"), ("config", "The config.yaml files"), ("real", "What is real here")]), main, footer)
 write(ROOT / "archon-workspace-setup.html", html_)
