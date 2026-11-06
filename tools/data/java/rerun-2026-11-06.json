@@ -1,0 +1,65 @@
+{
+ "date": "2026-11-06",
+ "archon": "0.13.2",
+ "how": "every Windows command box of archon-end-to-end-guide.html steps 3-19, as published on 5 Nov, run in order in one Git Bash session in a fresh folder; a guard before steps 11-15 checked the run was paused at the node the guide expects",
+ "steps_started": {
+  "step 3": "10:47:53",
+  "step 4": "10:47:53",
+  "step 5": "10:47:57",
+  "step 6": "10:47:59",
+  "step 7": "10:48:01",
+  "step 8": "10:48:02",
+  "step 9": "10:48:35",
+  "step 10": "10:48:36",
+  "step 11": "10:50:17",
+  "step 12": "10:51:46",
+  "step 13": "10:55:20",
+  "step 14": "11:00:42",
+  "step 15": "11:19:17",
+  "step 16": "11:19:27",
+  "step 17": "11:22:06",
+  "step 18": "11:22:12",
+  "step 19": "11:22:26",
+  "done": "11:25:51"
+ },
+ "guards_ok": [
+  "answer",
+  "requirements.review-requirements",
+  "approve-plan",
+  "approve-change",
+  "approve-change"
+ ],
+ "project": "java-workspace-2",
+ "branch": "request-age/pending-list-age",
+ "commits": {
+  "feature": "1873da4",
+  "fix": "71049ab"
+ },
+ "requirements_iterations": 2,
+ "review": "READY",
+ "jar_check_far_future": "no answer: the jar used a full CPU core (1117 CPU-seconds at 11:18); curl and the jar were stopped by hand at 11:19 after 18 min",
+ "jar_check_2_codes": [
+  "200",
+  "400",
+  "400"
+ ],
+ "fix_green": true,
+ "costs": {
+  "request-to-pr": 3.5394991,
+  "archon-implement": 0.6832665,
+  "archon-plan": 1.2592197
+ },
+ "guide_failed": {
+  "step 17": "error: src refspec request-age/pending-age does not match any",
+  "step 18 merge": "merge: origin/request-age/pending-age - not something we can merge",
+  "step 18 verify": "verify on main: passed on the unmerged main, listing 31 tests from stale surefire reports (main has 3)",
+  "step 18 cleanup": "error: branch 'request-age/pending-age' not found."
+ },
+ "finished_by_hand": {
+  "merge": "6557369",
+  "tests_on_main": 31,
+  "verify_on_main": "passed",
+  "workspace": "clean",
+  "how": "push, merge, verify (after rm -rf priorauth-api/target) and cleanup with BRANCH read from the repo, as the guide now does"
+ }
+}
