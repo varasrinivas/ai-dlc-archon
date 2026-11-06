@@ -1,8 +1,8 @@
 """Build archon-concepts-onepage.html: Archon's concepts on one A4-landscape sheet (the AI-DLC course's aidlc-concepts-onepage.html).
 
 Same design and print rules as the AI-DLC sheet: a header with the idea, a strip of the run's five phases,
-twelve concept tiles (what, why, analogy, in the tool), and a bottom row of mappings, mix-ups, myths and
-what you type. Facts are the concepts page's, condensed; node ids, counts and tiers are asserted against
+twelve concept tiles (what, why, analogy, in the tool), and a bottom row of mappings, mix-ups, what each AI
+node hands Claude Code and what you type. Facts are the concepts page's, condensed; node ids, counts and tiers are asserted against
 the team workflow and the captured CLI output.
 
 Usage: py -3.12 tools/build_onepage.py
@@ -14,7 +14,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 from cli_parse import workflow_nodes  # noqa: E402
-from pagekit import ROOT, multirepo_facts, write  # noqa: E402
+from pagekit import CLAUDE_MAP, ROOT, claude_facts, multirepo_facts, write  # noqa: E402
 
 WF_TEXT = (ROOT / "tools/data/java/files/.archon/workflows/team/request-to-pr/request-to-pr.yaml").read_text(encoding="utf-8")
 NODES = {n["id"]: n["kind"] for n in workflow_nodes(WF_TEXT)}
@@ -26,6 +26,7 @@ for n, k in {"scan": "command", "questions": "prompt", "answer": "wait", "requir
 assert "until_bash: ./scripts/verify.sh" in WF_TEXT and "fresh_context: true" in WF_TEXT
 CLI = json.loads((ROOT / "tools/data/cli/cli.json").read_text(encoding="utf-8"))
 multirepo_facts(CLI)  # the folder-project lines are documented, not run
+claude_facts()  # the YAML → Claude Code column: CLAUDE_MAP condensed, tied to the docs
 VERSION = re.search(r"Archon CLI v([\d.]+)", CLI["version"]["out"]).group(1)
 BUNDLED = sum(1 for w in json.loads(CLI["workflow-list-json"]["out"])["workflows"] if w["name"].startswith("archon-"))
 assert (VERSION, BUNDLED) == ("0.13.2", 25)
@@ -65,16 +66,15 @@ code{font-family:"Source Code Pro",ui-monospace,Consolas,Menlo,monospace;font-si
 .tile .ana{background:#F3F1EC;border-radius:1.4mm;padding:.7mm 1.3mm;color:#4B4742;margin-top:auto}
 .tile .ana b{color:#D97706}
 .tile .tool{font-size:6.2pt;color:#6B6560;border-top:0.5pt dashed #DDD8D0;padding-top:.5mm}
-.side{display:grid;grid-template-columns:1fr 1.35fr 1.1fr 1fr;gap:2.4mm;border-top:0.8pt solid #DDD8D0;padding-top:1.1mm}
+.side{display:grid;grid-template-columns:1fr 1.3fr 1.2fr .95fr;gap:2.4mm;border-top:0.8pt solid #DDD8D0;padding-top:1.1mm}
 .side h3{margin:0 0 .4mm;font-size:7.2pt;color:#1C1917}
 .side table{border-collapse:collapse;width:100%;font-size:6.3pt}
 .side td{padding:.15mm 1mm .15mm 0;vertical-align:top;border-bottom:0.5pt solid #ECE9E3}
 .side td:first-child{font-weight:600;white-space:nowrap;padding-right:2mm}
+.side table.cc td:first-child{white-space:normal;max-width:19mm}
 .side td.arrow{color:#9CA3AF;padding:0 1mm}
 .side .mix b{display:block;font-size:6.5pt}
 .side .mix p{margin:0 0 .3mm;font-size:6.2pt;color:#4B4742}
-.side .myth p{margin:0 0 .3mm;font-size:6.3pt}
-.side .myth b{color:#9F1239;font-weight:600}
 .side .gates{font-size:6.3pt;color:#4B4742;line-height:1.35}
 .side .gates code{font-size:6.6pt}
 .foot{display:flex;justify-content:space-between;gap:4mm;font-size:5.8pt;color:#6B6560;border-top:0.5pt solid #DDD8D0;padding-top:.7mm}
@@ -160,16 +160,22 @@ MAPPING = [("Intent", "a run (run id)"), ("Scope", "which workflow you run"), ("
            ("Gate 1 / 2 &lt;why&gt;", "<code>wait</code>, <code>form: approval</code>"), ("Request Changes", "reject in a <code>loop_group</code>"),
            ("Verification command", "<code>until_bash</code> + bash node"), ("<code>aidlc/</code> record", "artifacts + transcript, not committed"), ("Workspace", "the same: a folder project"),
            ("<code>/aidlc</code> in Claude", "<code>archon workflow run</code>")]
+CLAUDE = [("<code>prompt</code> · <code>command</code>", "one Claude Code session; a command file is not a slash command"),
+          ("<code>loop</code>", "a new session per pass (<code>fresh_context</code>)"),
+          ("<code>allowed_tools</code>", "the only limits: no prompts (<code>bypassPermissions</code>)"),
+          ("<code>skills:</code>", "only these skills; none if left out"),
+          ("<code>agents:</code> · <code>hooks:</code> · <code>mcp:</code>", "subagents (<code>Task</code>), SDK hooks, MCP: this node only"),
+          ("<code>CLAUDE.md</code>", "read in every session (project + user)"),
+          ("<code>bash</code> · <code>wait</code>", "no Claude at all")]
+_MAPTXT = " ".join(a + b for a, b, _ in CLAUDE_MAP)
+for _f in ["<code>prompt:</code>", "<code>command: scan</code>", "fresh_context", "<code>allowed_tools</code>", "bypassPermissions", "<code>skills: [name]</code>", "<b>no</b> skills", "<code>agents:</code>", "<code>Task</code>",
+           "<code>hooks:</code>", "<code>mcp:</code>", "for that node only", "CLAUDE.md", "<code>bash:</code>", "<code>wait:</code>", "no Claude at all", "slash command"]:
+    assert _f in _MAPTXT, _f  # every condensed row says what the full mapping says
 MIX = [("run ≠ workflow ≠ command", "one execution · the YAML process · one prompt file a node sends"),
        ("wait ≠ cancel ≠ reject", "a pause · a node that ends the run · an answer the YAML must route"),
        ("loop ≠ loop_group ≠ retry", "repeat one step · repeat a small graph · run a failed node again"),
        ("workspace ≠ worktree ≠ branch", "the team folder, committed · a per-run checkout · what the agent commits on"),
        ("artifacts ≠ the repo", "per-run papers in <code>~/.archon</code> · only the code and tests")]
-MYTHS = [("\"Reject stops the run.\"", "Only where a <code>cancel:</code> node says so."),
-         ("\"It's an AI model.\"", "It is an engine that runs your agent."),
-         ("\"The worktree keeps the agent safe.\"", "It keeps your checkout clean; it is not a sandbox."),
-         ("\"Old workflow names still work.\"", "0.12.0 removed <code>archon-fix-github-issue</code> and others."),
-         ("\"Telemetry is off.\"", "It is on: <code>ARCHON_TELEMETRY_DISABLED=1</code>.")]
 
 phases = "".join(f'<div class="ph" style="--c:{c}"><b>{n}<span>{s}</span></b><div class="q">{q}</div><div class="o">{o}</div>'
                  f'<div class="pp"><i>You:</i> {p}</div></div>' for c, n, s, q, o, p in PHASES)
@@ -178,7 +184,8 @@ tiles = "".join(f'<article class="tile" style="--c:{c}"><h2>{h}</h2><p><b>What</
 side = ('<section class="side"><div><h3>AI-DLC → Archon</h3><table>'
         + "".join(f'<tr><td>{a}</td><td class="arrow">→</td><td>{b}</td></tr>' for a, b in MAPPING) + "</table></div>"
         + '<div><h3>Easy to mix up</h3>' + "".join(f'<div class="mix"><b>{a}</b><p>{b}</p></div>' for a, b in MIX) + "</div>"
-        + '<div><h3>Five myths</h3><div class="myth">' + "".join(f'<p class="myth"><b>{a}</b> {b}</p>' for a, b in MYTHS) + "</div></div>"
+        + '<div><h3>YAML → Claude Code</h3><table class="cc">'
+        + "".join(f'<tr><td>{a}</td><td>{b}</td></tr>' for a, b in CLAUDE) + "</table></div>"
         + '<div><h3>At a pause you type</h3><div class="gates"><code>archon workflow attention</code> (what waits) · '
           '<code>answer &lt;run&gt; --occurrence &lt;id&gt; --text "…"</code> · <code>approve &lt;run&gt; "why"</code> · '
           '<code>reject &lt;run&gt; "what to change"</code> · <code>respond &lt;run&gt; &lt;option&gt;</code></div>'
@@ -187,7 +194,7 @@ side = ('<section class="side"><div><h3>AI-DLC → Archon</h3><table>'
           'A follow-up fix: <code>archon-implement --adopt &lt;run&gt;</code>.</div></div></section>')
 
 page = f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Archon Concepts, One Page</title>
-<meta name="description" content="Archon {VERSION}'s concepts on one A4 page: the run's five phases, twelve concepts with what, why and an analogy, AI-DLC to Archon, mix-ups, myths, and what you type at a pause.">
+<meta name="description" content="Archon {VERSION}'s concepts on one A4 page: the run's five phases, twelve concepts with what, why and an analogy, AI-DLC to Archon, mix-ups, what each node hands Claude Code, and what you type at a pause.">
 <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
 <style>
 {CSS}</style></head><body><div class="sheet">
@@ -195,7 +202,7 @@ page = f"""<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name
 <section class="phases">{phases}</section>
 <section class="body">{tiles}</section>
 {side}
-<footer class="foot"><span>Sources: github.com/coleam00/Archon (v{VERSION}) · archon.diy (Why Archon; Workflow language; Asking for an answer; Loop nodes; Worktrees; Archon directories; Multi-repo projects; SDLC pack; Configuration), read at the v{VERSION} tag. Definitions paraphrased; examples from the course's run of 3 Nov 2026; analogies ours.</span><span>Companions: <a href="archon-concepts-explained.html">concepts explained</a> · <a href="archon-concepts-map.svg">concept map</a> · <a href="index.html">the course</a></span></footer>
+<footer class="foot"><span>Sources: github.com/coleam00/Archon (v{VERSION}) · archon.diy (Why Archon; Workflow language; Asking for an answer; Loop nodes; Worktrees; Archon directories; Multi-repo projects; Skills; Hooks; Security; SDLC pack; Configuration), read at the v{VERSION} tag. Definitions paraphrased; examples from the course's run of 3 Nov 2026; analogies ours.</span><span>Companions: <a href="archon-concepts-explained.html">concepts explained</a> · <a href="archon-concepts-map.svg">concept map</a> · <a href="index.html">the course</a></span></footer>
 </div></body></html>
 """
 write(ROOT / "archon-concepts-onepage.html", page)
