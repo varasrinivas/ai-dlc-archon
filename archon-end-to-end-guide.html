@@ -260,9 +260,11 @@ figure.dia{margin:14px 0}figure.dia figcaption{font-size:.82rem;color:var(--ink-
   <a class="rl" href="#s27" data-step="27" style="--c:var(--review)"><b>27</b><span>Inspect</span></a>
   <a class="rl" href="#s28" data-step="28" style="--c:var(--review)"><b>28</b><span>Merge, tidy</span></a>
   <h4>Reference</h4>
+  <a class="rl" href="#claude" style="--c:var(--review)"><b>·</b><span>What Claude Code gets</span></a>
   <a class="rl" href="#trouble" style="--c:var(--review)"><b>·</b><span>Troubleshooting</span></a>
   <a class="rl" href="#cost" style="--c:var(--review)"><b>·</b><span>Cost and time</span></a>
   <a class="rl" href="#again" style="--c:var(--review)"><b>·</b><span>Start over</span></a>
+  <a class="rl" href="#rerun" style="--c:var(--review)"><b>·</b><span>Re-run from this page</span></a>
   <a class="rl" href="#real" style="--c:var(--review)"><b>·</b><span>What is real here</span></a>
 </nav>
 
@@ -494,7 +496,7 @@ Answer these before requirements are written (one message, e.g. &quot;1 A: ... 2
 # Questions before requirements: request age on the pending list (API)
 
 …</pre></div><div class="note"><code>RUN</code> is the run id (the course's was <code>d9d9f6523154ac4773648b9a08d84989</code>) and <code>OCC</code> the pause's <code>occurrence</code>: every later command names them, so keep this terminal (or set both again by hand). The scan and the questions took 94.1 s. The seven questions: <a href="archon-hello-world-java/archon-hello-world-java-run.html#s07">run page, step 7</a>.</div>
-</section>
+<div class="note">Every agent node of the run (<code>scan</code>, <code>questions</code>, <code>write-requirements</code>, <code>plan</code>, each <code>implement</code> pass, <code>review</code>) is one Claude Code session in this workspace, with your login; the bash nodes and the waits start none. What each workflow field hands that session: <a href="#claude">What each AI node hands Claude Code</a>.</div></section>
 <section class="step" id="s11" data-step="11" data-phase="One request, one repo" style="--c:var(--build)">
   <div class="step__head"><span class="step__n">11</span><div><span class="chip">gate 1 · answer</span><h2>Answer the seven questions</h2><p class="step__why">One message answers all seven; the run goes on to write the requirements and pauses again for their approval.</p></div><span class="who">Kiran for Ravi and Meena · 2 min</span></div>
 <div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">Git Bash</span><span class="os-mac">Terminal</span></span></div><pre class="os-win">cd &quot;$JRUN/java-workspace&quot;
@@ -526,15 +528,19 @@ Wrote plan.md for adding business-day age to GET /requests/pending in priorauth-
   <div class="step__head"><span class="step__n">13</span><div><span class="chip">gate 3 · plan</span><h2>Approve the plan; implement, checks and review run</h2><p class="step__why">The longest command of the run (286 s): the implement loop runs until verify.sh passes, a bash node checks the branch, a second agent reviews.</p></div><span class="who">Meena · 5 min</span></div>
 <div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">Git Bash</span><span class="os-mac">Terminal</span></span></div><pre class="os-win">cd &quot;$JRUN/java-workspace&quot;
 archon workflow approve $RUN &#x27;Approved - Meena Iyer. Keep the README as is; we update it at release. Q1 and Q2 as proposed.&#x27;
-archon workflow wait $RUN --json</pre><pre class="os-mac">cd &quot;$JRUN/java-workspace&quot;
+archon workflow wait $RUN --json
+BRANCH=$(git -C priorauth-api branch --show-current)   # the branch the agent made
+echo &quot;BRANCH=$BRANCH&quot;</pre><pre class="os-mac">cd &quot;$JRUN/java-workspace&quot;
 archon workflow approve $RUN &#x27;Approved - Meena Iyer. Keep the README as is; we update it at release. Q1 and Q2 as proposed.&#x27;
-archon workflow wait $RUN --json</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real · 286 s</span></div><pre>The change is in and the verify script passes: `./scripts/verify.sh` exited 0 with 19 tests passing and none failing or skipped. The commit is **`a3972b42ef31bf68500d39389b0d5f8caf9724d1`**.
+archon workflow wait $RUN --json
+BRANCH=$(git -C priorauth-api branch --show-current)   # the branch the agent made
+echo &quot;BRANCH=$BRANCH&quot;</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real · 286 s</span></div><pre>The change is in and the verify script passes: `./scripts/verify.sh` exited 0 with 19 tests passing and none failing or skipped. The commit is **`a3972b42ef31bf68500d39389b0d5f8caf9724d1`**.
 Loop node &#x27;implement&#x27; completed after 1 iteration
 verify: passed
 [review] Completed (1m55s)</pre></div><div class="box claude"><div class="box__bar">Check: wait returns <span class="tag">real · waited 0.4 s</span></div><pre>&quot;nodeId&quot;: &quot;approve-change&quot;,  &quot;form&quot;: &quot;approval&quot;,  &quot;occurrence&quot;: &quot;27098d37-8f88-4c6b-8089-88c4d4a3cc5f&quot;
 &quot;message&quot;:
 Review verdict: READY
-…</pre></div><div class="note">The agent made branch <code>request-age/pending-age</code> in priorauth-api and committed there; Archon made no branch or worktree. The review's verdict and the diff: <a href="archon-hello-world-java/archon-hello-world-java-run.html#s12">step 12</a>.</div>
+…</pre></div><div class="note">The agent made branch <code>request-age/pending-age</code> in priorauth-api and committed there; Archon made no branch or worktree. <code>BRANCH</code> keeps the name it chose for steps 16–18: in the re-run from this page it was <code>request-age/pending-list-age</code>. The review's verdict and the diff: <a href="archon-hello-world-java/archon-hello-world-java-run.html#s12">step 12</a>.</div>
 </section>
 <section class="step" id="s14" data-step="14" data-phase="One request, one repo" style="--c:var(--build)">
   <div class="step__head"><span class="step__n">14</span><div><span class="chip">by hand</span><h2>Check the packaged jar by hand</h2><p class="step__why">Tests passed and the review said READY. Run the real jar on three dates before the last approval.</p></div><span class="who">Kiran · 1 min</span></div>
@@ -550,7 +556,7 @@ pid=$!
 for i in $(seq 90); do curl -s -o /dev/null localhost:8093/requests/pending &amp;&amp; break; sleep 1; done
 for q in &quot;asOf=2026-10-13&quot; &quot;asOf=2026-10-05&quot; &quot;asOf=%2B999999999-12-31&quot;; do
   echo &quot;$ curl -i \&quot;http://localhost:8093/requests/pending?$q\&quot;&quot;
-  curl -s -i &quot;localhost:8093/requests/pending?$q&quot; | grep -v -i -E &quot;^(date|keep-alive|connection|transfer-encoding|vary):&quot;; echo
+  curl -s -i --max-time 20 &quot;localhost:8093/requests/pending?$q&quot; | grep -v -i -E &quot;^(date|keep-alive|connection|transfer-encoding|vary):&quot;; echo
 done
 kill $pid
 )</pre><pre class="os-mac">cd &quot;$JRUN/java-workspace&quot;
@@ -565,7 +571,7 @@ pid=$!
 for i in $(seq 90); do curl -s -o /dev/null localhost:8093/requests/pending &amp;&amp; break; sleep 1; done
 for q in &quot;asOf=2026-10-13&quot; &quot;asOf=2026-10-05&quot; &quot;asOf=%2B999999999-12-31&quot;; do
   echo &quot;$ curl -i \&quot;http://localhost:8093/requests/pending?$q\&quot;&quot;
-  curl -s -i &quot;localhost:8093/requests/pending?$q&quot; | grep -v -i -E &quot;^(date|keep-alive|connection|transfer-encoding|vary):&quot;; echo
+  curl -s -i --max-time 20 &quot;localhost:8093/requests/pending?$q&quot; | grep -v -i -E &quot;^(date|keep-alive|connection|transfer-encoding|vary):&quot;; echo
 done
 kill $pid
 )</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real · 10 s</span></div><pre>$ curl -i &quot;http://localhost:8093/requests/pending?asOf=2026-10-13&quot;
@@ -574,7 +580,7 @@ HTTP/1.1 200
 $ curl -i &quot;http://localhost:8093/requests/pending?asOf=2026-10-05&quot;
 HTTP/1.1 400 
 $ curl -i &quot;http://localhost:8093/requests/pending?asOf=%2B999999999-12-31&quot;
-HTTP/1.1 500 </pre></div><div class="note">7 OVER 5 / 4 / 1 as Ravi expects, an as-of before a received date is 400, but <code>asOf=+999999999-12-31</code> is a <b>500</b>. That is the reason for the next two steps (<a href="archon-hello-world-java/archon-hello-world-java-run.html#s13">step 13</a>).</div>
+HTTP/1.1 500 </pre></div><div class="note">7 OVER 5 / 4 / 1 as Ravi expects, an as-of before a received date is 400, but <code>asOf=+999999999-12-31</code> is a <b>500</b>. That is the reason for the next two steps (<a href="archon-hello-world-java/archon-hello-world-java-run.html#s13">step 13</a>). In the re-run from this page the same date never answered: the code looped, using a full CPU core, so each curl now gives up after 20 s (<code>--max-time 20</code>) and prints nothing for that date. A hang is a defect too; reject it the same way.</div>
 </section>
 <section class="step" id="s15" data-step="15" data-phase="One request, one repo" style="--c:var(--build)">
   <div class="step__head"><span class="step__n">15</span><div><span class="chip">gate 4 · change</span><h2>Reject the change: the run is cancelled</h2><p class="step__why">At the last gate a reject runs <code>stop-change</code>. The CLI's message about resuming is misleading: the run is over, and the rejection is recorded.</p></div><span class="who">Meena · 1 min</span></div>
@@ -583,12 +589,12 @@ archon workflow reject $RUN &quot;Not pushing yet - Meena Iyer. Kiran&#x27;s jar
 archon workflow reject $RUN &quot;Not pushing yet - Meena Iyer. Kiran&#x27;s jar check: asOf=+999999999-12-31 returns 500. An asOf after today is a caller error: 400 under FR11, with a test. The empty asOf stays today, as the review noted; add a test for it.&quot;</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real · 7.2 s</span></div><pre>❌ **Workflow cancelled** (node `stop-change`): The change was rejected at review.
     Cost: $3.732674
 Error: Rejected but failed to resume workflow &#x27;request-to-pr&#x27;: Workflow failed: Workflow did not complete successfully
-The rejection was recorded. Run &#x27;bun run cli workflow resume d9d9f6523154ac4773648b9a08d84989&#x27; to retry.</pre></div><div class="note">Don't run the suggested <code>bun run cli workflow resume</code>: it is the source checkout's command, and there is nothing to resume. The fix is a new run that adopts this one.</div>
+The rejection was recorded. Run &#x27;bun run cli workflow resume d9d9f6523154ac4773648b9a08d84989&#x27; to retry.</pre></div><div class="note">Don't run the suggested <code>bun run cli workflow resume</code>: it is the source checkout's command, and there is nothing to resume. The fix is a new run that adopts this one. The reject text is the course's: say what your jar check showed (a 500, or no answer).</div>
 </section>
 <section class="step" id="s16" data-step="16" data-phase="One request, one repo" style="--c:var(--build)">
   <div class="step__head"><span class="step__n">16</span><div><span class="chip">the fix</span><h2>Fix it with <code>archon-implement</code>, adopting the run</h2><p class="step__why">The bundled <code>archon-implement</code>, with Meena's decision as the message, on the same branch. Then verify and the jar again.</p></div><span class="who">Kiran · 3 min</span></div>
 <div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">Git Bash</span><span class="os-mac">Terminal</span></span></div><pre class="os-win">cd &quot;$JRUN/java-workspace&quot;
-archon workflow run archon-implement --adopt $RUN &quot;Apply Meena&#x27;s decision from the adopted run: an asOf after today is a caller error, 400 under FR11, with a test (asOf=+999999999-12-31 returns 500 today). The empty asOf stays today; add a test for it. Work in priorauth-api on its current branch request-age/pending-age; commit there, do not push. Tests only through ./scripts/verify.sh from the workspace root.&quot;
+archon workflow run archon-implement --adopt $RUN &quot;Apply Meena&#x27;s decision from the adopted run: an asOf after today is a caller error, 400 under FR11, with a test (asOf=+999999999-12-31 returns 500 today). The empty asOf stays today; add a test for it. Work in priorauth-api on its current branch $BRANCH; commit there, do not push. Tests only through ./scripts/verify.sh from the workspace root.&quot;
 ./scripts/verify.sh &gt; /dev/null 2&gt;&amp;1 &amp;&amp; echo &quot;verify: passed&quot;; grep -h &quot;Tests run&quot; priorauth-api/target/surefire-reports/*.txt
 (
 set -u
@@ -599,11 +605,11 @@ pid=$!
 for i in $(seq 90); do curl -s -o /dev/null localhost:8093/requests/pending &amp;&amp; break; sleep 1; done
 for q in &quot;asOf=2026-10-13&quot; &quot;asOf=2026-10-05&quot; &quot;asOf=%2B999999999-12-31&quot;; do
   echo &quot;$ curl -i \&quot;http://localhost:8093/requests/pending?$q\&quot;&quot;
-  curl -s -i &quot;localhost:8093/requests/pending?$q&quot; | grep -v -i -E &quot;^(date|keep-alive|connection|transfer-encoding|vary):&quot;; echo
+  curl -s -i --max-time 20 &quot;localhost:8093/requests/pending?$q&quot; | grep -v -i -E &quot;^(date|keep-alive|connection|transfer-encoding|vary):&quot;; echo
 done
 kill $pid
 )</pre><pre class="os-mac">cd &quot;$JRUN/java-workspace&quot;
-archon workflow run archon-implement --adopt $RUN &quot;Apply Meena&#x27;s decision from the adopted run: an asOf after today is a caller error, 400 under FR11, with a test (asOf=+999999999-12-31 returns 500 today). The empty asOf stays today; add a test for it. Work in priorauth-api on its current branch request-age/pending-age; commit there, do not push. Tests only through ./scripts/verify.sh from the workspace root.&quot;
+archon workflow run archon-implement --adopt $RUN &quot;Apply Meena&#x27;s decision from the adopted run: an asOf after today is a caller error, 400 under FR11, with a test (asOf=+999999999-12-31 returns 500 today). The empty asOf stays today; add a test for it. Work in priorauth-api on its current branch $BRANCH; commit there, do not push. Tests only through ./scripts/verify.sh from the workspace root.&quot;
 ./scripts/verify.sh &gt; /dev/null 2&gt;&amp;1 &amp;&amp; echo &quot;verify: passed&quot;; grep -h &quot;Tests run&quot; priorauth-api/target/surefire-reports/*.txt
 (
 set -u
@@ -614,7 +620,7 @@ pid=$!
 for i in $(seq 90); do curl -s -o /dev/null localhost:8093/requests/pending &amp;&amp; break; sleep 1; done
 for q in &quot;asOf=2026-10-13&quot; &quot;asOf=2026-10-05&quot; &quot;asOf=%2B999999999-12-31&quot;; do
   echo &quot;$ curl -i \&quot;http://localhost:8093/requests/pending?$q\&quot;&quot;
-  curl -s -i &quot;localhost:8093/requests/pending?$q&quot; | grep -v -i -E &quot;^(date|keep-alive|connection|transfer-encoding|vary):&quot;; echo
+  curl -s -i --max-time 20 &quot;localhost:8093/requests/pending?$q&quot; | grep -v -i -E &quot;^(date|keep-alive|connection|transfer-encoding|vary):&quot;; echo
 done
 kill $pid
 )</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real · 141.6 s</span></div><pre>Adopting run d9d9f6523154ac4773648b9a08d84989 — folder projects run in place; adoption carries provenance and $ADOPTED_RUN_DIR access only.
@@ -627,12 +633,12 @@ HTTP/1.1 200
 $ curl -i &quot;http://localhost:8093/requests/pending?asOf=2026-10-05&quot;
 HTTP/1.1 400 
 $ curl -i &quot;http://localhost:8093/requests/pending?asOf=%2B999999999-12-31&quot;
-HTTP/1.1 400 </pre></div><div class="note">Write the decision into the message: an adopted run can read the old run's files through <code>$ADOPTED_RUN_DIR</code>, but it does not inherit the reject text. Commit <code>4ea9e9d</code>: <a href="archon-hello-world-java/archon-hello-world-java-run.html#s15">step 15</a>.</div>
+HTTP/1.1 400 </pre></div><div class="note">Write the decision into the message, naming what you saw; it names <code>$BRANCH</code>, so the agent stays on the right branch. An adopted run can read the old run's files through <code>$ADOPTED_RUN_DIR</code>, but it does not inherit the reject text. Commit <code>4ea9e9d</code>: <a href="archon-hello-world-java/archon-hello-world-java-run.html#s15">step 15</a>.</div>
 </section>
 <section class="step" id="s17" data-step="17" data-phase="One request, one repo" style="--c:var(--build)">
   <div class="step__head"><span class="step__n">17</span><div><span class="chip">ship</span><h2>Push by hand, and look at what the run left</h2><p class="step__why">The run was cancelled before its push node, so Kiran pushes. Then the read-only commands: runs, the run, its artifacts and log, the project, doctor.</p></div><span class="who">Kiran · 2 min</span></div>
 <div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">Git Bash</span><span class="os-mac">Terminal</span></span></div><pre class="os-win">cd &quot;$JRUN/java-workspace&quot;
-git -C priorauth-api push -u origin request-age/pending-age 2&gt;&amp;1
+git -C priorauth-api push -u origin &quot;$BRANCH&quot; 2&gt;&amp;1
 archon workflow runs
 archon workflow get $RUN
 archon workflow artifacts $RUN
@@ -641,7 +647,7 @@ archon project list
 archon isolation list
 archon doctor
 git -C priorauth-api ls-remote --heads origin; echo &quot;== workspace&quot;; git status --short; git log --oneline -1</pre><pre class="os-mac">cd &quot;$JRUN/java-workspace&quot;
-git -C priorauth-api push -u origin request-age/pending-age 2&gt;&amp;1
+git -C priorauth-api push -u origin &quot;$BRANCH&quot; 2&gt;&amp;1
 archon workflow runs
 archon workflow get $RUN
 archon workflow artifacts $RUN
@@ -659,42 +665,46 @@ git -C priorauth-api ls-remote --heads origin; echo &quot;== workspace&quot;; gi
 <div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">Git Bash</span><span class="os-mac">Terminal</span></span></div><pre class="os-win">cd &quot;$JRUN&quot;
 (
 set -e
+rm -rf meena-priorauth-api
 git clone -q remotes/priorauth-api.git meena-priorauth-api
 cd meena-priorauth-api
-git -c user.name=&quot;Meena Iyer&quot; -c user.email=meena@acme-health.example merge -q --no-ff origin/request-age/pending-age -m &quot;Merge request-age/pending-age: request age on the pending list&quot;
+git -c user.name=&quot;Meena Iyer&quot; -c user.email=meena@acme-health.example merge -q --no-ff &quot;origin/$BRANCH&quot; -m &quot;Merge $BRANCH: request age on the pending list&quot;
 git push -q origin main
 git log --oneline --graph -5
 cd .. &amp;&amp; rm -rf meena-priorauth-api
 )
 cd &quot;$JRUN/java-workspace&quot;
-archon complete request-age/pending-age
+archon complete &quot;$BRANCH&quot;
 (
 set -e
 git -C priorauth-api switch -q main &amp;&amp; git -C priorauth-api pull -q --ff-only &amp;&amp; echo &quot;priorauth-api: $(git -C priorauth-api log --oneline -1)&quot;
+rm -rf priorauth-api/target
 ./scripts/verify.sh &gt; /dev/null 2&gt;&amp;1 &amp;&amp; echo &quot;verify on main: passed&quot;
 grep -h &quot;Tests run&quot; priorauth-api/target/surefire-reports/*.txt
 git status --short &amp;&amp; echo &quot;workspace clean&quot;
 )
-git -C priorauth-api branch -d request-age/pending-age; git -C priorauth-api branch --list</pre><pre class="os-mac">cd &quot;$JRUN&quot;
+git -C priorauth-api branch -d &quot;$BRANCH&quot;; git -C priorauth-api branch --list</pre><pre class="os-mac">cd &quot;$JRUN&quot;
 (
 set -e
+rm -rf meena-priorauth-api
 git clone -q remotes/priorauth-api.git meena-priorauth-api
 cd meena-priorauth-api
-git -c user.name=&quot;Meena Iyer&quot; -c user.email=meena@acme-health.example merge -q --no-ff origin/request-age/pending-age -m &quot;Merge request-age/pending-age: request age on the pending list&quot;
+git -c user.name=&quot;Meena Iyer&quot; -c user.email=meena@acme-health.example merge -q --no-ff &quot;origin/$BRANCH&quot; -m &quot;Merge $BRANCH: request age on the pending list&quot;
 git push -q origin main
 git log --oneline --graph -5
 cd .. &amp;&amp; rm -rf meena-priorauth-api
 )
 cd &quot;$JRUN/java-workspace&quot;
-archon complete request-age/pending-age
+archon complete &quot;$BRANCH&quot;
 (
 set -e
 git -C priorauth-api switch -q main &amp;&amp; git -C priorauth-api pull -q --ff-only &amp;&amp; echo &quot;priorauth-api: $(git -C priorauth-api log --oneline -1)&quot;
+rm -rf priorauth-api/target
 ./scripts/verify.sh &gt; /dev/null 2&gt;&amp;1 &amp;&amp; echo &quot;verify on main: passed&quot;
 grep -h &quot;Tests run&quot; priorauth-api/target/surefire-reports/*.txt
 git status --short &amp;&amp; echo &quot;workspace clean&quot;
 )
-git -C priorauth-api branch -d request-age/pending-age; git -C priorauth-api branch --list</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real · git log --graph</span></div><pre>*   4ca6b6a Merge request-age/pending-age: request age on the pending list
+git -C priorauth-api branch -d &quot;$BRANCH&quot;; git -C priorauth-api branch --list</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real · git log --graph</span></div><pre>*   4ca6b6a Merge request-age/pending-age: request age on the pending list
 | * 4ea9e9d Pending list: asOf after today is a 400
 | * a3972b4 Pending list: business-day age, over-limit flag and label (asOf)</pre></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real · archon complete</span></div><pre>  Not found: request-age/pending-age (no active isolation environment)</pre></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real</span></div><pre>verify on main: passed
 workspace clean</pre></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real</span></div><pre>Deleted branch request-age/pending-age (was 4ea9e9d).</pre></div>
@@ -975,14 +985,18 @@ RUN=$(echo &quot;$out&quot; | sed -n &#x27;s/^Run id: //p&#x27; | tr -d &#x27;\r
 echo &quot;RUN=$RUN&quot;
 archon workflow wait $RUN --json
 archon workflow approve $RUN &quot;Approved - Meena Iyer. One correction: 1 Jan 2027 falls inside all three requests&#x27; periods, so all three drop by one on 2027-01-05: PA-10231 62, PA-10244 59, PA-10263 56 (today 63, 60, 57; Ravi says the others are off too). Leave the missing-2028-file behaviour as it is; I&#x27;ll raise it separately. Kiran checks the packaged jar by hand before we push.&quot;
-archon workflow wait $RUN --json</pre><pre class="os-mac">cd &quot;$MRUN/priorauth-workspace&quot;
+archon workflow wait $RUN --json
+BRANCH=$(git -C priorauth-api branch --show-current)   # the branch the agent made
+echo &quot;BRANCH=$BRANCH&quot;</pre><pre class="os-mac">cd &quot;$MRUN/priorauth-workspace&quot;
 out=$(archon workflow run fix-across-repos --folder --detach &quot;Fix the bug in docs-in/bug-report.md (Ravi, 17 Oct): New Year&#x27;s Day counted as a working day&quot;)
 echo &quot;$out&quot;
 RUN=$(echo &quot;$out&quot; | sed -n &#x27;s/^Run id: //p&#x27; | tr -d &#x27;\r&#x27;)
 echo &quot;RUN=$RUN&quot;
 archon workflow wait $RUN --json
 archon workflow approve $RUN &quot;Approved - Meena Iyer. One correction: 1 Jan 2027 falls inside all three requests&#x27; periods, so all three drop by one on 2027-01-05: PA-10231 62, PA-10244 59, PA-10263 56 (today 63, 60, 57; Ravi says the others are off too). Leave the missing-2028-file behaviour as it is; I&#x27;ll raise it separately. Kiran checks the packaged jar by hand before we push.&quot;
-archon workflow wait $RUN --json</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real · 6.4 s</span></div><pre>Registered folder project &quot;priorauth-workspace&quot; (C:\work\archon-multirepo\priorauth-workspace)
+archon workflow wait $RUN --json
+BRANCH=$(git -C priorauth-api branch --show-current)   # the branch the agent made
+echo &quot;BRANCH=$BRANCH&quot;</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real · 6.4 s</span></div><pre>Registered folder project &quot;priorauth-workspace&quot; (C:\work\archon-multirepo\priorauth-workspace)
 Run id: 5138e1be8e01d39ed631d192df3bb2c1</pre></div><div class="box claude"><div class="box__bar">Check: wait returns <span class="tag">real · waited 137 s</span></div><pre>&quot;nodeId&quot;: &quot;approve-plan&quot;,  &quot;form&quot;: &quot;approval&quot;,  &quot;occurrence&quot;: &quot;12f141a7-d310-4550-b8a5-db4b76d036b5&quot;
 &quot;message&quot;:
 Approve the plan before any code is written.
@@ -1005,8 +1019,8 @@ unzip -l target/priorauth-api-1.2.1.jar | grep -o &quot;BOOT-INF/lib/priorauth-a
 java -jar target/priorauth-api-1.2.1.jar --server.port=8092 &gt; ../../app-after.log 2&gt;&amp;1 &amp;
 pid=$!
 for i in $(seq 90); do curl -s -o /dev/null localhost:8092/requests/pending &amp;&amp; break; sleep 1; done
-echo &quot;asOf=2027-01-05:&quot;; curl -s &quot;localhost:8092/requests/pending?asOf=2027-01-05&quot;; echo
-echo &quot;asOf=2026-10-13:&quot;; curl -s &quot;localhost:8092/requests/pending?asOf=2026-10-13&quot;; echo
+echo &quot;asOf=2027-01-05:&quot;; curl -s --max-time 20 &quot;localhost:8092/requests/pending?asOf=2027-01-05&quot;; echo
+echo &quot;asOf=2026-10-13:&quot;; curl -s --max-time 20 &quot;localhost:8092/requests/pending?asOf=2026-10-13&quot;; echo
 kill $pid
 )
 archon workflow approve $RUN &#x27;Approved - Meena Iyer. Kiran ran the 1.2.1 jar: 2027-01-05 gives 62/59/56, 2026-10-13 still 7/4/1. Push both; aging merges first.&#x27;</pre><pre class="os-mac">cd &quot;$MRUN/priorauth-workspace&quot;
@@ -1019,8 +1033,8 @@ unzip -l target/priorauth-api-1.2.1.jar | grep -o &quot;BOOT-INF/lib/priorauth-a
 java -jar target/priorauth-api-1.2.1.jar --server.port=8092 &gt; ../../app-after.log 2&gt;&amp;1 &amp;
 pid=$!
 for i in $(seq 90); do curl -s -o /dev/null localhost:8092/requests/pending &amp;&amp; break; sleep 1; done
-echo &quot;asOf=2027-01-05:&quot;; curl -s &quot;localhost:8092/requests/pending?asOf=2027-01-05&quot;; echo
-echo &quot;asOf=2026-10-13:&quot;; curl -s &quot;localhost:8092/requests/pending?asOf=2026-10-13&quot;; echo
+echo &quot;asOf=2027-01-05:&quot;; curl -s --max-time 20 &quot;localhost:8092/requests/pending?asOf=2027-01-05&quot;; echo
+echo &quot;asOf=2026-10-13:&quot;; curl -s --max-time 20 &quot;localhost:8092/requests/pending?asOf=2026-10-13&quot;; echo
 kill $pid
 )
 archon workflow approve $RUN &#x27;Approved - Meena Iyer. Kiran ran the 1.2.1 jar: 2027-01-05 gives 62/59/56, 2026-10-13 still 7/4/1. Push both; aging merges first.&#x27;</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real · 10 s</span></div><pre>BOOT-INF/lib/priorauth-aging-1.0.1.jar
@@ -1053,45 +1067,45 @@ for r in priorauth-aging priorauth-api; do echo &quot;== $r&quot;; git -C &quot;
 </section>
 <section class="step" id="s28" data-step="28" data-phase="One bug, two repos" style="--c:var(--review)">
   <div class="step__head"><span class="step__n">28</span><div><span class="chip">after</span><h2>Merge in release order; tidy up by hand</h2><p class="step__why">The library first (tag v1.0.1), then the API (v1.2.1). verify on main, then delete the branches.</p></div><span class="who">Meena, Kiran · 2 min</span></div>
-<div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">Git Bash</span><span class="os-mac">Terminal</span></span></div><pre class="os-win">mkdir -p &quot;$MRUN/meena&quot;
+<div class="box you"><div class="box__bar">You type <span class="tag"><span class="os-win">Git Bash</span><span class="os-mac">Terminal</span></span></div><pre class="os-win">rm -rf &quot;$MRUN/meena&quot; &amp;&amp; mkdir -p &quot;$MRUN/meena&quot;
 cd &quot;$MRUN/meena&quot;
 (
 set -e
 for pair in priorauth-aging:v1.0.1 priorauth-api:v1.2.1; do r=${pair%%:*}; t=${pair##*:}
   git clone -q ../remotes/$r.git $r
-  git -C $r -c user.name=&quot;Meena Iyer&quot; -c user.email=meena@acme-health.example merge -q --no-ff origin/fix/holidays-across-years -m &quot;Merge fix/holidays-across-years: holidays across years (Ravi, 17 Oct)&quot;
+  git -C $r -c user.name=&quot;Meena Iyer&quot; -c user.email=meena@acme-health.example merge -q --no-ff &quot;origin/$BRANCH&quot; -m &quot;Merge $BRANCH: holidays across years (Ravi, 17 Oct)&quot;
   git -C $r tag $t &amp;&amp; git -C $r push -q origin main $t
   echo &quot;== $r&quot;; git -C $r log --oneline --graph -4
 done
 )
 cd &quot;$MRUN/priorauth-workspace&quot;
-archon complete fix/holidays-across-years
+archon complete &quot;$BRANCH&quot;
 (
 set -e
 for r in priorauth-aging priorauth-api; do git -C $r switch -q main &amp;&amp; git -C $r pull -q --ff-only &amp;&amp; echo &quot;$r: $(git -C $r log --oneline -1) $(git -C $r describe --tags)&quot;; done
 ./scripts/verify.sh &gt;/dev/null 2&gt;&amp;1 &amp;&amp; echo &quot;verify on main: passed&quot;
 git status --short; echo &quot;workspace clean&quot;
 )
-for r in priorauth-aging priorauth-api; do git -C $r branch -d fix/holidays-across-years; git -C $r branch --list; done</pre><pre class="os-mac">mkdir -p &quot;$MRUN/meena&quot;
+for r in priorauth-aging priorauth-api; do git -C $r branch -d &quot;$BRANCH&quot;; git -C $r branch --list; done</pre><pre class="os-mac">rm -rf &quot;$MRUN/meena&quot; &amp;&amp; mkdir -p &quot;$MRUN/meena&quot;
 cd &quot;$MRUN/meena&quot;
 (
 set -e
 for pair in priorauth-aging:v1.0.1 priorauth-api:v1.2.1; do r=${pair%%:*}; t=${pair##*:}
   git clone -q ../remotes/$r.git $r
-  git -C $r -c user.name=&quot;Meena Iyer&quot; -c user.email=meena@acme-health.example merge -q --no-ff origin/fix/holidays-across-years -m &quot;Merge fix/holidays-across-years: holidays across years (Ravi, 17 Oct)&quot;
+  git -C $r -c user.name=&quot;Meena Iyer&quot; -c user.email=meena@acme-health.example merge -q --no-ff &quot;origin/$BRANCH&quot; -m &quot;Merge $BRANCH: holidays across years (Ravi, 17 Oct)&quot;
   git -C $r tag $t &amp;&amp; git -C $r push -q origin main $t
   echo &quot;== $r&quot;; git -C $r log --oneline --graph -4
 done
 )
 cd &quot;$MRUN/priorauth-workspace&quot;
-archon complete fix/holidays-across-years
+archon complete &quot;$BRANCH&quot;
 (
 set -e
 for r in priorauth-aging priorauth-api; do git -C $r switch -q main &amp;&amp; git -C $r pull -q --ff-only &amp;&amp; echo &quot;$r: $(git -C $r log --oneline -1) $(git -C $r describe --tags)&quot;; done
 ./scripts/verify.sh &gt;/dev/null 2&gt;&amp;1 &amp;&amp; echo &quot;verify on main: passed&quot;
 git status --short; echo &quot;workspace clean&quot;
 )
-for r in priorauth-aging priorauth-api; do git -C $r branch -d fix/holidays-across-years; git -C $r branch --list; done</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real</span></div><pre>== priorauth-aging
+for r in priorauth-aging priorauth-api; do git -C $r branch -d &quot;$BRANCH&quot;; git -C $r branch --list; done</pre><button class="copy" type="button">copy</button></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real</span></div><pre>== priorauth-aging
 *   317874b Merge fix/holidays-across-years: holidays across years (Ravi, 17 Oct)
 == priorauth-api
 *   e7b9a6d Merge fix/holidays-across-years: holidays across years (Ravi, 17 Oct)</pre></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real</span></div><pre>priorauth-aging: 317874b Merge fix/holidays-across-years: holidays across years (Ravi, 17 Oct) v1.0.1
@@ -1099,10 +1113,14 @@ priorauth-api: e7b9a6d Merge fix/holidays-across-years: holidays across years (R
 verify on main: passed
 workspace clean</pre></div><div class="box claude"><div class="box__bar">Check: you see <span class="tag">real</span></div><pre>Deleted branch fix/holidays-across-years (was 074d524).</pre></div><div class="note">Open both PRs before this on a real team; merge the library's first, because the API's pom names its new version. The same bug through AWS AI-DLC: <a href="archon-hello-world-java/archon-two-repos-run.html#s16">two-repo page, step 16</a>.</div>
 </section>
-<div class="phase" style="--c:var(--ship)"><i></i>Reference<span>troubleshooting, cost, start over</span></div>
+<div class="phase" style="--c:var(--ship)"><i></i>Reference<span>what Claude Code gets, troubleshooting, cost, start over</span></div>
+<section class="card" id="claude">
+  <h2>What each AI node hands Claude Code</h2>
+<p>Archon's Claude provider uses the Claude Agent SDK, which starts Claude Code as a background process: <b>each agent node, and each loop pass, is one Claude Code session</b> in the workspace, with your claude.ai login. The node's fields decide what that session gets. The third column is the request-to-pr run (Part B).</p><div class="gwrap"><table class="kv"><thead><tr><th>In the workflow</th><th>What Claude Code gets</th><th>In the course's run</th></tr></thead><tbody><tr><td><code>prompt:</code></td><td>a new Claude Code session (headless, the way <code>claude -p</code> runs) whose first message is the prompt, after Archon fills in <code>$USER_MESSAGE</code>, <code>$ARTIFACTS_DIR</code>, <code>$node.output</code></td><td><code>questions</code>, <code>write-requirements</code>, <code>plan</code>, <code>review</code></td></tr><tr><td><code>command: scan</code></td><td>the same, with the prompt read from <code>commands/scan.md</code>. <b>Not</b> a Claude Code slash command: Archon reads the Markdown file and sends its text; <code>.claude/commands/</code> is a different folder that Archon doesn't use for this</td><td><code>scan</code>; each <code>implement</code> pass</td></tr><tr><td><code>loop:</code> + <code>fresh_context: true</code></td><td>one new session per pass; the check (<code>until_bash</code>) is Archon's, not Claude's</td><td><code>implement</code>: 1 pass</td></tr><tr><td><code>context:</code> <code>fresh</code> / <code>shared</code> / <code>resume</code></td><td>start a new session, continue the previous node's, or fork a named node's. Otherwise nodes share nothing but the files they write</td><td><code>questions</code> continued <code>scan</code>'s session</td></tr><tr><td><code>output_format:</code></td><td>the SDK's structured output: the agent ends by calling a <code>StructuredOutput</code> tool with JSON that fits the schema</td><td>3 calls: questions, plan, review</td></tr><tr><td><code>allowed_tools</code> / <code>denied_tools</code></td><td>the session's tool list. Archon runs Claude Code with <code>bypassPermissions</code>: no permission prompts, so these lists (and <code>mutates_checkout</code>) are the limits</td><td>not used; <code>mutates_checkout: false</code> on the read-only nodes</td></tr><tr><td><code>skills: [name]</code></td><td>loads exactly those skills (<code>SKILL.md</code> from <code>.claude/skills/</code> or <code>~/.claude/skills/</code>) into that node's session. Leave it out and the node gets <b>no</b> skills, even ones you have installed</td><td>none</td></tr><tr><td><code>agents:</code></td><td>subagents defined in the YAML; the node's agent starts them with the <code>Task</code> tool. Subagents in <code>.claude/agents/*.md</code> are available too</td><td>none</td></tr><tr><td><code>hooks:</code></td><td>Claude Agent SDK hooks (<code>PreToolUse</code> …) with a fixed answer. Your own hooks in <code>.claude/settings.json</code> and <code>~/.claude/settings.json</code> also run</td><td>none</td></tr><tr><td><code>mcp:</code> · <code>plugins:</code></td><td>MCP servers from a JSON file, and Claude Code plugins, for that node only</td><td>none</td></tr><tr><td><code>model</code>, <code>effort</code>, <code>systemPrompt</code></td><td>the session's model and reasoning effort. The system prompt is Claude Code's own unless a node replaces it</td><td>Opus, the default</td></tr><tr><td><code>CLAUDE.md</code>, <code>settingSources</code></td><td>every session reads the project's and your user <code>CLAUDE.md</code>, agents and hooks (<code>settingSources: [project, user]</code>, the default)</td><td>the workspace's <code>CLAUDE.md</code></td></tr><tr><td><code>bash:</code> · <code>script:</code> · <code>wait:</code> · <code>cancel:</code></td><td>no Claude at all: Archon runs the command, or waits for a person</td><td><code>checks</code>, <code>push</code>, the 4 waits</td></tr></tbody></table></div><p style="margin-top:14px"><b>What the two runs' sessions did</b>, from their transcripts (real):</p><div class="gwrap"><table><thead><tr><th>Run</th><th>AI node runs, in order</th><th>Tool calls</th></tr></thead><tbody><tr><td>One request, one repo · <code>request-to-pr</code></td><td>7: <code>scan</code>, <code>questions</code>, <code>write-requirements</code>, <code>write-requirements</code>, <code>plan</code>, <code>implement</code>, <code>review</code></td><td>Read 40, PowerShell 20, Write 13, Grep 8, Glob 5, StructuredOutput 3, Edit 2</td></tr><tr><td>One bug, two repos · <code>fix-across-repos</code></td><td>4: <code>scan</code>, <code>plan</code>, <code>implement</code>, <code>review</code></td><td>PowerShell 16, Read 8, Edit 7, Write 5, StructuredOutput 2, Grep 1</td></tr></tbody></table></div><div class="note">Neither workflow names <code>skills:</code>, <code>agents:</code>, <code>hooks:</code> or <code>mcp:</code>, and neither workspace has a <code>.claude/</code> folder, so no session called <code>Skill</code> or <code>Task</code>: the one Claude Code file both runs relied on is the workspace's <code>CLAUDE.md</code>. Your own <code>~/.claude/</code> (its <code>CLAUDE.md</code>, agents and hooks) loads too unless <code>.archon/config.yaml</code> sets <code>settingSources: [project]</code> under <code>assistants.claude</code>. More: <a href="archon-introduction.html#s11">the introduction, step 11</a>.</div>
+</section>
 <section class="card" id="trouble">
   <h2>Troubleshooting</h2>
-<p>Every symptom marked measured happened in the course's runs; the rest are what the setup guards against.</p><div class="gwrap"><table><thead><tr><th>You see</th><th>Why</th><th>Do</th></tr></thead><tbody><tr><td><code>bash executable not found at 'C:\Program Files\Git\bin\bash.exe'</code>, on the first bash node</td><td>Git for Windows is installed somewhere Archon doesn't look; <code>archon validate</code> passes anyway (measured)</td><td><code>export ARCHON_BASH_PATH="&lt;your Git&gt;\bin\bash.exe"</code> (step 3), or set it as a user variable</td></tr><tr><td><code>Error: --dry-run cannot be combined with --folder.</code></td><td>measured, step 24</td><td>dry-run without <code>--folder</code></td></tr><tr><td><code>answer</code> / <code>approve</code> seems to hang</td><td>it resumes the run in your terminal until the next pause (up to 286 s here)</td><td>wait; or follow the transcript path <code>run</code> printed</td></tr><tr><td><code>Rejected but failed to resume … bun run cli workflow resume</code></td><td>a reject at the last gate cancels the run; the message is misleading (measured, step 15)</td><td>start a new run with <code>--adopt $RUN</code> (step 16)</td></tr><tr><td>An adopted run doesn't know what was decided</td><td>it gets the old run's files via <code>$ADOPTED_RUN_DIR</code>, not the reject text</td><td>write the decision into the new run's message</td></tr><tr><td><code>archon complete &lt;branch&gt;</code>: <code>Not found … no active isolation environment</code></td><td>expected: a folder project has no worktree to clean</td><td>delete the branches yourself (steps 18, 28)</td></tr><tr><td><code>mvn</code> fails inside the agent's session with <code>ClassNotFoundException: …Launcher</code></td><td>seen in the two-repo run: Git Bash's <code>mvn</code> broke in the agent's shell; the agent ran <code>verify.cmd</code> and said so</td><td>nothing to do; the checks node ran <code>verify.sh</code> and passed</td></tr><tr><td><code>verify.sh: $'\r': command not found</code></td><td>the script got CRLF endings (<code>core.autocrlf=true</code>)</td><td>keep the team's <code>.gitattributes</code> (<code>*.sh text eol=lf</code>); not hit in the course</td></tr><tr><td><code>release version 21 not supported</code> from Maven</td><td>an older JDK first on PATH</td><td>step 3's <code>JAVA_HOME</code> and <code>PATH</code>; not hit in the course</td></tr><tr><td>the jar check can't start: port in use</td><td>an earlier java is still running on 8091–8093</td><td>stop it, or change <code>--server.port</code></td></tr><tr><td><code>archon project list</code> shows old projects</td><td>there is no <code>project remove</code> in 0.13.2 (the course's list has an older <code>_local/priorauth-api</code>)</td><td>harmless; each run names its project</td></tr></tbody></table></div>
+<p>Every symptom marked measured happened in the course's runs; the rest are what the setup guards against.</p><div class="gwrap"><table><thead><tr><th>You see</th><th>Why</th><th>Do</th></tr></thead><tbody><tr><td><code>bash executable not found at 'C:\Program Files\Git\bin\bash.exe'</code>, on the first bash node</td><td>Git for Windows is installed somewhere Archon doesn't look; <code>archon validate</code> passes anyway (measured)</td><td><code>export ARCHON_BASH_PATH="&lt;your Git&gt;\bin\bash.exe"</code> (step 3), or set it as a user variable</td></tr><tr><td><code>Error: --dry-run cannot be combined with --folder.</code></td><td>measured, step 24</td><td>dry-run without <code>--folder</code></td></tr><tr><td><code>answer</code> / <code>approve</code> seems to hang</td><td>it resumes the run in your terminal until the next pause (up to 286 s here)</td><td>wait; or follow the transcript path <code>run</code> printed</td></tr><tr><td><code>Rejected but failed to resume … bun run cli workflow resume</code></td><td>a reject at the last gate cancels the run; the message is misleading (measured, step 15)</td><td>start a new run with <code>--adopt $RUN</code> (step 16)</td></tr><tr><td>An adopted run doesn't know what was decided</td><td>it gets the old run's files via <code>$ADOPTED_RUN_DIR</code>, not the reject text</td><td>write the decision into the new run's message</td></tr><tr><td><code>archon complete &lt;branch&gt;</code>: <code>Not found … no active isolation environment</code></td><td>expected: a folder project has no worktree to clean</td><td>delete the branches yourself (steps 18, 28)</td></tr><tr><td><code>mvn</code> fails inside the agent's session with <code>ClassNotFoundException: …Launcher</code></td><td>seen in the two-repo run: Git Bash's <code>mvn</code> broke in the agent's shell; the agent ran <code>verify.cmd</code> and said so</td><td>nothing to do; the checks node ran <code>verify.sh</code> and passed</td></tr><tr><td><code>verify.sh: $'\r': command not found</code></td><td>the script got CRLF endings (<code>core.autocrlf=true</code>)</td><td>keep the team's <code>.gitattributes</code> (<code>*.sh text eol=lf</code>); not hit in the course</td></tr><tr><td><code>release version 21 not supported</code> from Maven</td><td>an older JDK first on PATH</td><td>step 3's <code>JAVA_HOME</code> and <code>PATH</code>; not hit in the course</td></tr><tr><td>the jar check prints nothing for <code>asOf=%2B999999999-12-31</code></td><td>measured in the re-run from this page: the code looped on the far date, using a full CPU core; before <code>--max-time</code> the curl waited 18 min</td><td>a defect like the 500: reject (step 15) and say so in the fix's message</td></tr><tr><td><code>error: src refspec request-age/pending-age does not match any</code></td><td>the agent named the branch differently (measured: <code>request-age/pending-list-age</code>) and a command had the course's name</td><td>use <code>$BRANCH</code> from step 13 (25), as every command here now does</td></tr><tr><td>the first run registers <code>java-workspace-2</code>, not <code>java-workspace</code></td><td>a folder project with that name already exists (an earlier run from another folder; measured)</td><td>harmless: runs are kept per project</td></tr><tr><td>the jar check can't start: port in use</td><td>an earlier java is still running on 8091–8093</td><td>stop it, or change <code>--server.port</code></td></tr><tr><td><code>archon project list</code> shows old projects</td><td>there is no <code>project remove</code> in 0.13.2 (the course's list has an older <code>_local/priorauth-api</code>)</td><td>harmless; each run names its project</td></tr></tbody></table></div>
 </section>
 <section class="card" id="cost">
   <h2>What it cost, how long it took</h2>
@@ -1114,9 +1132,13 @@ workspace clean</pre></div><div class="box claude"><div class="box__bar">Check: 
 archon project list</pre><pre class="os-mac">rm -rf &quot;$JRUN&quot; &quot;$MRUN&quot;
 archon project list</pre><button class="copy" type="button">copy</button></div>
 </section>
+<section class="card" id="rerun">
+  <h2>Re-run from this page</h2>
+<p>On 2026-11-06 every command box of steps 3–19, as first published, ran in order in one Git Bash session in a fresh folder, with the same answers and decisions. Before each gate a check stopped the script if the run was paused anywhere else; it never was. The agents wrote other code, so the details differ, and the guide's commands changed where they had assumed the 4 Nov run's details.</p><div class="gwrap"><table><thead><tr><th>Step</th><th>4 Nov (the Check boxes)</th><th>6 Nov, from this page</th></tr></thead><tbody><tr><td>10 · the project</td><td><code>java-workspace</code></td><td><code>java-workspace-2</code> (the name was taken)</td></tr><tr><td>12 · requirements</td><td>rejected once, approved on revision 2</td><td>the same: 2 iterations</td></tr><tr><td>13 · branch, commit</td><td><code>request-age/pending-age</code>, <code>a3972b4</code></td><td><code>request-age/pending-list-age</code>, <code>1873da4</code>; review READY</td></tr><tr><td>14 · far-future date</td><td>500</td><td>no answer: a busy loop, stopped by hand after 18 min</td></tr><tr><td>16 · the fix</td><td><code>4ea9e9d</code>, both bad dates 400</td><td><code>71049ab</code>, codes 200 / 400 / 400</td></tr><tr><td>17–18 · push, merge, tidy</td><td>worked</td><td><b>failed</b>: the course's branch name was hardcoded (now <code>$BRANCH</code>); finished by hand with the fixed commands: merge <code>6557369</code>, verify on main passed, 31 tests</td></tr><tr><td>18 · verify on main</td><td>passed, 21 tests</td><td>printed passed on the unmerged main, listing stale test reports; the step now deletes <code>target/</code> first</td></tr><tr><td>reported cost</td><td>$3.73 + $0.63 + $0.83</td><td>$3.54 + $0.68 + $1.26</td></tr></tbody></table></div><p>The fixes are in every command above: <code>$BRANCH</code> (steps 13, 16–18, 25, 28), <code>--max-time 20</code> on the jar checks, <code>rm -rf priorauth-api/target</code> before verify on main, and merge steps that clear an earlier attempt's clone. Part C was not re-run end to end; its setup was (steps 20–23).</p>
+</section>
 <section class="card" id="real">
   <h2>What is real here</h2>
-<p>Every command and every Check box is from the course's real runs with Archon 0.13.2 and Claude Code on a claude.ai login, Windows 10, 4 Nov 2026 (the tool versions in step 1: 5 Nov). The commands are the recorded ones with the run folders written as <code>$JRUN</code>/<code>$MRUN</code>, the run id as <code>$RUN</code>, and the recorded multi-line scripts in a subshell; the file copies and the starter split are the course's setup scripts written as shell, and Parts B and C's setup (steps 5–8, 20–23) was re-run from this page in a fresh folder on 5 Nov 2026: same trees as the course's remotes, same checks. Commit ids other than the starter's (<code>d9aa178</code>, <code>49fe266</code>) will differ on your machine. The macOS commands were not run. Your agent will word things differently, and may take another number of passes; the gates are where you decide. The cast (Ravi Menon, Kiran Rao, Meena Iyer) is fictional.</p>
+<p>Every command and every Check box is from the course's real runs with Archon 0.13.2 and Claude Code on a claude.ai login, Windows 10, 4 Nov 2026 (the tool versions in step 1: 5 Nov). The commands are the recorded ones, changed where the re-run from this page (6 Nov) showed they depended on that run's details (<a href='#rerun'>Re-run from this page</a>), and with the run folders written as <code>$JRUN</code>/<code>$MRUN</code>, the run id as <code>$RUN</code>, and the recorded multi-line scripts in a subshell; the file copies and the starter split are the course's setup scripts written as shell, and Parts B and C's setup (steps 5–8, 20–23) was re-run from this page in a fresh folder on 5 Nov 2026: same trees as the course's remotes, same checks. Commit ids other than the starter's (<code>d9aa178</code>, <code>49fe266</code>) will differ on your machine. The macOS commands were not run. Your agent will word things differently, and may take another number of passes; the gates are where you decide. The cast (Ravi Menon, Kiran Rao, Meena Iyer) is fictional.</p>
 </section>
 <div class="plain"><div><b>In plain words.</b> A stays done; B and C are independent. Each starts from an empty folder and ends with the change merged and verified on main, so you can run either one alone (after A), or both.</div></div>
 </main>

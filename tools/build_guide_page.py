@@ -19,7 +19,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 import archon_step  # noqa: E402
 import setup_multirepo_run as MR  # noqa: E402
-from pagekit import E, ROOT, card, io, note, page, phase, plain, rail, scrub, see, step, strip_ansi, table, write, you  # noqa: E402
+from pagekit import CLAUDE_MAP, E, ROOT, card, claude_facts, io, note, page, phase, plain, rail, scrub, see, step, strip_ansi, table, write, you  # noqa: E402
 
 DATA = ROOT / "tools" / "data"
 HW = ROOT / "archon-hello-world-java"
@@ -34,6 +34,7 @@ MS, MRS = load(HW / "multirepo-run/setup-steps.json"), load(HW / "multirepo-run/
 PRE = load(DATA / "setup/prereq-steps.json")
 CLI = json.loads((DATA / "cli/cli.json").read_text(encoding="utf-8"))
 INSTALL = scrub(strip_ansi((DATA / "cli/install.txt").read_text(encoding="utf-8-sig")))
+RERUN = json.loads((DATA / "java/rerun-2026-11-06.json").read_text(encoding="utf-8"))
 PROBE = json.loads((DATA / "setup/bash-probe.json").read_text(encoding="utf-8"))
 VERSION = re.search(r"Archon CLI v([\d.]+)", CLI["version"]["out"]).group(1)
 COURSE_URL = "https://github.com/varasrinivas/ai-dlc-archon"
@@ -88,11 +89,45 @@ def split_message(c):
     return w[:n], " ".join(w[n:])
 
 
+# Changes to the recorded commands, from re-running Part B from this page (6 Nov 2026):
+#  - the agent names the branch: that run's was request-age/pending-list-age, so a hardcoded name failed the push, the merge
+#    and the cleanup. The page reads it into $BRANCH once the agent has made it (steps 13 and 25).
+#  - that run's code looped forever on asOf=+999999999-12-31 (no 500): curl without a timeout waited 18 min.
+#  - "verify on main" grepped stale surefire reports left by the branch build; a failed merge left its clone behind.
+JB, MB = "request-age/pending-age", "fix/holidays-across-years"
+HARDEN = {
+    ("java", "fix-run"): [(JB, "$BRANCH")],
+    ("java", "jar-check"): [('curl -s -i "localhost', 'curl -s -i --max-time 20 "localhost')],
+    ("java", "jar-check-2"): [('curl -s -i "localhost', 'curl -s -i --max-time 20 "localhost')],
+    ("java", "push-by-hand"): [(JB, '"$BRANCH"')],
+    ("java", "merge"): [("set -e\n", "set -e\nrm -rf meena-priorauth-api\n"), (f"origin/{JB}", '"origin/$BRANCH"'), (f'"Merge {JB}:', '"Merge $BRANCH:')],
+    ("java", "complete"): [(JB, '"$BRANCH"')],
+    ("java", "verify-main"): [("./scripts/verify.sh", "rm -rf priorauth-api/target\n./scripts/verify.sh")],
+    ("java", "cleanup"): [(JB, '"$BRANCH"')],
+    ("multirepo", "jar-check"): [('curl -s "localhost:8092/requests/pending?asOf', 'curl -s --max-time 20 "localhost:8092/requests/pending?asOf')],
+    ("multirepo", "merge"): [(f"origin/{MB}", '"origin/$BRANCH"'), (f'"Merge {MB}:', '"Merge $BRANCH:')],
+    ("multirepo", "complete"): [(MB, '"$BRANCH"')],
+    ("multirepo", "cleanup"): [(MB, '"$BRANCH"')],
+}
+BRANCH_SET = 'BRANCH=$(git -C priorauth-api branch --show-current)   # the branch the agent made\necho "BRANCH=$BRANCH"'
+
+
+def harden(s, c):
+    which = "java" if "archon-java" in s["cwd"] else "multirepo"
+    for old, new in HARDEN.get((which, s["label"]), []):
+        n = c.count(old)
+        assert n >= 1 and (n == 1 or old.startswith("curl")), (which, s["label"], old, n)
+        c = c.replace(old, new)
+    return c
+
+
 def command(s):
     c = s["cmd"]
     if not s["sh"] and c.startswith("archon workflow ") and c.split(" ")[2] in ("run", *MSG_AT):
         head, msg = split_message(c)
+        assert s["label"] != "fix-run" or "'" in msg, "the fix message must stay double-quoted so $BRANCH expands"
         c = " ".join(head) + " " + bashq(msg)
+    c = harden(s, c)
     for rid in (JRID, MRID):
         c = c.replace(rid, "$RUN")
     c = c.replace(OCC, "$OCC")
@@ -366,6 +401,8 @@ add(10, P, C, "the run", "Start the run, then wait for its questions",
     + attention(JR["wait-1"], 4)
     + note(f"<code>RUN</code> is the run id (the course's was <code>{JRID}</code>) and <code>OCC</code> the pause's <code>occurrence</code>: every later command names them, so keep this terminal (or set both again by hand). The scan and the questions took {JR['wait-1']['seconds']:g} s. The seven questions: {link(RUNP, 7, 'run page, step 7')}."),
     "Run, wait")
+S[-1] = S[-1].replace("</section>", note('Every agent node of the run (<code>scan</code>, <code>questions</code>, <code>write-requirements</code>, <code>plan</code>, each <code>implement</code> pass, <code>review</code>) is one Claude Code session in this workspace, with your login; the bash nodes and the waits start none. What each workflow field hands that session: <a href="#claude">What each AI node hands Claude Code</a>.') + "</section>", 1)
+assert S[-1].count('href="#claude"') == 1
 
 add(11, P, C, "gate 1 · answer", "Answer the seven questions",
     "One message answers all seven; the run goes on to write the requirements and pauses again for their approval.", "Kiran for Ravi and Meena · 2 min",
@@ -383,24 +420,24 @@ add(12, P, C, "gate 2 · requirements", "Reject the requirements once, then appr
 
 add(13, P, C, "gate 3 · plan", "Approve the plan; implement, checks and review run",
     f"The longest command of the run ({SLOWEST['seconds']:g} s): the implement loop runs until verify.sh passes, a bash node checks the branch, a second agent reviews.", "Meena · 5 min",
-    cmd(jr("approve-plan", "wait-5"))
+    cmd(jr("approve-plan", "wait-5") + "\n" + BRANCH_SET)
     + check(JR["approve-plan"], "Loop node 'implement' completed after 1 iteration", "verify: passed", "a3972b4", "[review] Completed")
     + attention(JR["wait-5"], 1)
-    + note(f"The agent made branch <code>request-age/pending-age</code> in priorauth-api and committed there; Archon made no branch or worktree. The review's verdict and the diff: {link(RUNP, 12, 'step 12')}."),
+    + note(f"The agent made branch <code>request-age/pending-age</code> in priorauth-api and committed there; Archon made no branch or worktree. <code>BRANCH</code> keeps the name it chose for steps 16–18: in the re-run from this page it was <code>{RERUN['branch']}</code>. The review's verdict and the diff: {link(RUNP, 12, 'step 12')}."),
     "Plan, implement")
 
 add(14, P, C, "by hand", "Check the packaged jar by hand",
     "Tests passed and the review said READY. Run the real jar on three dates before the last approval.", "Kiran · 1 min",
     cmd(jr("jar-check"))
     + see(x(short("\n".join(ln for ln in text_of(JR["jar-check"]).splitlines() if ln.startswith(("$ curl", "HTTP/1.1", "[{"))), 120)), "real · 10 s", "Check: you see")
-    + note(f"7 OVER 5 / 4 / 1 as Ravi expects, an as-of before a received date is 400, but <code>asOf=+999999999-12-31</code> is a <b>500</b>. That is the reason for the next two steps ({link(RUNP, 13, 'step 13')})."),
+    + note(f"7 OVER 5 / 4 / 1 as Ravi expects, an as-of before a received date is 400, but <code>asOf=+999999999-12-31</code> is a <b>500</b>. That is the reason for the next two steps ({link(RUNP, 13, 'step 13')}). In the re-run from this page the same date never answered: the code looped, using a full CPU core, so each curl now gives up after 20 s (<code>--max-time 20</code>) and prints nothing for that date. A hang is a defect too; reject it the same way."),
     "Jar check: a 500")
 
 add(15, P, C, "gate 4 · change", "Reject the change: the run is cancelled",
     "At the last gate a reject runs <code>stop-change</code>. The CLI's message about resuming is misleading: the run is over, and the rejection is recorded.", "Meena · 1 min",
     cmd(jr("reject-change"))
     + check(JR["reject-change"], "Workflow cancelled", "Cost: $3.73", "Rejected but failed to resume", "bun run cli workflow resume")
-    + note("Don't run the suggested <code>bun run cli workflow resume</code>: it is the source checkout's command, and there is nothing to resume. The fix is a new run that adopts this one."),
+    + note("Don't run the suggested <code>bun run cli workflow resume</code>: it is the source checkout's command, and there is nothing to resume. The fix is a new run that adopts this one. The reject text is the course's: say what your jar check showed (a 500, or no answer)."),
     "Reject: cancelled")
 
 add(16, P, C, "the fix", "Fix it with <code>archon-implement</code>, adopting the run",
@@ -409,7 +446,7 @@ add(16, P, C, "the fix", "Fix it with <code>archon-implement</code>, adopting th
     + check(JR["fix-run"], "folder projects run in place; adoption carries provenance and $ADOPTED_RUN_DIR access only.", "Loop node 'implement' completed after 1 iteration", "Cost: $0.62")
     + check(JR["verify-fix"], "verify: passed", "RequestAgingTest", "PendingRequestsControllerTest", "RequestStoreTest", tag="real · 21 tests")
     + see(x("\n".join(ln for ln in text_of(JR["jar-check-2"]).splitlines() if ln.startswith(("$ curl", "HTTP/1.1")))), "real · both bad dates now 400", "Check: you see")
-    + note(f"Write the decision into the message: an adopted run can read the old run's files through <code>$ADOPTED_RUN_DIR</code>, but it does not inherit the reject text. Commit <code>4ea9e9d</code>: {link(RUNP, 15, 'step 15')}."),
+    + note(f"Write the decision into the message, naming what you saw; it names <code>$BRANCH</code>, so the agent stays on the right branch. An adopted run can read the old run's files through <code>$ADOPTED_RUN_DIR</code>, but it does not inherit the reject text. Commit <code>4ea9e9d</code>: {link(RUNP, 15, 'step 15')}."),
     "Fix (adopt)")
 
 add(17, P, C, "ship", "Push by hand, and look at what the run left",
@@ -475,7 +512,7 @@ add(24, P, C, "free", "Dry-run it: not with <code>--folder</code>",
 
 add(25, P, C, "gate 1 · plan", "Start the run; approve the plan with a correction",
     "Scan and plan find the cause in the library. The plan miscounts two ages; Meena approves with the right numbers instead of rejecting (a reject here cancels).", "Kiran, Meena · 6 min",
-    cmd(started(MRS, "run") + "\n" + "\n".join(command(MRS[label]) for label in ("wait-1", "approve-plan", "wait-2")))
+    cmd(started(MRS, "run") + "\n" + "\n".join(command(MRS[label]) for label in ("wait-1", "approve-plan", "wait-2")) + "\n" + BRANCH_SET)
     + check(MRS["run"], 'Registered folder project "priorauth-workspace"', "Run id:")
     + attention(MRS["wait-1"], 3)
     + check(MRS["approve-plan"], "Loop node 'implement' completed after 1 iteration", "074d524", "8d65a37", "Workflow paused — waiting for approval.", tag=f"real · {MRS['approve-plan']['seconds']:g} s")
@@ -500,7 +537,7 @@ add(27, P, C, "after", "What a folder project leaves behind",
 
 add(28, P, C, "after", "Merge in release order; tidy up by hand",
     "The library first (tag v1.0.1), then the API (v1.2.1). verify on main, then delete the branches.", "Meena, Kiran · 2 min",
-    cmd('mkdir -p "$MRUN/meena"\n' + mr("merge", "complete", "after-merge", "cleanup"))
+    cmd('rm -rf "$MRUN/meena" && mkdir -p "$MRUN/meena"\n' + mr("merge", "complete", "after-merge", "cleanup"))
     + check(MRS["merge"], "== priorauth-aging", "317874b", "== priorauth-api", "e7b9a6d", tag="real")
     + check(MRS["after-merge"], "v1.0.1", "v1.2.1", "verify on main: passed", "workspace clean", tag="real")
     + check(MRS["cleanup"], "Deleted branch fix/holidays-across-years", tag="real")
@@ -520,9 +557,47 @@ TROUBLE = [
     ["<code>mvn</code> fails inside the agent's session with <code>ClassNotFoundException: …Launcher</code>", "seen in the two-repo run: Git Bash's <code>mvn</code> broke in the agent's shell; the agent ran <code>verify.cmd</code> and said so", "nothing to do; the checks node ran <code>verify.sh</code> and passed"],
     ["<code>verify.sh: $'\\r': command not found</code>", "the script got CRLF endings (<code>core.autocrlf=true</code>)", "keep the team's <code>.gitattributes</code> (<code>*.sh text eol=lf</code>); not hit in the course"],
     ["<code>release version 21 not supported</code> from Maven", "an older JDK first on PATH", "step 3's <code>JAVA_HOME</code> and <code>PATH</code>; not hit in the course"],
+    ["the jar check prints nothing for <code>asOf=%2B999999999-12-31</code>", "measured in the re-run from this page: the code looped on the far date, using a full CPU core; before <code>--max-time</code> the curl waited 18 min", "a defect like the 500: reject (step 15) and say so in the fix's message"],
+    [f"<code>{RERUN['guide_failed']['step 17']}</code>", f"the agent named the branch differently (measured: <code>{RERUN['branch']}</code>) and a command had the course's name", "use <code>$BRANCH</code> from step 13 (25), as every command here now does"],
+    [f"the first run registers <code>{RERUN['project']}</code>, not <code>java-workspace</code>", "a folder project with that name already exists (an earlier run from another folder; measured)", "harmless: runs are kept per project"],
     ["the jar check can't start: port in use", "an earlier java is still running on 8091–8093", "stop it, or change <code>--server.port</code>"],
     ["<code>archon project list</code> shows old projects", "there is no <code>project remove</code> in 0.13.2 (the course's list has an older <code>_local/priorauth-api</code>)", "harmless; each run names its project"],
 ]
+# What each AI node hands Claude Code: the shared mapping (asserted against tools/data/docs/), and what both runs' sessions did.
+claude_facts()
+
+
+def _sessions(log, rid):
+    """The (node, session origin) of each agent/loop node start, and the tool calls, of one run's transcript."""
+    starts, tools = [], {}
+    for ln in log.read_text(encoding="utf-8").splitlines():
+        d = json.loads(ln)
+        if d.get("workflow_id") != rid:
+            continue
+        if d.get("type") == "node_start" and d["execution"]["node"]["kind"] in ("agent", "loop"):
+            starts.append(d["step"])
+        if d.get("type") == "provider_event" and d["event"].get("type") == "tool_call":
+            tools[d["event"]["name"]] = tools.get(d["event"]["name"], 0) + 1
+    assert starts and not set(tools) & {"Skill", "Task", "Agent"}, (rid, tools)
+    return starts, tools
+
+
+CC_RUNS = []
+for _label, _dir, _rid, _wf, _ws in [("One request, one repo · <code>request-to-pr</code>", "java-run", JRID, "tools/data/java/files/.archon/workflows/team/request-to-pr/request-to-pr.yaml", "java-workspace"),
+                                     ("One bug, two repos · <code>fix-across-repos</code>", "multirepo-run", MRID, "tools/data/multirepo/files/.archon/workflows/team/fix-across-repos/fix-across-repos.yaml", "multirepo-workspace")]:
+    _log = next((HW / _dir / "logs").glob(f"{_rid}*.jsonl"))
+    _starts, _tools = _sessions(_log, _rid)
+    assert not re.search(r"^\s*(skills|agents|hooks|mcp|plugins):", (ROOT / _wf).read_text(encoding="utf-8"), re.M)
+    assert not (HW / _ws / ".claude").exists() and (HW / _ws / "CLAUDE.md").exists()
+    CC_RUNS.append([_label, f"{len(_starts)}: " + ", ".join(f"<code>{n}</code>" for n in _starts),
+                    ", ".join(f"{k} {v}" for k, v in sorted(_tools.items(), key=lambda kv: -kv[1]))])
+ref_claude = card("claude", "What each AI node hands Claude Code",
+                  "<p>Archon's Claude provider uses the Claude Agent SDK, which starts Claude Code as a background process: <b>each agent node, and each loop pass, is one Claude Code session</b> in the workspace, with your claude.ai login. The node's fields decide what that session gets. The third column is the request-to-pr run (Part B).</p>"
+                  + table(["In the workflow", "What Claude Code gets", "In the course's run"], [list(r_) for r_ in CLAUDE_MAP], "kv")
+                  + "<p style=\"margin-top:14px\"><b>What the two runs' sessions did</b>, from their transcripts (real):</p>"
+                  + table(["Run", "AI node runs, in order", "Tool calls"], CC_RUNS)
+                  + note("Neither workflow names <code>skills:</code>, <code>agents:</code>, <code>hooks:</code> or <code>mcp:</code>, and neither workspace has a <code>.claude/</code> folder, so no session called <code>Skill</code> or <code>Task</code>: the one Claude Code file both runs relied on is the workspace's <code>CLAUDE.md</code>. Your own <code>~/.claude/</code> (its <code>CLAUDE.md</code>, agents and hooks) loads too unless <code>.archon/config.yaml</code> sets <code>settingSources: [project]</code> under <code>assistants.claude</code>. More: <a href=\"archon-introduction.html#s11\">the introduction, step 11</a>."))
+
 ref_trouble = card("trouble", "Troubleshooting", "<p>Every symptom marked measured happened in the course's runs; the rest are what the setup guards against.</p>"
                    + table(["You see", "Why", "Do"], TROUBLE))
 ref_cost = card("cost", "What it cost, how long it took", "<p>Reported by Archon at the end of each run (API-price equivalents; the course ran on a claude.ai plan, so nothing was billed per token). Time is the sum of the recorded commands, waits included.</p>"
@@ -533,7 +608,21 @@ ref_cost = card("cost", "What it cost, how long it took", "<p>Reported by Archon
                     ["One bug, two repos", "<code>fix-across-repos</code>", f"${COST['fix-across-repos']:.2f}", f"{MIN['multirepo']} min"]]))
 ref_again = card("again", "Start over", "<p>Each run's folders can be deleted and rebuilt from step 5 or step 20. Archon keeps the runs under <code>~/.archon/workspaces/_folder/&lt;workspace&gt;/</code> and the project in its database; a new first run from the same path reuses the project.</p>"
                  + cmd('rm -rf "$JRUN" "$MRUN"\narchon project list'))
-real = card("real", "What is real here", f"<p>Every command and every Check box is from the course's real runs with Archon {VERSION} and Claude Code on a claude.ai login, Windows 10, 4 Nov 2026 (the tool versions in step 1: 5 Nov). The commands are the recorded ones with the run folders written as <code>$JRUN</code>/<code>$MRUN</code>, the run id as <code>$RUN</code>, and the recorded multi-line scripts in a subshell; the file copies and the starter split are the course's setup scripts written as shell, and Parts B and C's setup (steps 5–8, 20–23) was re-run from this page in a fresh folder on 5 Nov 2026: same trees as the course's remotes, same checks. Commit ids other than the starter's (<code>d9aa178</code>, <code>49fe266</code>) will differ on your machine. The macOS commands were not run. Your agent will word things differently, and may take another number of passes; the gates are where you decide. The cast (Ravi Menon, Kiran Rao, Meena Iyer) is fictional.</p>")
+R = RERUN
+assert R["guards_ok"] == ["answer", "requirements.review-requirements", "approve-plan", "approve-change", "approve-change"]
+assert R["jar_check_2_codes"] == ["200", "400", "400"] and R["fix_green"] and R["review"] == "READY" and R["requirements_iterations"] == 2
+ref_rerun = card("rerun", "Re-run from this page", f"<p>On {R['date']} every command box of steps 3–19, as first published, ran in order in one Git Bash session in a fresh folder, with the same answers and decisions. Before each gate a check stopped the script if the run was paused anywhere else; it never was. The agents wrote other code, so the details differ, and the guide's commands changed where they had assumed the 4 Nov run's details.</p>"
+    + table(["Step", "4 Nov (the Check boxes)", "6 Nov, from this page"], [
+        ["10 · the project", "<code>java-workspace</code>", f"<code>{R['project']}</code> (the name was taken)"],
+        ["12 · requirements", "rejected once, approved on revision 2", f"the same: {R['requirements_iterations']} iterations"],
+        ["13 · branch, commit", "<code>request-age/pending-age</code>, <code>a3972b4</code>", f"<code>{R['branch']}</code>, <code>{R['commits']['feature']}</code>; review {R['review']}"],
+        ["14 · far-future date", "500", "no answer: a busy loop, stopped by hand after 18 min"],
+        ["16 · the fix", "<code>4ea9e9d</code>, both bad dates 400", f"<code>{R['commits']['fix']}</code>, codes {' / '.join(R['jar_check_2_codes'])}"],
+        ["17–18 · push, merge, tidy", "worked", f"<b>failed</b>: the course's branch name was hardcoded (now <code>$BRANCH</code>); finished by hand with the fixed commands: merge <code>{R['finished_by_hand']['merge']}</code>, verify on main passed, {R['finished_by_hand']['tests_on_main']} tests"],
+        ["18 · verify on main", "passed, 21 tests", "printed passed on the unmerged main, listing stale test reports; the step now deletes <code>target/</code> first"],
+        ["reported cost", "$3.73 + $0.63 + $0.83", f"${R['costs']['request-to-pr']:.2f} + ${R['costs']['archon-implement']:.2f} + ${R['costs']['archon-plan']:.2f}"]])
+    + "<p>The fixes are in every command above: <code>$BRANCH</code> (steps 13, 16–18, 25, 28), <code>--max-time 20</code> on the jar checks, <code>rm -rf priorauth-api/target</code> before verify on main, and merge steps that clear an earlier attempt's clone. Part C was not re-run end to end; its setup was (steps 20–23).</p>")
+real = card("real", "What is real here", f"<p>Every command and every Check box is from the course's real runs with Archon {VERSION} and Claude Code on a claude.ai login, Windows 10, 4 Nov 2026 (the tool versions in step 1: 5 Nov). The commands are the recorded ones, changed where the re-run from this page (6 Nov) showed they depended on that run's details (<a href='#rerun'>Re-run from this page</a>), and with the run folders written as <code>$JRUN</code>/<code>$MRUN</code>, the run id as <code>$RUN</code>, and the recorded multi-line scripts in a subshell; the file copies and the starter split are the course's setup scripts written as shell, and Parts B and C's setup (steps 5–8, 20–23) was re-run from this page in a fresh folder on 5 Nov 2026: same trees as the course's remotes, same checks. Commit ids other than the starter's (<code>d9aa178</code>, <code>49fe266</code>) will differ on your machine. The macOS commands were not run. Your agent will word things differently, and may take another number of passes; the gates are where you decide. The cast (Ravi Menon, Kiran Rao, Meena Iyer) is fictional.</p>")
 
 hero = f'''<section class="hero" id="top">
   <div>
@@ -564,12 +653,12 @@ main = (hero + phase("--setup", "A · Your machine", "steps 1–4 · once per ma
         + "".join(S[4:19])
         + phase("--review", "C · One bug, two repos", f"steps 20–28 · fix-across-repos in priorauth-workspace/ · the story: <a href='archon-hello-world-java/{TWOP}.html'>two-repo page</a>")
         + "".join(S[19:28])
-        + phase("--ship", "Reference", "troubleshooting, cost, start over") + ref_trouble + ref_cost + ref_again + real
+        + phase("--ship", "Reference", "what Claude Code gets, troubleshooting, cost, start over") + ref_claude + ref_trouble + ref_cost + ref_again + ref_rerun + real
         + plain("A stays done; B and C are independent. Each starts from an empty folder and ends with the change merged and verified on main, so you can run either one alone (after A), or both."))
 footer = ('<footer class="foot">Archon end to end · Archon ' + VERSION + ' · <a href="archon-workspace-setup.html">setup, explained</a> · '
           f'<a href="archon-hello-world-java/{RUNP}.html">one request, one repo</a> · <a href="archon-hello-world-java/{TWOP}.html">one bug, two repos</a> · '
           '<a href="index.html">all course pages</a> · <a href="#top">Back to top</a></footer>\n')
 html_ = page("Archon End to End", f"Every command of the course's two real Archon {VERSION} runs, from installing the tools to the merge: one request in one repo, one bug across two repos, with the real output after each step.",
              "Archon end to end", "machine · one request · one bug · real output", len(STEPS),
-             rail(STEPS, PH, [("trouble", "Troubleshooting"), ("cost", "Cost and time"), ("again", "Start over"), ("real", "What is real here")]), main, footer)
+             rail(STEPS, PH, [("claude", "What Claude Code gets"), ("trouble", "Troubleshooting"), ("cost", "Cost and time"), ("again", "Start over"), ("rerun", "Re-run from this page"), ("real", "What is real here")]), main, footer)
 write(ROOT / "archon-end-to-end-guide.html", html_)
