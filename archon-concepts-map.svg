@@ -1,6 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1660 780" width="1660" height="780" role="img" aria-labelledby="t1"><title id="t1">Archon concepts: where things live, how one run flows, who decides what</title>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1660 1060" width="1660" height="1060" role="img" aria-labelledby="t1"><title id="t1">Archon concepts: where things live, how one run flows, who decides what, and what an AI node hands Claude Code</title>
 <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#6B6560"/></marker></defs>
-<rect width="1660" height="780" fill="#FFFFFF"/>
+<rect width="1660" height="1060" fill="#FFFFFF"/>
 <text x="30" y="42" font-size="24" font-weight="700" fill="#1C1917" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">Archon concepts in one picture</text>
 <text x="30" y="66" font-size="12.5" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">Three questions a beginner asks: where does everything live, how does one run flow, and who decides what. Analogy throughout: a restaurant kitchen with a recipe card for every dish.</text>
 <rect x="30" y="92" width="500" height="650" rx="16" fill="#FAFAF9" stroke="#E7E5E4" stroke-width="1"/>
@@ -156,7 +156,7 @@
 <rect x="1168" y="416" width="444" height="84" rx="10" fill="#FFFFFF" stroke="#6D28D9" stroke-width="1.8"/>
 <text x="1180" y="437" font-size="13" font-weight="700" fill="#6D28D9" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">The agent · the cooks</text>
 <text x="1180" y="456" font-size="10.5" font-weight="400" fill="#1C1917" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">Claude Code (or Codex, Pi) inside AI nodes only</text>
-<text x="1180" y="472" font-size="10.5" font-weight="400" fill="#1C1917" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">reads CLAUDE.md; a fresh session per node or loop pass</text>
+<text x="1180" y="472" font-size="10.5" font-weight="400" fill="#1C1917" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">reads CLAUDE.md; one session per node or loop pass</text>
 <text x="1180" y="488" font-size="10" font-weight="400" fill="#1C1917" text-anchor="start" font-family="ui-monospace, Consolas, Menlo, monospace">tiers: small = haiku · medium = sonnet · large = opus</text>
 <rect x="1168" y="512" width="444" height="84" rx="10" fill="#FFFFFF" stroke="#15803D" stroke-width="1.8"/>
 <text x="1180" y="533" font-size="13" font-weight="700" fill="#15803D" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">The code · the timer and the thermometer</text>
@@ -170,5 +170,55 @@
 <text x="1180" y="678" font-size="10.5" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">what the agent committed stays on its branch.</text>
 <text x="1180" y="700" font-size="10.5" font-weight="700" fill="#1C1917" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">Every answer is kept with the run:</text>
 <text x="1180" y="715" font-size="10.5" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">who said what, and when, is in archon.db and the transcript.</text>
-<text x="1630" y="766" font-size="10" font-weight="400" fill="#6B6560" text-anchor="end" font-family="'Segoe UI', system-ui, sans-serif">Archon 0.13.2 (29 Oct 2026) and its docs at archon.diy · node ids and settings read from the course&#x27;s request-to-pr.yaml · analogies ours</text>
+<rect x="30" y="762" width="1600" height="262" rx="16" fill="#FAFAF9" stroke="#E7E5E4" stroke-width="1"/>
+<text x="48" y="792" font-size="17" font-weight="700" fill="#6D28D9" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">What an AI node hands Claude Code</text>
+<text x="48" y="812" font-size="11.5" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">each prompt, command or loop pass is one Claude Code session, started by Archon&#x27;s Claude provider through the Claude Agent SDK, in the workspace, with your login</text>
+<rect x="48" y="832" width="150" height="44" rx="8" fill="#FFFFFF" stroke="#6D28D9" stroke-width="1.8"/>
+<text x="58" y="851" font-size="12" font-weight="700" fill="#1C1917" text-anchor="start" font-family="ui-monospace, Consolas, Menlo, monospace">scan</text>
+<text x="58" y="867" font-size="10" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">an AI node in the YAML</text>
+<path d="M198 854 L236 854" fill="none" stroke="#6D28D9" stroke-width="1.6" marker-end="url(#ah)"/>
+<rect x="238" y="832" width="300" height="44" rx="8" fill="#FFFFFF" stroke="#0E7490" stroke-width="1.8"/>
+<text x="250" y="851" font-size="12" font-weight="700" fill="#0E7490" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">Archon · the Claude provider</text>
+<text x="250" y="867" font-size="10" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">Claude Agent SDK · bypassPermissions</text>
+<path d="M388 876 L388 892" fill="none" stroke="#6D28D9" stroke-width="1.6" marker-end="url(#ah)"/>
+<rect x="48" y="894" width="490" height="92" rx="8" fill="#FFFFFF" stroke="#6D28D9" stroke-width="2"/>
+<text x="60" y="914" font-size="12.5" font-weight="700" fill="#6D28D9" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">a Claude Code session in java-workspace/</text>
+<rect x="60" y="924" width="52" height="20" rx="10" fill="#F5F5F4" stroke="#6D28D9" stroke-width="1"/>
+<text x="67" y="938" font-size="10.5" font-weight="600" fill="#6D28D9" text-anchor="start" font-family="ui-monospace, Consolas, Menlo, monospace">prompt</text>
+<rect x="120" y="924" width="46" height="20" rx="10" fill="#F5F5F4" stroke="#6D28D9" stroke-width="1"/>
+<text x="127" y="938" font-size="10.5" font-weight="600" fill="#6D28D9" text-anchor="start" font-family="ui-monospace, Consolas, Menlo, monospace">tools</text>
+<rect x="174" y="924" width="52" height="20" rx="10" fill="#F5F5F4" stroke="#6D28D9" stroke-width="1"/>
+<text x="181" y="938" font-size="10.5" font-weight="600" fill="#6D28D9" text-anchor="start" font-family="ui-monospace, Consolas, Menlo, monospace">skills</text>
+<rect x="235" y="924" width="72" height="20" rx="10" fill="#F5F5F4" stroke="#6D28D9" stroke-width="1"/>
+<text x="242" y="938" font-size="10.5" font-weight="600" fill="#6D28D9" text-anchor="start" font-family="ui-monospace, Consolas, Menlo, monospace">subagents</text>
+<rect x="314" y="924" width="46" height="20" rx="10" fill="#F5F5F4" stroke="#6D28D9" stroke-width="1"/>
+<text x="321" y="938" font-size="10.5" font-weight="600" fill="#6D28D9" text-anchor="start" font-family="ui-monospace, Consolas, Menlo, monospace">hooks</text>
+<rect x="368" y="924" width="33" height="20" rx="10" fill="#F5F5F4" stroke="#6D28D9" stroke-width="1"/>
+<text x="375" y="938" font-size="10.5" font-weight="600" fill="#6D28D9" text-anchor="start" font-family="ui-monospace, Consolas, Menlo, monospace">MCP</text>
+<rect x="410" y="924" width="72" height="20" rx="10" fill="#F5F5F4" stroke="#6D28D9" stroke-width="1"/>
+<text x="417" y="938" font-size="10.5" font-weight="600" fill="#6D28D9" text-anchor="start" font-family="ui-monospace, Consolas, Menlo, monospace">CLAUDE.md</text>
+<text x="60" y="964" font-size="10.5" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">each one set per node by the fields on the right</text>
+<text x="60" y="979" font-size="10.5" font-weight="400" fill="#15803D" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">bash · script · wait: no session; Archon runs them</text>
+<text x="572" y="854" font-size="11" font-weight="700" fill="#1C1917" text-anchor="start" font-family="ui-monospace, Consolas, Menlo, monospace">prompt: · command:</text>
+<text x="742" y="854" font-size="10.5" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">one session; command: is a prompt file, not a slash command</text>
+<text x="572" y="878" font-size="11" font-weight="700" fill="#1C1917" text-anchor="start" font-family="ui-monospace, Consolas, Menlo, monospace">loop + fresh_context</text>
+<text x="742" y="878" font-size="10.5" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">a new session per pass (implement: 1 pass)</text>
+<text x="572" y="902" font-size="11" font-weight="700" fill="#1C1917" text-anchor="start" font-family="ui-monospace, Consolas, Menlo, monospace">context:</text>
+<text x="742" y="902" font-size="10.5" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">a new, continued or forked session (questions continued scan&#x27;s)</text>
+<text x="572" y="926" font-size="11" font-weight="700" fill="#1C1917" text-anchor="start" font-family="ui-monospace, Consolas, Menlo, monospace">output_format:</text>
+<text x="742" y="926" font-size="10.5" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">a StructuredOutput tool call (questions, plan, review)</text>
+<text x="572" y="950" font-size="11" font-weight="700" fill="#1C1917" text-anchor="start" font-family="ui-monospace, Consolas, Menlo, monospace">allowed_tools</text>
+<text x="742" y="950" font-size="10.5" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">the only limits: bypassPermissions, so no prompts</text>
+<text x="1098" y="854" font-size="11" font-weight="700" fill="#1C1917" text-anchor="start" font-family="ui-monospace, Consolas, Menlo, monospace">skills: [name]</text>
+<text x="1268" y="854" font-size="10.5" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">only those skills, from .claude/skills/; none if left out</text>
+<text x="1098" y="878" font-size="11" font-weight="700" fill="#1C1917" text-anchor="start" font-family="ui-monospace, Consolas, Menlo, monospace">agents:</text>
+<text x="1268" y="878" font-size="10.5" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">subagents that the node&#x27;s agent starts with the Task tool</text>
+<text x="1098" y="902" font-size="11" font-weight="700" fill="#1C1917" text-anchor="start" font-family="ui-monospace, Consolas, Menlo, monospace">hooks: · mcp: · plugins:</text>
+<text x="1268" y="902" font-size="10.5" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">SDK hooks, MCP servers, plugins: for this node only</text>
+<text x="1098" y="926" font-size="11" font-weight="700" fill="#1C1917" text-anchor="start" font-family="ui-monospace, Consolas, Menlo, monospace">CLAUDE.md</text>
+<text x="1268" y="926" font-size="10.5" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">read in every session: project + user (settingSources)</text>
+<text x="1098" y="950" font-size="11" font-weight="700" fill="#1C1917" text-anchor="start" font-family="ui-monospace, Consolas, Menlo, monospace">bash: · script: · wait:</text>
+<text x="1268" y="950" font-size="10.5" font-weight="400" fill="#6B6560" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">no Claude at all: Archon runs it, or waits for you</text>
+<text x="572" y="984" font-size="10.5" font-weight="600" fill="#0E7490" text-anchor="start" font-family="'Segoe UI', system-ui, sans-serif">In the course&#x27;s run: no skills:, agents: or hooks: and no .claude/ folder; the agents called Read, PowerShell, Write, Grep, Glob, StructuredOutput, Edit. No Skill, no Task.</text>
+<text x="1630" y="1046" font-size="10" font-weight="400" fill="#6B6560" text-anchor="end" font-family="'Segoe UI', system-ui, sans-serif">Archon 0.13.2 (29 Oct 2026) and its docs at archon.diy · node ids and settings read from the course&#x27;s request-to-pr.yaml · analogies ours</text>
 </svg>

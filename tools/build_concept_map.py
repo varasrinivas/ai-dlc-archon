@@ -1,7 +1,7 @@
 """Build archon-concepts-map.svg: Archon's concepts in one standalone picture (the AI-DLC course's aidlc-concepts-map.svg).
 
 Three columns answer a beginner's three questions: where does everything live, how does one run flow,
-and who decides what. Fixed light colours (it is opened on its own, not inside a themed page).
+and who decides what; a bottom panel shows what each AI node hands Claude Code (pagekit.CLAUDE_MAP, condensed). Fixed light colours (it is opened on its own, not inside a themed page).
 
 The middle column is drawn from the team workflow file (node ids, kinds, the loop checks), the left one is
 checked against the captured ~/.archon inventory, so neither can drift from what the run actually had.
@@ -15,7 +15,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
 from cli_parse import workflow_nodes  # noqa: E402
-from pagekit import E, ROOT, write  # noqa: E402
+from pagekit import CLAUDE_MAP, E, ROOT, claude_facts, write  # noqa: E402
 
 WF_TEXT = (ROOT / "tools/data/java/files/.archon/workflows/team/request-to-pr/request-to-pr.yaml").read_text(encoding="utf-8")
 NODES = {n["id"]: n for n in workflow_nodes(WF_TEXT)}
@@ -45,6 +45,34 @@ assert ARTS == ["implementation.md", "plan.md", "questions.md", "requirements.md
 CLI = json.loads((ROOT / "tools/data/cli/cli.json").read_text(encoding="utf-8"))
 VERSION = re.search(r"Archon CLI v([\d.]+)", CLI["version"]["out"]).group(1)
 assert VERSION == "0.13.2"
+
+# The bottom panel: CLAUDE_MAP condensed (its documented claims asserted against tools/data/docs/), and what the run's
+# Claude sessions actually called, from the request-to-pr transcript.
+claude_facts()
+_LOG = next((ROOT / "archon-hello-world-java/java-run/logs").glob(f"{RID}*.jsonl")).read_text(encoding="utf-8")
+TOOLS = {}
+for _l in _LOG.splitlines():
+    _d = json.loads(_l)
+    if _d.get("type") == "provider_event" and _d["event"].get("type") == "tool_call":
+        TOOLS[_d["event"]["name"]] = TOOLS.get(_d["event"]["name"], 0) + 1
+assert "StructuredOutput" in TOOLS and not set(TOOLS) & {"Skill", "Task", "Agent"}, TOOLS
+assert not re.search(r"^\s*(skills|agents|hooks|mcp):", WF_TEXT, re.M) and not (_WS / ".claude").exists()
+CC_ROWS = [("prompt: · command:", "one session; command: is a prompt file, not a slash command"),
+           ("loop + fresh_context", "a new session per pass (implement: 1 pass)"),
+           ("context:", "a new, continued or forked session (questions continued scan's)"),
+           ("output_format:", "a StructuredOutput tool call (questions, plan, review)"),
+           ("allowed_tools", "the only limits: bypassPermissions, so no prompts"),
+           ("skills: [name]", "only those skills, from .claude/skills/; none if left out"),
+           ("agents:", "subagents that the node's agent starts with the Task tool"),
+           ("hooks: · mcp: · plugins:", "SDK hooks, MCP servers, plugins: for this node only"),
+           ("CLAUDE.md", "read in every session: project + user (settingSources)"),
+           ("bash: · script: · wait:", "no Claude at all: Archon runs it, or waits for you")]
+_MAPTXT = re.sub(r"<[^>]+>", "", " ".join(a + " " + b + " " + c for a, b, c in CLAUDE_MAP))
+for _f in ["prompt:", "command: scan", "slash command", "fresh_context", "implement: 1 pass", "context:", "questions continued scan's session",
+           "output_format:", "StructuredOutput", "3 calls: questions, plan, review", "allowed_tools", "bypassPermissions", "skills: [name]",
+           ".claude/skills/", "no skills", "agents:", "Task", "hooks:", "mcp:", "plugins:", "for that node only", "CLAUDE.md", "settingSources",
+           "bash:", "script:", "wait:", "no Claude at all"]:
+    assert _f in _MAPTXT, _f  # each condensed row says what the full mapping says
 
 INK, INK2, LINE, PANEL, SOFT = "#1C1917", "#6B6560", "#E7E5E4", "#FAFAF9", "#F5F5F4"
 AI, CODE, WAIT, STOP = "#6D28D9", "#15803D", "#D97706", "#9F1239"
@@ -230,7 +258,7 @@ cards = [
       ("records transcript, artifacts, tokens and cost per run", False)]),
     ("The agent · the cooks", AI, False,
      [("Claude Code (or Codex, Pi) inside AI nodes only", False),
-      ("reads CLAUDE.md; a fresh session per node or loop pass", False),
+      ("reads CLAUDE.md; one session per node or loop pass", False),
       ("tiers: small = haiku · medium = sonnet · large = opus", True)]),
     ("The code · the timer and the thermometer", CODE, False,
      [("until_bash: ./scripts/verify.sh ends the loop", True),
@@ -254,12 +282,49 @@ t(X3 + 12, y + 70, "what the agent committed stays on its branch.", 10.5, 400, I
 t(X3 + 12, y + 92, "Every answer is kept with the run:", 10.5, 700, INK)
 t(X3 + 12, y + 107, "who said what, and when, is in archon.db and the transcript.", 10.5, 400, INK2)
 
-t(1630, 766, f"Archon {VERSION} (29 Oct 2026) and its docs at archon.diy · node ids and settings read from the course's "
+# ==== bottom: what an AI node hands Claude Code ===========================================
+YB = 762
+r(30, YB, 1600, 262, fill=PANEL, stroke=LINE, sw=1, rx=16)
+t(48, YB + 30, "What an AI node hands Claude Code", 17, 700, AI)
+t(48, YB + 50, "each prompt, command or loop pass is one Claude Code session, started by Archon's Claude provider through the "
+               "Claude Agent SDK, in the workspace, with your login", 11.5, 400, INK2)
+# the chain: node → Archon → session
+r(48, YB + 70, 150, 44, stroke=AI)
+t(58, YB + 89, "scan", 12, 700, mono=True)
+t(58, YB + 105, "an AI node in the YAML", 10, 400, INK2)
+a(198, YB + 92, 236, YB + 92, col=AI)
+r(238, YB + 70, 300, 44, stroke=PH["plan"])
+t(250, YB + 89, "Archon · the Claude provider", 12, 700, PH["plan"])
+t(250, YB + 105, "Claude Agent SDK · bypassPermissions", 10, 400, INK2)
+a(388, YB + 114, 388, YB + 130, col=AI)
+r(48, YB + 132, 490, 92, stroke=AI, sw=2)
+t(60, YB + 152, "a Claude Code session in java-workspace/", 12.5, 700, AI)
+for i, chip in enumerate(["prompt", "tools", "skills", "subagents", "hooks", "MCP", "CLAUDE.md"]):
+    cx = 60 + sum(len(c) * 6.4 + 22 for c in ["prompt", "tools", "skills", "subagents", "hooks", "MCP", "CLAUDE.md"][:i])
+    r(round(cx), YB + 162, round(len(chip) * 6.4 + 14), 20, fill=SOFT, stroke=AI, sw=1, rx=10)
+    t(round(cx + 7), YB + 176, chip, 10.5, 600, AI, mono=True)
+assert 60 + sum(len(c) * 6.4 + 22 for c in ["prompt", "tools", "skills", "subagents", "hooks", "MCP", "CLAUDE.md"]) < 538
+t(60, YB + 202, "each one set per node by the fields on the right", 10.5, 400, INK2)
+t(60, YB + 217, "bash · script · wait: no session; Archon runs them", 10.5, 400, CODE)
+# the mapping, two columns
+for col in range(2):
+    x = 572 + col * 526
+    for i, (f, d) in enumerate(CC_ROWS[col * 5:col * 5 + 5]):
+        y = YB + 92 + i * 24
+        t(x, y, f, 11, 700, INK, mono=True)
+        assert len(f) * 6.6 < 168 and 170 + len(d) * 5.4 < 515, (f, d)
+        t(x + 170, y, d, 10.5, 400, INK2)
+_TOOLS_TXT = ", ".join(k for k, _ in sorted(TOOLS.items(), key=lambda kv: -kv[1]))
+_RUNLINE = f"In the course's run: no skills:, agents: or hooks: and no .claude/ folder; the agents called {_TOOLS_TXT}. No Skill, no Task."
+assert len(_RUNLINE) * 5.4 < 1040, _RUNLINE
+t(572, YB + 222, _RUNLINE, 10.5, 600, PH["plan"])
+
+t(1630, 1046, f"Archon {VERSION} (29 Oct 2026) and its docs at archon.diy · node ids and settings read from the course's "
              "request-to-pr.yaml · analogies ours", 10, 400, INK2, anchor="end")
 
-svg = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1660 780" width="1660" height="780" role="img" aria-labelledby="t1">'
-       '<title id="t1">Archon concepts: where things live, how one run flows, who decides what</title>\n'
+svg = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1660 1060" width="1660" height="1060" role="img" aria-labelledby="t1">'
+       '<title id="t1">Archon concepts: where things live, how one run flows, who decides what, and what an AI node hands Claude Code</title>\n'
        f'<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">'
        f'<path d="M0 0 L10 5 L0 10 z" fill="{INK2}"/></marker></defs>\n'
-       '<rect width="1660" height="780" fill="#FFFFFF"/>\n' + "\n".join(P) + "\n</svg>\n")
+       '<rect width="1660" height="1060" fill="#FFFFFF"/>\n' + "\n".join(P) + "\n</svg>\n")
 write(ROOT / "archon-concepts-map.svg", svg)
