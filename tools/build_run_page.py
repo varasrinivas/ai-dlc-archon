@@ -16,7 +16,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 from cli_parse import workflow_nodes  # noqa: E402
 from diagrams import workflow_dag  # noqa: E402
-from pagekit import (ARCHON_WORDS, E, ROOT, card, disk, gloss, gate, io, note, page, phase, plain, rail, see, shell_group, step, table, tabs,  # noqa: E402
+from pagekit import (ARCHON_WORDS, CLAUDE_MAP, E, ROOT, card, claude_facts, disk, gloss, gate, io, note, page, phase, plain, rail, see, shell_group, step, table, tabs,  # noqa: E402
                      three, write, you)
 
 DEST = ROOT / "archon-hello-world-java"
@@ -253,6 +253,7 @@ ST.append(step(7, "Plan", "--plan", "scan · questions", "Start the run from the
     └── <span class="n">questions.md</span>''', "On disk now (not in either repo)")}
 {three([("The AI asked", "seven questions: holidays, how to count, weekends, what over 5 means, which day is today, field names, the version"),
         ("It suggested", "an answer for each, with the reason"), ("Nobody decided yet", "the run is paused; it holds no process")])}
+{note("Each AI node here (<code>scan</code>, then <code>questions</code>, which continued <code>scan</code>'s session) is one Claude Code session in the workspace, reading its <code>CLAUDE.md</code>. Every session of the three runs, its prompt, model and tool calls: <a href='#claude'>What each AI node handed Claude Code</a>.")}
 {note("<code>_folder/java-workspace</code>: the run's transcript and artifacts live under the folder project in <code>~/.archon/workspaces/</code>. No worktree, no branch: Kiran's clones are the checkouts the agent will work in. A one-repo project with <code>.archon/</code> inside the repo would get a worktree per run instead; the introduction's step 7 compares the two.")}
 """))
 
@@ -421,6 +422,64 @@ hero = f'''<section class="hero" id="top">
   </aside>
 </section>
 '''
+# What each AI node handed Claude Code: the shared mapping (asserted against tools/data/docs/), and, from the three
+# transcripts, every Claude Code session the course's runs started and the tools its agent called.
+claude_facts()
+
+
+def cc_sessions(rid):
+    """[(node, prompt source, model asked for, session origin, {tool: count})] for each agent/loop node start of one run."""
+    log = next((RUN / "logs").glob(f"{rid}*.jsonl")).read_text(encoding="utf-8")
+    rows, subtasks = [], set()
+    for ln in log.splitlines():
+        d = json.loads(ln)
+        if d.get("workflow_id") != rid:
+            continue
+        if d.get("type") == "node_start" and d["execution"]["node"]["kind"] in ("agent", "loop"):
+            n, b = d["execution"]["node"], d["execution"]["binding"]
+            assert b["provider"] == "claude" and not n.get("skills"), (rid, n, b)
+            cmd = n.get("command") or (n.get("source") or {}).get("name")
+            src = (f"<code>command: {cmd.rsplit('::', 1)[1]}</code> " + ("(the team's <code>commands/</code>)" if "__archon_pack__project:" in cmd else "(bundled sdlc pack)")) if cmd else "<code>prompt:</code> in the YAML"
+            rows.append([d["step"], src, b["model"].get("requested") or "default", b["sessionOrigin"], {}])
+        if d.get("type") == "provider_event":
+            e = d["event"]
+            if e.get("type") == "tool_call":
+                rows[-1][4][e["name"]] = rows[-1][4].get(e["name"], 0) + 1
+            if e.get("type") == "subtask":
+                subtasks.add(e.get("taskType") or "")
+    assert rows and not any({"Skill", "Task", "Agent"} & set(r[4]) for r in rows), rid
+    assert subtasks <= {"local_bash", ""}, subtasks  # background shell commands of the session, not subagents
+    return rows
+
+
+CC = {rid: cc_sessions(rid) for rid in (RID, FIX_ID, PLAN_ID)}
+assert [(r[0], r[3]) for r in CC[RID]] == [("scan", "fresh"), ("questions", "resumed"), ("write-requirements", "fresh"), ("write-requirements", "resumed"),
+                                         ("plan", "fresh"), ("implement", "fresh"), ("review", "fresh")]
+assert [(r[0], r[2]) for r in CC[PLAN_ID]] == [("stage__plan", "opus"), ("attend__decide", "sonnet")], CC[PLAN_ID]
+assert [r[0] for r in CC[FIX_ID]] == ["implement"] and CC[FIX_ID][0][2] == "opus"
+assert sum(r[4].get("StructuredOutput", 0) for r in CC[RID]) == 3
+assert [r[0] for r in CC[RID] if "team's" in r[1]] == ["scan", "implement"] and "bundled" in CC[FIX_ID][0][1]
+assert not re.search(r"^\s*(skills|agents|hooks|mcp|plugins):", WF_TEXT, re.M) and not (WS / ".claude").exists() and (WS / "CLAUDE.md").exists()
+CC_STEP = {"scan": 7, "questions": 7, "write-requirements": 8, "plan": 10, "implement": 11, "review": 12}
+cc_rows, _seen = [], set()
+for rid, label in [(RID, "<code>request-to-pr</code>"), (FIX_ID, "<code>archon-implement</code>, step 15"), (PLAN_ID, "<code>archon-plan</code>, step 19")]:
+    for node, src, model, origin, tools in CC[rid]:
+        nm = node.split(".")[-1]
+        if rid == RID:
+            nm_txt = f"<code>{nm}</code>" + (" (revision 2)" if (rid, nm) in _seen else "") + f", step {CC_STEP[nm] + (1 if (rid, nm) in _seen else 0)}"
+        else:
+            nm_txt = f"<code>{nm}</code>"
+        _seen.add((rid, nm))
+        cc_rows.append([label, nm_txt, src, model, {"fresh": "new", "resumed": "continued the one before"}[origin],
+                        ", ".join(f"{k} {v}" for k, v in sorted(tools.items(), key=lambda kv: -kv[1]))])
+N_SESS = len(cc_rows)
+ccard = card("claude", "What each AI node handed Claude Code",
+             f"<p>Archon's Claude provider starts Claude Code through the Claude Agent SDK, with Kiran's claude.ai login: <b>each AI node, and each loop pass, is one Claude Code session</b> in the workspace. The course's three runs started {N_SESS} of them. From their transcripts (real):</p>"
+             + table(["Run", "Node", "Its prompt", "Model asked for", "Session", "Tool calls"], cc_rows)
+             + note("No session called <code>Skill</code> or <code>Task</code>: none of the workflows names <code>skills:</code> or <code>agents:</code>, and the workspace has no <code>.claude/</code> folder, so the one Claude Code file every session read was the workspace's <code>CLAUDE.md</code>. The transcripts' <i>subtasks</i> are the agent's background shell commands, not subagents. Both bundled workflows ask for a model per node (a tier: <code>opus</code> for planning and implementing, <code>sonnet</code> for <code>archon-plan</code>'s decision); <code>request-to-pr</code> names none, so Claude Code's default ran.")
+             + "<p style=\"margin-top:14px\"><b>What each workflow field hands the session</b> (the third column is <code>request-to-pr</code>):</p>"
+             + table(["In the workflow", "What Claude Code gets", "In the course's run"], [list(r_) for r_ in CLAUDE_MAP], "kv")
+             + note("Checked against the Archon 0.13.2 docs (workflow language, skills, hooks, authoring commands, security). More: <a href=\"../archon-introduction.html#s11\">the introduction, step 11</a>, and where Claude Code's own files go in a workspace: <a href=\"../archon-workspace-setup.html#claude\">the setup page</a>."))
 glossary = card("glossary", "Ten words", gloss([(w, ARCHON_WORDS[w]) for w in (
     "workflow", "node", "run", "wait", "form", "loop_group", "until_bash", "workspace", "folder project", "artifacts")]))
 yourself = card("yourself", "Run it yourself", f"""<ol>
@@ -438,10 +497,10 @@ main = (hero + phase("--setup", "Set up", "steps 1–6 · the remotes, the works
         + phase("--review", "Review", "steps 13–15 · a 500 by hand, a cancel, a fix") + "".join(ST[12:15])
         + phase("--ship", "Ship", "step 16 · check again, push, PR") + "".join(ST[15:16])
         + phase("--setup", "After", "steps 17–20 · the record, the merge, a comparison") + "".join(ST[16:20])
-        + yourself + glossary + real)
+        + yourself + ccard + glossary + real)
 footer = ('<footer class="foot">Archon, Java edition · Archon 0.13.2 · <a href="archon-two-repos-run.html">the two-repo run</a> · <a href="../archon-introduction.html">introduction</a> · <a href="../archon-concepts-explained.html">concepts</a> · '
           '<a href="../archon-workspace-setup.html">setup</a> · <a href="../index.html">all course pages</a> · <a href="#top">Back to top</a></footer>\n')
 html_ = page("Archon, Java Edition: Every Step", "One small requirement taken through an Archon workflow from a team workspace with a Spring Boot repo inside it, step by step: the setup, what you type, what Archon and Claude return, every wait and who answered it, and what lands on disk. Real run, real code, real output.",
              "Archon, Java edition", "one request · every step · real run", len(STEPS),
-             rail(STEPS, PH, [("yourself", "Run it yourself"), ("glossary", "Ten words"), ("real", "What is real here")]), main, footer)
+             rail(STEPS, PH, [("yourself", "Run it yourself"), ("claude", "What Claude Code got"), ("glossary", "Ten words"), ("real", "What is real here")]), main, footer)
 write(DEST / "archon-hello-world-java-run.html", html_)
