@@ -16,7 +16,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 from cli_parse import workflow_nodes  # noqa: E402
 from diagrams import workflow_dag  # noqa: E402
-from pagekit import (E, ROOT, card, disk, gate, io, multirepo_facts, note, page, phase, plain, rail, see, shell_group,  # noqa: E402
+from pagekit import (CLAUDE_MAP, E, ROOT, card, claude_facts, disk, gate, io, multirepo_facts, note, page, phase, plain, rail, see, shell_group,  # noqa: E402
                      step, table, tabs, write, you)
 from setup_multirepo_run import AGING_POM, AGING_README, API_DEP  # noqa: E402
 
@@ -266,6 +266,7 @@ ST.append(step(10, "Build", "--build", "in place", "Implement in both repos, in 
                + table(["Repo", "Branch", "Commit", "Change"], [
                    ["priorauth-aging", "<code>fix/holidays-across-years</code>", f"<code>{COMMIT['priorauth-aging']}</code>", "1.0.0 → 1.0.1: every year's holiday file is loaded; the 2027 file added; 3 tests"],
                    ["priorauth-api", "<code>fix/holidays-across-years</code>", f"<code>{COMMIT['priorauth-api']}</code>", "1.2.0 → 1.2.1: depends on aging 1.0.1; one test for 2027-01-05; no code change"]], "kv")
+               + note("One Claude Code session did all of this, from the workspace root: to it the two repos are two folders. Its tool calls, and the files it edited in each repo: <a href='#claude'>What each AI node handed Claude Code</a>.")
                + note("Archon's own check passed: the loop's <code>until_bash: ./scripts/verify.sh</code> ran in Archon's shell. Inside the agent's session, Git Bash's <code>mvn</code> failed to start (<code>ClassNotFoundException: …classworlds.launcher.Launcher</code>), so the agent ran <code>scripts\\verify.cmd</code> for its own check, as CLAUDE.md allows on Windows, and said so. Nothing ran in a worktree: these are Kiran's own clones, switched to the new branch.")))
 
 ST.append(step(11, "Build", "--review", "checks + review", "Checks, then a second reader",
@@ -345,6 +346,46 @@ hero = f'''<section class="hero" id="top">
   </aside>
 </section>
 '''
+# What each AI node handed Claude Code: the shared mapping (asserted against tools/data/docs/), and, from the transcript,
+# each session: its prompt, new or continued, its tool calls, and the files it edited in each repo.
+claude_facts()
+CC = []
+for _ln in next((RUN / "logs").glob(f"{RID}*.jsonl")).read_text(encoding="utf-8").splitlines():
+    _d = json.loads(_ln)
+    if _d.get("type") == "node_start" and _d["execution"]["node"]["kind"] in ("agent", "loop"):
+        _n, _b = _d["execution"]["node"], _d["execution"]["binding"]
+        assert _b["provider"] == "claude" and not _n.get("skills")
+        _cmd = _n.get("command") or (_n.get("source") or {}).get("name")
+        assert not _cmd or _cmd.startswith("__archon_pack__project:team:fix-across-repos::"), _cmd
+        CC.append({"node": _d["step"], "src": f"<code>command: {_cmd.rsplit('::', 1)[1]}</code> (the team's <code>commands/</code>)" if _cmd else "<code>prompt:</code> in the YAML",
+                   "origin": _b["sessionOrigin"], "tools": {}, "edits": {r: set() for r in REPOS}})
+    if _d.get("type") == "provider_event" and _d["event"].get("type") == "tool_call":
+        _e = _d["event"]
+        CC[-1]["tools"][_e["name"]] = CC[-1]["tools"].get(_e["name"], 0) + 1
+        _fp = (_e.get("rawInput") or {}).get("file_path", "").replace("\\", "/")
+        for r in REPOS:
+            if _e["name"] in ("Edit", "Write") and f"/{r}/" in _fp:
+                CC[-1]["edits"][r].add(_fp.split(f"/{r}/", 1)[1])
+    if _d.get("type") == "provider_event" and _d["event"].get("type") == "subtask":
+        assert _d["event"].get("taskType") in ("local_bash", None), _d["event"]
+assert [(c["node"], c["origin"]) for c in CC] == [("scan", "fresh"), ("plan", "resumed"), ("implement", "fresh"), ("review", "fresh")], CC
+assert not any({"Skill", "Task", "Agent"} & set(c["tools"]) for c in CC)
+assert [c["node"] for c in CC if any(c["edits"].values())] == ["implement"]
+EDITS = CC[2]["edits"]
+for r in REPOS:  # the files the session edited are the files of that repo's commit
+    assert EDITS[r] and all(f"b/{f}" in PATCH[r].read_text(encoding="utf-8") for f in EDITS[r]), (r, EDITS[r])
+assert not re.search(r"^\s*(skills|agents|hooks|mcp|plugins):", WF_TEXT, re.M) and not any(p.parts[0] == ".claude" for p in (q.relative_to(FILES) for q in FILES.rglob("*")))
+CC_STEP = {"scan": 8, "plan": 8, "implement": 10, "review": 11}
+cc_rows = [[f"<code>{c['node']}</code>, step {CC_STEP[c['node']]}", c["src"], {"fresh": "new", "resumed": "continued <code>scan</code>'s"}[c["origin"]],
+            ", ".join(f"{k} {v}" for k, v in sorted(c["tools"].items(), key=lambda kv: -kv[1])),
+            "<br>".join(f"{r}: {len(c['edits'][r])}" for r in REPOS if c["edits"][r]) or "none (artifacts only)"] for c in CC]
+ccard = card("claude", "What each AI node handed Claude Code",
+             f"<p>Archon's Claude provider starts Claude Code through the Claude Agent SDK, with Kiran's claude.ai login: <b>each AI node, and each loop pass, is one Claude Code session</b>, and in a folder project its folder is the workspace root, so <b>one session sees both repos</b>. The run started {len(CC)}. From its transcript (real):</p>"
+             + table(["Node", "Its prompt", "Session", "Tool calls", "Files it changed with Edit or Write"], cc_rows)
+             + note("One <code>implement</code> session changed both repos: it made the branch in each (<code>git checkout -b</code>), edited the files of both commits, and committed in each, all because <code>commands/implement.md</code> and the workspace's <code>CLAUDE.md</code> say so. Nothing in Claude Code knows about repos: to it they are two folders. No session called <code>Skill</code> or <code>Task</code>: the workflow names no <code>skills:</code> or <code>agents:</code>, and the workspace has no <code>.claude/</code> folder. The transcript's <i>subtasks</i> are the agent's background shell commands, not subagents.")
+             + "<p style=\"margin-top:14px\"><b>What each workflow field hands the session</b> (the third column is the one-repo run's <code>request-to-pr</code>; <code>fix-across-repos</code> uses the same fields):</p>"
+             + table(["In the workflow", "What Claude Code gets", "In the course's run"], [list(r_) for r_ in CLAUDE_MAP], "kv")
+             + note("Checked against the Archon 0.13.2 docs (workflow language, skills, hooks, authoring commands, security). More: <a href=\"../archon-introduction.html#s11\">the introduction, step 11</a>; where Claude Code's own files go in a workspace: <a href=\"../archon-workspace-setup.html#claude\">the setup page</a>."))
 yourself = card("yourself", "Run it yourself", f"""<ol>
 <li>Set up Archon as on the <a href="../archon-workspace-setup.html">setup page</a> (steps 1–4), with JDK 21, Maven and Git Bash.</li>
 <li>Take the workspace from the course repo: <code>archon-hello-world-java/multirepo-workspace/</code> holds the team's files and both repos as they are after the run (library 1.0.1, API 1.2.1). To start where the run started, do steps 1–4 instead: they build the two repos from the public starter at <code>v1.1.0</code> (the course's <code>tools/setup_multirepo_run.py</code> runs exactly those commands).</li>
@@ -359,10 +400,10 @@ main = (hero + phase("--setup", "Set up", "steps 1–7 · the two repos, the wor
         + phase("--build", "Build", "steps 10–11 · fix in both repos, check, review") + "".join(ST[9:11])
         + phase("--ship", "Ship", "steps 12–13 · check by hand, push a branch per repo") + "".join(ST[11:13])
         + phase("--setup", "After", "steps 14–16 · the record, the merges, AI-DLC") + "".join(ST[13:16])
-        + yourself + real)
+        + yourself + ccard + real)
 footer = ('<footer class="foot">Archon, two repos · Archon 0.13.2 · <a href="archon-hello-world-java-run.html">the one-repo run</a> · <a href="../archon-introduction.html#s10">introduction, step 10</a> · '
           '<a href="../archon-concepts-explained.html#places">concepts</a> · <a href="../index.html">all course pages</a> · <a href="#top">Back to top</a></footer>\n')
 html_ = page("Archon, Two Repos: Every Step", "One bug fixed across two repos with an Archon folder project, step by step: the workspace, the workflow, what you type, what Archon and Claude return, both waits, a branch per repo, and the merges. Real run, real output.",
              "Archon, two repos", "one bug · a folder project · real run", len(STEPS),
-             rail(STEPS, PH, [("yourself", "Run it yourself"), ("real", "What is real here")]), main, footer)
+             rail(STEPS, PH, [("yourself", "Run it yourself"), ("claude", "What Claude Code got"), ("real", "What is real here")]), main, footer)
 write(DEST / "archon-two-repos-run.html", html_)
