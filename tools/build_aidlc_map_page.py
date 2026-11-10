@@ -16,7 +16,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from aidlc_map import (CODE, DATA, INIT_KIND, NEEDS_CODE, NEEDS_PIPELINE, PHASES, ROLE, SCOPE_ORDER, SCOPES, SLUGS, STAGES, WF_DIR,  # noqa: E402
                        WF_FILE, WF_REL, WORK, key, phase_check, runs)
 from cli_parse import workflow_nodes  # noqa: E402
-from pagekit import (ARROW_DEF, DOC, E, REAL, ROOT, card, gate, io, note, page, phase, plain, rail, scrub, see, step, svg, t, table,  # noqa: E402
+from pagekit import (ARROW_DEF, CLAUDE_MAP, DOC, E, REAL, ROOT, card, claude_facts, gate, io, note, page, phase, plain, rail, scrub, see, step, svg, t, table,  # noqa: E402
                      tabs, write, you)
 
 WF = WF_FILE.read_text(encoding="utf-8")
@@ -343,6 +343,7 @@ TR = [
 S.append(step(2, "The idea", "--setup", "the translation", "How each AI-DLC part becomes Archon",
               "Eight things AI-DLC has, and the Archon feature that does the same job.", "read · 3 min",
               table(["AI-DLC", "In Archon", "In the workflow"], TR)
+              + note("Each agent node then runs as one Claude Code session: the persona is words in its prompt, not a Claude subagent, and a <i>subagent</i> stage becomes <code>context: fresh</code>, a session of its own. The whole chain, and what the real run's sessions did: <a href='#claude'>What each AI node handed Claude Code</a>.")
               + plain("Every stage has the same shape in Archon: <b>an agent writes, a person approves</b>. The only exceptions are the three setup stages, which have no gate in AI-DLC either, and Code Generation, which runs the tests between the two.")))
 
 S.append(step(3, "The map", "--plan", "every stage", "The 33 stages, as Archon nodes",
@@ -522,6 +523,73 @@ S.append(step(12, "Try it", "--ship", "the files", "The files",
                       [[f"{s['n']} {x(s['name'])}", s["phase"], s["execution"].lower() + " · " + s["mode"], ROLE[s["lead"]],
                         " → ".join(f"<code>{n}</code>" for n, _ in STAGE_INFO[s["slug"]]["nodes"][1:]) or f"<code>{s['slug']}</code> ({INIT_KIND[s['slug']]})"] for s in STAGES])))
 
+# ---------------- what each AI node handed Claude Code ----------------
+# The shared mapping (asserted against tools/data/docs/), AI-DLC's execution modes as node fields, and, from the real
+# run's two transcripts, every Claude Code session: its stage, pass, new or continued, tool calls.
+claude_facts()
+FRESH = {n["id"].removesuffix("-work") for n in NODES if n["id"].endswith("-work") and re.search(rf"- id: {re.escape(n['id'])}\n(?:\s+\w+:.*\n)*?\s+context: fresh\n", WF)}
+assert FRESH == {s_["slug"] for s_ in STAGES if s_["mode"] in ("subagent", "pipeline")}, FRESH
+assert not re.search(r"^\s*(skills|agents|hooks|mcp|plugins|model):", WF, re.M)
+assert not any(".claude" in q.parts for q in (DATA / "files").rglob("*"))
+assert "You lead it as the team's" in WF
+
+
+def cc_sessions(path):
+    rows, rid = [], None
+    for ln in path.read_text(encoding="utf-8").splitlines():
+        d = json.loads(ln)
+        rid = rid or d.get("workflow_id")
+        if d.get("workflow_id") != rid:
+            continue
+        if d.get("type") == "node_start" and d["execution"]["node"]["kind"] in ("agent", "loop"):
+            n, b = d["execution"]["node"], d["execution"]["binding"]
+            assert b["provider"] == "claude" and not n.get("skills")
+            rows.append([d["step"], b["sessionOrigin"], b["model"].get("requested"), {}])
+        if d.get("type") == "provider_event":
+            e = d["event"]
+            if e.get("type") == "tool_call":
+                rows[-1][3][e["name"]] = rows[-1][3].get(e["name"], 0) + 1
+            if e.get("type") == "subtask":
+                assert e.get("taskType") in ("local_bash", None), e
+    assert rows and not any({"Skill", "Task", "Agent"} & set(r[3]) for r in rows)
+    return rid, rows
+
+
+_rid, CC = cc_sessions(RUNDIR / "log.jsonl")
+assert _rid == RUN_ID
+_, CC_FIX = cc_sessions(RUNDIR / "fix-log.jsonl")
+assert [(r[0], r[1]) for r in CC] == [("workspace-detection", "fresh"), ("reverse-engineering-work", "fresh"), ("requirements-analysis-work", "fresh"),
+                                     ("requirements-analysis-work", "resumed"), ("code-generation-work", "fresh"), ("code-generation-work", "fresh"),
+                                     ("build-and-test-work", "fresh")], [(r[0], r[1]) for r in CC]
+assert all(r[2] is None for r in CC) and [(r[0], r[2]) for r in CC_FIX] == [("implement", "opus")]
+assert CC[0][3].get("StructuredOutput") == 1  # workspace-detection's output_format
+_pass, cc_rows = {}, []
+for node, origin, _m, tools in CC:
+    slug = node.removesuffix("-work")
+    _pass[slug] = _pass.get(slug, 0) + 1
+    st_ = BY[slug]
+    how = ("<code>context: fresh</code> (AI-DLC: " + st_["mode"] + ")") if slug in FRESH else ("no <code>context:</code>" + ("" if slug in INIT_KIND else " (AI-DLC: " + st_["mode"] + ")"))
+    cc_rows.append([f"{st_['n']} {x(st_['name'])}", str(_pass[slug]), how,
+                    {"fresh": "new", "resumed": "continued pass 1's"}[origin], ", ".join(f"{k} {v}" for k, v in sorted(tools.items(), key=lambda kv: -kv[1]))])
+cc_rows.append(["the follow-up fix (step 9)", "1", "<code>archon-implement</code>'s bundled <code>command: implement</code>, model <code>opus</code>", "new",
+                ", ".join(f"{k} {v}" for k, v in sorted(CC_FIX[0][3].items(), key=lambda kv: -kv[1]))])
+_fresh_ns = ", ".join(BY[s_]["n"] for s_ in sorted(FRESH, key=lambda z: [int(v) for v in BY[z]["n"].split(".")]))
+ccard = card("claude", "What each AI node handed Claude Code",
+             "<p>AI-DLC's stages become Archon nodes (step 2); Archon's Claude provider then starts <b>one Claude Code session per agent node, and per pass of a loop</b>, through the Claude Agent SDK, in the workspace, with the claude.ai login. So each AI-DLC part ends up as one of Claude Code's own pieces, or as none:</p>"
+             + table(["AI-DLC", "In the workflow", "What Claude Code gets"], [
+                 ["the stage's <b>lead persona</b> and its support", "words in the stage's prompt (“You lead it as the team's …”)", "the first message of a session. Not a Claude subagent: no <code>agents:</code>, no <code>Task</code>"],
+                 ["an <b>inline</b> or <b>mob</b> stage", "an agent node with no <code>context:</code>", "a new session; a redo after a reject <b>continues</b> it, so the agent keeps what it already read and wrote"],
+                 [f"a <b>subagent</b> or <b>pipeline</b> stage ({_fresh_ns})", "<code>context: fresh</code>", "a new session every pass, with nothing from earlier nodes but the files on disk. AI-DLC's separate subagent becomes a separate session, not a <code>Task</code> call"],
+                 ["Workspace detection's answers", "<code>output_format</code>", "a <code>StructuredOutput</code> tool call the agent ends with"],
+                 ["the <b>record</b>", "<code>$ARTIFACTS_DIR/record/…</code> in the prompt", "files the agent writes with <code>Write</code>"],
+                 ["the <b>gate</b>, the scope, the phase check, Code Generation's tests", "<code>wait:</code>, <code>script:</code>, <code>bash:</code>, <code>when:</code>", "nothing: Archon runs these without Claude"]])
+             + f"<p style=\"margin-top:14px\"><b>The real express run's sessions</b>, from its two transcripts ({len(CC) + 1} in all, real):</p>"
+             + table(["Stage", "Pass", "Node field", "Session", "Tool calls"], cc_rows)
+             + note("Both redos were asked for by a reject, and they differ because of one field: 2.3's second pass continued its session; 3.5's second pass (<code>context: fresh</code>) started over and read the code from disk. No session called <code>Skill</code> or <code>Task</code>: the workflow names no <code>skills:</code>, <code>agents:</code> or <code>model:</code> (so Claude Code's default model ran), and the workspace has no <code>.claude/</code> folder; the one Claude Code file every session read was the workspace's <code>CLAUDE.md</code>. The transcripts' <i>subtasks</i> are background shell commands, not subagents.")
+             + "<p style=\"margin-top:14px\"><b>What each workflow field hands the session</b> (the third column is the course's <code>request-to-pr</code> run):</p>"
+             + table(["In the workflow", "What Claude Code gets", "In the course's run"], [list(r_) for r_ in CLAUDE_MAP], "kv")
+             + note("Checked against the Archon 0.13.2 docs (workflow language, skills, hooks, authoring commands, security). More: <a href=\"archon-introduction.html#s11\">the introduction, step 11</a>; where Claude Code's own files go in a workspace: <a href=\"archon-workspace-setup.html#claude\">the setup page</a>."))
+
 STEPS_RAIL = [(1, "Two tools, one lifecycle"), (2, "The translation"), (3, "The 33 stages"), (4, "One stage up close"), (5, "How the scope picks"),
               (6, "Thirteen dry runs"), (7, "Same, and not"),
               (8, "A real express run"), (9, "The follow-up fix"), (10, "What it showed"), (11, "Run it yourself"), (12, "The files")]
@@ -559,9 +627,9 @@ main = (hero + phase("--setup", "The idea", "steps 1–2 · what each tool does,
         + phase("--plan", "The map", "steps 3–5 · every stage, one up close, and how the scope picks them") + "".join(S[2:5])
         + phase("--build", "The check", "steps 6–7 · Archon's real dry runs, and the limits") + "".join(S[5:7])
         + phase("--review", "The real run", "steps 8–10 · one express run with Claude, gate by gate, its follow-up fix, and what it showed") + "".join(S[7:10])
-        + phase("--ship", "Try it", "steps 11–12 · in your workspace, and the files") + "".join(S[10:12]) + real)
+        + phase("--ship", "Try it", "steps 11–12 · in your workspace, and the files") + "".join(S[10:12]) + ccard + real)
 footer = ('<footer class="foot">AI-DLC on Archon · Archon 0.13.2 · AI-DLC Workflows 2.11 · <a href="archon-introduction.html">introduction</a> · '
           '<a href="../ai-dlc-execution/aidlc-introduction.html">the AI-DLC course</a> · <a href="index.html">all course pages</a> · <a href="#top">Back to top</a></footer>\n')
 html_ = page("AI-DLC on Archon", "AWS AI-DLC's 33 stages written as one Archon workflow: each stage an agent node and an approval gate, the scope an input, with an interactive map of which stages run in each scope, checked by Archon's real validate and dry runs.",
-             "AI-DLC on Archon", "33 stages · 30 gates · 11 scopes", len(STEPS_RAIL), rail(STEPS_RAIL, PH, [("real", "Where this comes from")]), main, footer, MAP_JS)
+             "AI-DLC on Archon", "33 stages · 30 gates · 11 scopes", len(STEPS_RAIL), rail(STEPS_RAIL, PH, [("claude", "What Claude Code got"), ("real", "Where this comes from")]), main, footer, MAP_JS)
 write(ROOT / "archon-aidlc-on-archon.html", html_)
