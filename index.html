@@ -45,6 +45,13 @@ h2{font:750 1.4rem/1.2 var(--font-display);margin:0 0 4px}
 .ref b{display:block;font:700 1rem var(--font-display)}
 .ref span{color:var(--ink-2);font-size:.9rem}
 .note{margin:32px 0 0;color:var(--ink-2);font-size:.95rem}
+.cc{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:6px 20px 14px}
+.cc table{width:100%;border-collapse:collapse;font-size:.92rem}
+.cc th{text-align:left;font:700 .8rem var(--font-display);letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3);padding:10px 10px 6px 0;border-bottom:1px solid var(--line)}
+.cc td{padding:8px 10px 8px 0;border-bottom:1px solid var(--line);vertical-align:top;color:var(--ink-2)}
+.cc td:first-child{color:var(--ink);width:38%}
+.cc tr:last-child td{border-bottom:0}
+.cc p{margin:12px 0 0;color:var(--ink-2);font-size:.92rem}
 code{font-size:.88em;background:var(--accent-soft);padding:1px 5px;border-radius:5px}
 @media (max-width:560px){.mod{grid-template-columns:34px minmax(0,1fr);padding:14px 14px 14px 12px}.n{width:28px;height:28px;font-size:.85rem}}
 </style>
@@ -55,7 +62,7 @@ code{font-size:.88em;background:var(--accent-soft);padding:1px 5px;border-radius
   <h1>Archon, Step by Step</h1>
   <p class="lead">Archon turns how your team works into a YAML workflow and runs it with the agent you already use: agents where judgment is needed, commands where it isn't, and a pause wherever a person must decide. 6 modules in 4 parts, built from real runs and real output.</p>
   <a class="start" href="archon-introduction.html">Start with module 1: Introduction →</a>
-  <nav aria-label="Parts"><ol class="path"><li><a href="#part1"><span>1</span>Understand Archon</a></li><li><a href="#part2"><span>2</span>Set up</a></li><li><a href="#part3"><span>3</span>Real runs</a></li><li><a href="#reference"><span>★</span>Reference</a></li></ol></nav>
+  <nav aria-label="Parts"><ol class="path"><li><a href="#part1"><span>1</span>Understand Archon</a></li><li><a href="#part2"><span>2</span>Set up</a></li><li><a href="#part3"><span>3</span>Real runs</a></li><li><a href="#part4"><span>4</span>Archon and AI-DLC</a></li><li><a href="#claude"><span>⚙</span>YAML → Claude Code</a></li><li><a href="#reference"><span>★</span>Reference</a></li></ol></nav>
 
   <section class="part" id="part1"><header><p class="pn">Part 1</p><h2>Understand Archon</h2><p class="why">What Archon is, the words it uses, and the commands you type. No setup needed.</p></header>
   <ol class="mods">
@@ -79,6 +86,12 @@ code{font-size:.88em;background:var(--accent-soft);padding:1px 5px;border-radius
   <ol class="mods">
     <li class="mod"><span class="n">7</span><div class="body"><a class="t" href="archon-aidlc-on-archon.html">AI-DLC on Archon: 33 stages as one workflow</a><p>An interactive map of AI-DLC's 33 stages, each drawn as the Archon nodes it becomes: an agent node that does the stage's work and an approval gate. The scope becomes an input, a script turns it into one true/false per stage, and <code>when:</code> skips the rest. Pick a scope and see which stages Archon ran. Then a real express run with Claude, gate by gate: two stages sent back, a hang found by hand, a defect found by 3.6 and fixed in a follow-up run.</p><small>Generated from AI-DLC's stage table · validated · 13 real dry runs · 1 real express run and its fix, $3.67</small></div></li>
   </ol></section>
+
+  <section class="part" id="claude"><header><p class="pn">Under the hood</p><h2>What each workflow field hands Claude Code</h2><p class="why">Archon doesn't type into your Claude Code: each AI node is a Claude Code session of its own. The course's runs used none of <code>skills:</code>, <code>agents:</code> or <code>hooks:</code>; the one Claude Code file they read was the workspace's <code>CLAUDE.md</code>.</p></header>
+  <div class="cc">
+    <table><thead><tr><th>In the workflow</th><th>What Claude Code gets</th></tr></thead><tbody><tr><td><code>prompt:</code> · <code>command:</code></td><td>one Claude Code session per node, started through the Claude Agent SDK with your login. A command file is a prompt Archon sends, not a Claude slash command</td></tr><tr><td><code>loop:</code></td><td>a new session per pass (<code>fresh_context: true</code>); the check is Archon's</td></tr><tr><td><code>context: fresh</code> / <code>shared</code> / <code>resume</code></td><td>start over, continue the previous node's session, or fork a named node's</td></tr><tr><td><code>allowed_tools</code> / <code>denied_tools</code></td><td>the only limits: Archon runs Claude Code with <code>bypassPermissions</code>, so nothing prompts</td></tr><tr><td><code>skills:</code></td><td>exactly these skills; leave it out and the node gets none, even installed ones</td></tr><tr><td><code>agents:</code> · <code>hooks:</code> · <code>mcp:</code></td><td>subagents (via <code>Task</code>), SDK hooks and MCP servers, for that node only</td></tr><tr><td><code>CLAUDE.md</code>, <code>~/.claude/</code></td><td>read in every session (<code>settingSources: [project, user]</code>, the default)</td></tr><tr><td><code>bash:</code> · <code>script:</code> · <code>wait:</code></td><td>no Claude at all</td></tr></tbody></table>
+    <p>Every module shows it for its own material: <a href="archon-introduction.html#s11">introduction, step 11</a> · <a href="archon-concepts-explained.html#claude">concepts</a> · <a href="archon-workspace-setup.html#claude">setup: where Claude Code's files go</a> · <a href="archon-hello-world-java/archon-hello-world-java-run.html#claude">one repo: every session</a> · <a href="archon-hello-world-java/archon-two-repos-run.html#claude">two repos: one session, both repos</a> · <a href="archon-end-to-end-guide.html#claude">end to end</a> · <a href="archon-aidlc-on-archon.html#claude">AI-DLC: personas and subagent stages</a> · the <a href="archon-concepts-onepage.html">cheat sheet</a> and the <a href="archon-concepts-map.svg">concept map</a>.</p>
+  </div></section>
 
   <section class="part" id="reference"><header><p class="pn">Reference</p><h2>Keep these at hand</h2><p class="why">Cheat sheet, concept map and the repos the modules use.</p></header>
   <div class="refs">
